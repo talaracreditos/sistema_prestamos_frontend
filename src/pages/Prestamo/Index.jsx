@@ -54,7 +54,7 @@ const Index = () => {
             { 
                 header: 'ID', 
                 render: (row) => (
-                    <span className="font-mono text-[15px] font-black px-2 py-1 rounded text-slate-600">
+                    <span className="font-mono text-[14px] font-black px-2 py-1 rounded text-slate-600">
                         {row.id}
                     </span>
                 )
@@ -71,7 +71,7 @@ const Index = () => {
                 <div className="flex flex-col uppercase">
                     <div className="flex items-center gap-1.5">
                         {row.es_grupal ? <UserGroupIcon className="w-3.5 h-3.5 text-brand-red" /> : <UserIcon className="w-3.5 h-3.5 text-slate-400" />}
-                        <span className={`font-black text-[11px] ${row.es_grupal ? 'text-brand-red' : 'text-slate-800'}`}>
+                        <span className={`font-black text-[10px] ${row.es_grupal ? 'text-brand-red' : 'text-slate-800'}`}>
                             {row.cliente}
                         </span>
                     </div>
@@ -87,7 +87,7 @@ const Index = () => {
             { header: 'Financiero', render: (row) => (
                 <div className="flex flex-col">
                     <span className="font-black text-brand-red italic text-sm">S/ {row.monto}</span>
-                    <span className="text-[9px] text-slate-400 font-black uppercase tracking-tighter">{row.abonado_por}</span>
+                    <span className="text-[8px] text-slate-400 font-black uppercase tracking-tighter">{row.abonado_por}</span>
                 </div>
             )},
             { header: 'Cuotas', render: (row) => (
