@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from 'components/Shared/Modals/ViewModal';
-import { PhotoIcon, DocumentCheckIcon, ArrowsRightLeftIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, DocumentCheckIcon, ArrowsRightLeftIcon, XMarkIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline';
 
 const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
     const [file, setFile] = useState(null);
@@ -43,24 +43,59 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
 
     if (!prestamo) return null;
 
-    return (
-        <Modal isOpen={isOpen} onClose={reset} title="Autorizar Salida de Dinero" size="5xl">
-            <div className="flex flex-col md:flex-row -m-6 md:h-[580px] overflow-y-auto md:overflow-hidden">
+    const presidente = prestamo?.presidente ?? null;
+    const cuentas = presidente?.cuentas_bancarias ?? [];
 
-                <div className="w-full md:w-[45%] p-8 flex flex-col bg-white border-r border-slate-100">
-                    <div className="space-y-6 flex-1">
+    return (
+        <Modal isOpen={isOpen} hideFooter={true} onClose={reset} title="Autorizar Salida de Dinero" size="3xl">
+            <div className="flex flex-col md:flex-row -m-5 h-full min-h-[600px] max-h-[80vh]">
+
+                {/* Panel izquierdo */}
+                <div className="w-full md:w-[45%] flex flex-col bg-white border-r border-slate-100 overflow-y-auto">
+                    <div className="p-8 flex-1 space-y-6">
+
+                        {/* Card monto + beneficiario + cuentas del presidente */}
                         <div className="bg-slate-900 p-6 rounded-[28px] text-white shadow-xl border border-slate-800">
                             <div className="flex items-center gap-2 mb-2">
                                 <ArrowsRightLeftIcon className="w-4 h-4 text-brand-gold" />
                                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Importe Desembolso</span>
                             </div>
                             <h2 className="text-4xl font-black italic tracking-tighter text-brand-gold">S/ {prestamo.monto}</h2>
+
                             <div className="mt-5 pt-5 border-t border-white/10">
                                 <p className="text-[10px] font-bold uppercase text-slate-400 mb-1.5">Beneficiario / Titular:</p>
                                 <p className="text-sm font-black uppercase leading-snug text-white break-words">
                                     {prestamo.cliente}
                                 </p>
                             </div>
+
+                            {prestamo.es_grupal && presidente && (
+                                <div className="mt-4 pt-4 border-t border-white/10">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <BuildingLibraryIcon className="w-3.5 h-3.5 text-brand-gold" />
+                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                                            Cuentas — {presidente.nombre} <span className="text-slate-500">· {presidente.dni}</span>
+                                        </p>
+                                    </div>
+                                    {cuentas.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {cuentas.map((cuenta, i) => (
+                                                <div key={i} className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                                                        {cuenta.banco}
+                                                    </p>
+                                                    <p className="text-xs font-black text-white tracking-widest">{cuenta.numero_cuenta}</p>
+                                                    {cuenta.cci && (
+                                                        <p className="text-[10px] text-slate-400 font-bold">CCI: {cuenta.cci}</p>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-[10px] italic text-slate-500 font-bold uppercase">Sin cuentas registradas</p>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-5">
@@ -91,21 +126,22 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                                 </label>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Vista previa en móvil */}
-                    <div className="md:hidden mt-6 mb-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">Vista Previa:</p>
-                        <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-center border border-slate-100 min-h-[200px]">
-                            {preview ? (
-                                <img src={preview} alt="Voucher Preview" className="max-h-[300px] rounded-lg shadow-sm" />
-                            ) : (
-                                <p className="text-[10px] font-black text-slate-300 uppercase italic">Sin archivo seleccionado</p>
-                            )}
+                        {/* Vista previa en móvil */}
+                        <div className="md:hidden">
+                            <p className="text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">Vista Previa:</p>
+                            <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-center border border-slate-100 min-h-[200px]">
+                                {preview ? (
+                                    <img src={preview} alt="Voucher Preview" className="max-h-[300px] rounded-lg shadow-sm" />
+                                ) : (
+                                    <p className="text-[10px] font-black text-slate-300 uppercase italic">Sin archivo seleccionado</p>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="pt-6 md:pt-4">
+                    {/* Botón sticky al fondo */}
+                    <div className="sticky bottom-0 bg-white px-8 py-4 border-t border-slate-100">
                         <button
                             onClick={handleSubmit}
                             disabled={loading || !file}
