@@ -81,22 +81,17 @@ const PdfModal = ({ isOpen, onClose, title, pdfUrl, base64 }) => {
     };
 
     return (
-        // 🔥 Igual que ViewModal: p-0 en móvil, p-4 en desktop, pegado abajo en móvil
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
 
-            {/* 🔥 max-h-[95vh] en móvil para que no se coma la barra de navegación del celular */}
             <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-4xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden border-t sm:border border-slate-700">
 
-                {/* Header 🔥 Flex ajustado para que los botones NUNCA se aplasten */}
                 <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-slate-200 bg-slate-50 gap-2">
                     
-                    {/* Título: Usa min-w-0 y truncate para que si es muy largo, ponga "..." y no empuje lo demás */}
                     <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight truncate">{title}</h3>
                         <p className="text-[10px] text-slate-500 font-medium uppercase hidden sm:block">Vista Previa HD</p>
                     </div>
 
-                    {/* Controles: Agrupados y con shrink-0 para que no se encojan NUNCA */}
                     <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                         {/* Zoom */}
                         <div className="flex items-center bg-white border border-slate-200 rounded-lg p-1 shadow-sm gap-1">
