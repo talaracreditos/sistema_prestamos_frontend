@@ -15,6 +15,7 @@ export const useIndex = () => {
     const [selectedRole, setSelectedRole] = useState(null);
     const [allPermisos, setAllPermisos] = useState([]);
     const [checkedPermisos, setCheckedPermisos] = useState([]);
+    const [permisoBloqueados, setPermisosBloqueados] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [moduleFilter, setModuleFilter] = useState('');
 
@@ -46,6 +47,7 @@ export const useIndex = () => {
             setSelectedRole(res.data.rol);
             setAllPermisos(res.data.todos_los_permisos);
             setCheckedPermisos(res.data.rol.permisos.map(p => p.id));
+            setPermisosBloqueados(res.data.permisos_bloqueados || []);
         } catch (err) {
             setAlert(handleApiError(err, 'Error al obtener permisos'));
             setIsEditing(false);
@@ -54,8 +56,9 @@ export const useIndex = () => {
         }
     };
 
-    // Toggle individual — una sola operación de estado
+    // No permite desmarcar bloqueados
     const togglePermission = (permisoId) => {
+        if (permisoBloqueados.includes(permisoId)) return;
         setCheckedPermisos(prev =>
             prev.includes(permisoId)
                 ? prev.filter(id => id !== permisoId)
@@ -63,25 +66,22 @@ export const useIndex = () => {
         );
     };
 
-    // Toggle TODOS — una sola operación de estado
     const toggleTodos = () => {
         const todosIds = allPermisos.map(p => p.id);
         setCheckedPermisos(prev => {
             const todosActivos = todosIds.every(id => prev.includes(id));
-            return todosActivos ? [] : [...todosIds];
+            // Al deseleccionar todo, respetamos los bloqueados
+            return todosActivos ? [...permisoBloqueados] : [...todosIds];
         });
     };
 
-    // Toggle módulo completo — una sola operación de estado
     const toggleModulo = (permisos) => {
-        const ids = permisos.map(p => p.id);
+        const ids = permisos.map(p => p.id).filter(id => !permisoBloqueados.includes(id));
         setCheckedPermisos(prev => {
             const todosActivos = ids.every(id => prev.includes(id));
             if (todosActivos) {
-                // Quitar solo los de este módulo
                 return prev.filter(id => !ids.includes(id));
             } else {
-                // Agregar los que faltan de este módulo
                 const faltantes = ids.filter(id => !prev.includes(id));
                 return [...prev, ...faltantes];
             }
@@ -92,6 +92,7 @@ export const useIndex = () => {
         setIsEditing(false);
         setSelectedRole(null);
         setCheckedPermisos([]);
+        setPermisosBloqueados([]);
         setModuleFilter('');
     };
 
@@ -102,6 +103,7 @@ export const useIndex = () => {
             setAlert({ type: 'success', message: 'Permisos actualizados correctamente.' });
             setIsEditing(false);
             setSelectedRole(null);
+            setPermisosBloqueados([]);
             setModuleFilter('');
             fetchRoles(paginationInfo.currentPage);
         } catch (err) {
@@ -113,7 +115,7 @@ export const useIndex = () => {
 
     return {
         loading, roles, paginationInfo, filters, setFilters, alert, setAlert, fetchRoles,
-        isEditing, editLoading, selectedRole, allPermisos, checkedPermisos,
+        isEditing, editLoading, selectedRole, allPermisos, checkedPermisos, permisoBloqueados,
         togglePermission, toggleTodos, toggleModulo,
         handleManage, handleSave, handleCancel, isSaving,
         moduleFilter, setModuleFilter,

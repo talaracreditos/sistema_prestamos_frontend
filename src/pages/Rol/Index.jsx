@@ -3,13 +3,13 @@ import { useIndex } from 'hooks/Rol/useIndex';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
-import { ShieldCheckIcon, AdjustmentsHorizontalIcon, CheckBadgeIcon, ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, AdjustmentsHorizontalIcon, CheckBadgeIcon, ArrowLeftIcon, MagnifyingGlassIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 const Index = () => {
     const {
         loading, roles, paginationInfo, alert, setAlert, fetchRoles,
         isEditing, editLoading, selectedRole, allPermisos,
-        checkedPermisos, togglePermission, toggleTodos, toggleModulo,
+        checkedPermisos, permisoBloqueados, togglePermission, toggleTodos, toggleModulo,
         handleManage, handleSave, handleCancel, isSaving,
         moduleFilter, setModuleFilter,
     } = useIndex();
@@ -40,7 +40,7 @@ const Index = () => {
             render: (row) => (
                 <button
                     onClick={() => handleManage(row.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red text-white hover:bg-brand-red-dark rounded-lg text-xs font-bold transition-all shadow-md shadow-brand-red/30 active:scale-95"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red text-white hover:bg-brand-red-dark rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
                 >
                     <AdjustmentsHorizontalIcon className="w-4 h-4" />
                     Gestionar
@@ -78,7 +78,7 @@ const Index = () => {
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 
             {!isEditing ? (
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mt-6 animate-fade-in">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mt-6">
                     <Table
                         columns={columns}
                         data={roles}
@@ -87,7 +87,7 @@ const Index = () => {
                     />
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mt-6 flex flex-col overflow-hidden animate-in fade-in duration-300">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mt-6 flex flex-col overflow-hidden">
 
                     {/* Header */}
                     <div className="bg-slate-50 p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -105,6 +105,11 @@ const Index = () => {
                                 </h2>
                                 <p className="text-sm text-slate-500 font-medium mt-0.5">
                                     Marca o desmarca las casillas para asignar o revocar accesos.
+                                    {permisoBloqueados.length > 0 && (
+                                        <span className="ml-2 text-brand-gold-dark font-black">
+                                            🔒 Algunos permisos son obligatorios y no pueden removerse.
+                                        </span>
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -159,17 +164,16 @@ const Index = () => {
                                         const idsModulo    = permisos.map(p => p.id);
                                         const todosActivos = idsModulo.every(id => checkedPermisos.includes(id));
                                         const algunoActivo = idsModulo.some(id => checkedPermisos.includes(id)) && !todosActivos;
+                                        const moduloBloqueado = idsModulo.every(id => permisoBloqueados.includes(id));
 
                                         return (
                                             <div key={modulo} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-fit hover:shadow-md hover:border-brand-red/30 transition-all">
 
-                                                {/* Header módulo — div clickeable, SIN label ni input readOnly */}
                                                 <div
-                                                    className="bg-slate-900 text-brand-gold px-5 py-3 flex items-center justify-between border-b border-brand-gold/20 cursor-pointer select-none"
-                                                    onClick={() => toggleModulo(permisos)}
+                                                    className={`px-5 py-3 flex items-center justify-between border-b border-brand-gold/20 select-none ${moduloBloqueado ? 'bg-slate-700 cursor-not-allowed' : 'bg-slate-900 cursor-pointer'}`}
+                                                    onClick={() => !moduloBloqueado && toggleModulo(permisos)}
                                                 >
                                                     <div className="flex items-center gap-2.5 flex-1">
-                                                        {/* Checkbox visual hecho con div para evitar doble-trigger */}
                                                         <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
                                                             todosActivos
                                                                 ? 'bg-brand-red border-brand-red'
@@ -186,34 +190,49 @@ const Index = () => {
                                                                 <div className="w-1.5 h-0.5 bg-white rounded" />
                                                             )}
                                                         </div>
-                                                        <span className="font-black uppercase text-[11px] tracking-[0.2em]">{modulo}</span>
+                                                        <span className="font-black uppercase text-[11px] tracking-[0.2em] text-brand-gold">{modulo}</span>
+                                                        {moduloBloqueado && (
+                                                            <span className="ml-1 text-[9px] font-black text-brand-gold/60 uppercase tracking-widest flex items-center gap-1">
+                                                                <LockClosedIcon className="w-3 h-3" /> bloqueado
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                    <CheckBadgeIcon className="w-4 h-4 opacity-70 flex-shrink-0" />
+                                                    <CheckBadgeIcon className="w-4 h-4 text-brand-gold opacity-70 flex-shrink-0" />
                                                 </div>
 
-                                                {/* Permisos individuales */}
                                                 <div className="p-3 space-y-1.5">
-                                                    {permisos.map(perm => (
-                                                        <label
-                                                            key={perm.id}
-                                                            className="flex items-start gap-3 p-2.5 hover:bg-brand-red-light/30 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-brand-red/10 group"
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={checkedPermisos.includes(perm.id)}
-                                                                onChange={() => togglePermission(perm.id)}
-                                                                className="mt-0.5 w-4 h-4 text-brand-red rounded border-slate-300 focus:ring-brand-red cursor-pointer accent-brand-red"
-                                                            />
-                                                            <div className="flex flex-col">
-                                                                <span className={`text-[11px] font-black transition-colors ${checkedPermisos.includes(perm.id) ? 'text-slate-800' : 'text-slate-600 group-hover:text-slate-800'}`}>
-                                                                    {perm.nombre}
-                                                                </span>
-                                                                <span className="text-[10px] font-medium text-slate-400 leading-tight mt-0.5">
-                                                                    {perm.descripcion}
-                                                                </span>
-                                                            </div>
-                                                        </label>
-                                                    ))}
+                                                    {permisos.map(perm => {
+                                                        const bloqueado = permisoBloqueados.includes(perm.id);
+                                                        return (
+                                                            <label
+                                                                key={perm.id}
+                                                                className={`flex items-start gap-3 p-2.5 rounded-xl border border-transparent transition-colors group ${
+                                                                    bloqueado
+                                                                        ? 'opacity-60 cursor-not-allowed bg-slate-50'
+                                                                        : 'hover:bg-brand-red-light/30 hover:border-brand-red/10 cursor-pointer'
+                                                                }`}
+                                                            >
+                                                                {bloqueado ? (
+                                                                    <LockClosedIcon className="mt-0.5 w-4 h-4 text-slate-400 flex-shrink-0" />
+                                                                ) : (
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={checkedPermisos.includes(perm.id)}
+                                                                        onChange={() => togglePermission(perm.id)}
+                                                                        className="mt-0.5 w-4 h-4 text-brand-red rounded border-slate-300 focus:ring-brand-red cursor-pointer accent-brand-red"
+                                                                    />
+                                                                )}
+                                                                <div className="flex flex-col">
+                                                                    <span className={`text-[11px] font-black transition-colors ${checkedPermisos.includes(perm.id) ? 'text-slate-800' : 'text-slate-600 group-hover:text-slate-800'}`}>
+                                                                        {perm.nombre}
+                                                                    </span>
+                                                                    <span className="text-[10px] font-medium text-slate-400 leading-tight mt-0.5">
+                                                                        {perm.descripcion}
+                                                                    </span>
+                                                                </div>
+                                                            </label>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         );
@@ -239,7 +258,7 @@ const Index = () => {
                         <button
                             onClick={handleSave}
                             disabled={isSaving || editLoading}
-                            className="px-10 py-3 text-xs font-black uppercase text-white bg-brand-red hover:bg-brand-red-dark rounded-xl shadow-lg shadow-brand-red/30 transition-all disabled:opacity-50 flex items-center gap-2 tracking-wide active:scale-95"
+                            className="px-10 py-3 text-xs font-black uppercase text-white bg-brand-red hover:bg-brand-red-dark rounded-xl shadow-lg transition-all disabled:opacity-50 flex items-center gap-2 tracking-wide active:scale-95"
                         >
                             {isSaving && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                             {isSaving ? 'Guardando...' : 'Guardar Configuración'}
