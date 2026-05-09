@@ -64,7 +64,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         onClose();
     };
 
-    // Cronograma a mostrar: individual (fetch) o global
     const cronogramaActivo  = integranteData?.cronograma ?? data?.cronograma;
     const esVistaIntegrante = !!integranteData;
 
@@ -72,6 +71,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const integranteRefinanciado   = data?.integrantes_refinanciados?.find(i => i.id === integranteSeleccionado) ?? null;
     const integranteYaRefinanciado = !!integranteRefinanciado;
     const integranteNombre         = integranteActivo?.nombre ?? integranteRefinanciado?.nombre;
+
+    // Préstamo cancelado (estado=2) — no tiene sentido descargar PDF ni refinanciar
+    const prestamoCancelado = data?.estado === 2;
 
     const handleAbrirRefinanciamiento = () => {
         let deudaPendiente     = 0;
@@ -81,7 +83,8 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
         if (cronogramaActivo) {
             cronogramaActivo.forEach(cuota => {
-                if (cuota.estado === 2 || cuota.estado === 6) return;
+                // Saltar canceladas (0), pagadas (2) y refinanciadas (6)
+                if ([0, 2, 6].includes(cuota.estado)) return;
 
                 const deudaBase  = parseFloat(cuota.total_cuota ?? cuota.monto ?? 0);
                 const abonado    = parseFloat(cuota.pago_acumulado ?? 0);
@@ -162,6 +165,15 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         </div>
 
+                        {/* Banner cancelado */}
+                        {prestamoCancelado && (
+                            <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl">
+                                <span className="text-[9px] font-black text-slate-500 uppercase">
+                                    🚫 Préstamo Cancelado — Las cuotas ya no son exigibles
+                                </span>
+                            </div>
+                        )}
+
                         {/* 2. Integrantes */}
                         {data.es_grupal && tieneIntegrantes && (
                             <div className="bg-brand-red-light/40 p-4 rounded-xl border border-brand-red/10">
@@ -172,8 +184,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     Haz click en un socio para ver su cronograma individual
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-
-                                    {/* Activos */}
                                     {data.integrantes.map((int) => (
                                         <div key={int.id} onClick={() => handleSelectIntegrante(int.id)}
                                             className={`flex justify-between items-center bg-white p-2 rounded border shadow-sm cursor-pointer transition-all
@@ -190,8 +200,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                             </span>
                                         </div>
                                     ))}
-
-                                    {/* Refinanciados */}
                                     {data.integrantes_refinanciados?.map((int) => (
                                         <div key={int.id} onClick={() => handleSelectIntegrante(int.id)}
                                             className={`flex justify-between items-center bg-blue-50 p-2 rounded border shadow-sm cursor-pointer transition-all opacity-70
@@ -209,7 +217,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                             </span>
                                         </div>
                                     ))}
-
                                 </div>
                             </div>
                         )}
@@ -229,15 +236,11 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                             <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
                                 <p className="text-[9px] font-black text-slate-400 uppercase">Interés ({eco?.interes_porc}%)</p>
-                                <p className="text-md font-black text-brand-gold-dark">
-                                    S/ {interesMonto.toFixed(2)}
-                                </p>
+                                <p className="text-md font-black text-brand-gold-dark">S/ {interesMonto.toFixed(2)}</p>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center flex flex-col justify-center">
                                 <p className="text-[9px] font-black text-slate-400 uppercase">Seguro</p>
-                                <p className="text-md font-black text-slate-800">
-                                    S/ {parseFloat(eco?.seguro || 0).toFixed(2)}
-                                </p>
+                                <p className="text-md font-black text-slate-800">S/ {parseFloat(eco?.seguro || 0).toFixed(2)}</p>
                                 <p className={`text-[8px] font-black uppercase mt-0.5 ${eco?.seguro_financiado ? 'text-brand-gold-dark' : 'text-green-600'}`}>
                                     {eco?.seguro_financiado ? '(En Cuotas)' : '✓ Ya Cobrado'}
                                 </p>
@@ -262,7 +265,8 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </h4>
                             <div className="flex items-center gap-2">
 
-                                {canRefinanciar && data.estado === 1 && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (
+                                {/* Refinanciar — solo si vigente y no cancelado */}
+                                {canRefinanciar && data.estado === 1 && !prestamoCancelado && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (
                                     <button onClick={handleAbrirRefinanciamiento}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold hover:bg-brand-gold-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-gold/20">
                                         <ArrowPathRoundedSquareIcon className="w-3.5 h-3.5" />
@@ -277,18 +281,21 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </span>
                                 )}
 
-                                <button onClick={handleDescargarCronograma} disabled={loadingPdf}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red hover:bg-brand-red-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-red/20">
-                                    {loadingPdf
-                                        ? <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
-                                        : <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                                    }
-                                    {esVistaIntegrante ? 'PDF Individual' : (data.es_grupal ? 'PDF Grupal' : 'Descargar PDF')}
-                                </button>
+                                {/* PDF — oculto si el préstamo está cancelado */}
+                                {!prestamoCancelado && (
+                                    <button onClick={handleDescargarCronograma} disabled={loadingPdf}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red hover:bg-brand-red-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-red/20">
+                                        {loadingPdf
+                                            ? <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
+                                            : <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                                        }
+                                        {esVistaIntegrante ? 'PDF Individual' : (data.es_grupal ? 'PDF Grupal' : 'Descargar PDF')}
+                                    </button>
+                                )}
                             </div>
                         </div>
 
-                        {/* 5. Tabla — sin spinner de integrante, el swap es instantáneo */}
+                        {/* 5. Tabla */}
                         {loadingIntegrante ? (
                             <div className="flex items-center justify-center py-12">
                                 <ArrowPathIcon className="w-6 h-6 animate-spin text-brand-red" />
