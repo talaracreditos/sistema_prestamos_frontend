@@ -6,6 +6,7 @@ import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import ViewModal from 'components/Shared/Modals/ViewModal';
+import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import ViewPrestamoModal from './ViewPrestamoModal';
 import { 
     BanknotesIcon, 
@@ -14,7 +15,8 @@ import {
     ArrowPathIcon,
     UserGroupIcon,
     UserIcon,
-    BriefcaseIcon
+    BriefcaseIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
 
 const Index = () => {
@@ -22,10 +24,12 @@ const Index = () => {
         loading, prestamos, paginationInfo, filters, alert, setAlert,
         handleFilterChange, handleFilterSubmit, handleFilterClear, fetchPrestamos,
         handleView, isViewOpen, setIsViewOpen, viewData, viewLoading,
-        handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl
+        handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
+        isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading
     } = useIndex();
 
-    const { role } = useAuth();
+    const { role, can } = useAuth();
+    const canDelete = can('prestamo.delete');
 
     const filterConfig = useMemo(() => {
         const config = [];
@@ -80,7 +84,7 @@ const Index = () => {
             )},
             { header: 'Asesor', render: (row) => (
                 <div className="flex items-center gap-1.5 text-[11px] text-black w-fit">
-                    <BriefcaseIcon className="w-3 h-3 text-black " />
+                    <BriefcaseIcon className="w-3 h-3 text-black" />
                     {row.asesor}
                 </div>
             )},
@@ -100,15 +104,19 @@ const Index = () => {
                 const colors = { 
                     1: 'bg-green-50 text-green-700 border-green-100', 
                     2: 'bg-slate-50 text-slate-600 border-slate-100', 
-                    3: 'bg-brand-gold-light text-brand-gold-dark border-brand-gold/30' ,
+                    3: 'bg-brand-gold-light text-brand-gold-dark border-brand-gold/30',
                     4: 'bg-blue-50 text-blue-700 border-blue-100', 
                 };
-                const labels = { 1: 'VIGENTE', 2: 'CANCELADO', 3: 'LIQUIDADO' , 4: 'REFINANCIADO' };
-                return <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${colors[row.estado]}`}>{labels[row.estado]}</span>
+                const labels = { 1: 'VIGENTE', 2: 'CANCELADO', 3: 'LIQUIDADO', 4: 'REFINANCIADO' };
+                return <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${colors[row.estado]}`}>{labels[row.estado]}</span>;
             }},
             { header: 'Acciones', render: (row) => (
                 <div className="flex gap-2 items-center justify-end">
-                    <button onClick={() => handleView(row.id)} title="Ver Cronograma" className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                    <button 
+                        onClick={() => handleView(row.id)} 
+                        title="Ver Cronograma" 
+                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                    >
                         <EyeIcon className="w-4 h-4" />
                     </button>
 
@@ -121,12 +129,22 @@ const Index = () => {
                             <PhotoIcon className="w-4 h-4" />
                         </button>
                     )}
+
+                    {canDelete && !row.desembolsado && row.estado !== 2 && (
+                        <button
+                            onClick={() => openDeleteModal(row.id)}
+                            title="Cancelar Préstamo"
+                            className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                        >
+                            <TrashIcon className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             )}
         ];
 
         return cols;
-    }, [handleView, handleOpenAbono]);
+    }, [handleView, handleOpenAbono, openDeleteModal, canDelete]);
 
     if (loading && prestamos.length === 0) return <LoadingScreen />;
 
@@ -167,6 +185,16 @@ const Index = () => {
                     )}
                 </div>
             </ViewModal>
+
+            {isDeleteModalOpen && (
+                <ConfirmModal
+                    title="¿Cancelar Préstamo?"
+                    message="El préstamo será marcado como cancelado. Esta acción no se puede deshacer."
+                    confirmText={deleteLoading ? "Cancelando..." : "Sí, Cancelar Préstamo"}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setIsDeleteModalOpen(false)}
+                />
+            )}
         </div>
     );
 };

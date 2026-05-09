@@ -47,3 +47,8 @@ export const refinanciar = async (data) => {
     });
     return handleResponse(response);
 };
+
+export const deletePrestamo = async (id) => {
+    const response = await fetchWithAuth(`${BASE_URL}/delete/${id}`, { method: 'DELETE' });
+    return handleResponse(response);
+};

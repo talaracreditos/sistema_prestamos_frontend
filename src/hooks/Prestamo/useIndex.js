@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { index, show } from 'services/prestamoService';
+import { index, show, deletePrestamo } from 'services/prestamoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
 export const useIndex = () => {
@@ -17,6 +17,10 @@ export const useIndex = () => {
 
     const [isAbonoModalOpen, setIsAbonoModalOpen] = useState(false);
     const [selectedAbonoUrl, setSelectedAbonoUrl] = useState(null);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedDeleteId, setSelectedDeleteId] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const fetchPrestamos = useCallback(async (page = 1) => {
         setLoading(true);
@@ -56,6 +60,25 @@ export const useIndex = () => {
         setIsAbonoModalOpen(true);
     };
 
+    const openDeleteModal = (id) => {
+        setSelectedDeleteId(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        setDeleteLoading(true);
+        try {
+            await deletePrestamo(selectedDeleteId);
+            setAlert({ type: 'success', message: 'Préstamo cancelado correctamente.' });
+            setIsDeleteModalOpen(false);
+            fetchPrestamos(paginationInfo.currentPage);
+        } catch (err) {
+            setAlert(handleApiError(err));
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     const handleFilterChange = (name, val) => setFilters(prev => ({ ...prev, [name]: val }));
     const handleFilterSubmit = () => { filtersRef.current = filters; fetchPrestamos(1); };
     const handleFilterClear = () => {
@@ -69,6 +92,7 @@ export const useIndex = () => {
         loading, prestamos, paginationInfo, filters, alert, setAlert,
         handleFilterChange, handleFilterSubmit, handleFilterClear, fetchPrestamos,
         handleView, isViewOpen, setIsViewOpen, viewData, viewLoading,
-        handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl
+        handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
+        isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading
     };
 };
