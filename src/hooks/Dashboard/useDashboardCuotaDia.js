@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { getCuotaDiaDashboard } from 'services/dashboardService';
 
 export const useDashboardCuotaDia = () => {
-    const hoy = new Date().toISOString().slice(0, 10);
+
+    const hoy = new Date().toLocaleDateString('en-CA');
 
     const [loading,   setLoading]   = useState(true);
     const [data,      setData]      = useState(null);
@@ -11,22 +12,27 @@ export const useDashboardCuotaDia = () => {
 
     const fetchData = useCallback(async (f = hoy, aid = '') => {
         setLoading(true);
+
         try {
             const json = await getCuotaDiaDashboard({
-                fecha:     f,
+                fecha: f,
                 asesor_id: aid || undefined,
             });
+
             setData(json.data || json);
+
         } catch (e) {
             console.error(e);
+
         } finally {
             setLoading(false);
         }
+
     }, [hoy]);
 
-    // Carga inicial con hoy
-    // eslint-disable-next-line
-    useEffect(() => { fetchData(fecha, asesorId); }, [fetchData]);
+    useEffect(() => {
+        fetchData(fecha, asesorId);
+    }, [fetchData]);
 
     const handleFiltrar = () => fetchData(fecha, asesorId);
 
@@ -37,9 +43,15 @@ export const useDashboardCuotaDia = () => {
     };
 
     return {
-        loading, data,
-        fecha,    setFecha,
-        asesorId, setAsesorId,
+        loading,
+        data,
+
+        fecha,
+        setFecha,
+
+        asesorId,
+        setAsesorId,
+
         handleFiltrar,
         handleLimpiar,
     };
