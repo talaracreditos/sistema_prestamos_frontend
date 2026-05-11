@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
     HomeIcon, ChartPieIcon, UsersIcon, BanknotesIcon, 
@@ -10,6 +10,46 @@ import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import { useAuth } from 'context/AuthContext';
 import logo from 'assets/img/logo.png'; 
 import { Calendar1Icon, ChevronDownIcon, ChevronLeftIcon, CreditCardIcon, Lock, MapIcon, SettingsIcon, ShoppingBagIcon, UserPlusIcon } from 'lucide-react';
+
+// ── Reloj en tiempo real ──────────────────────────────────────────────────────
+const LiveClock = ({ collapsed = false }) => {
+    const [now, setNow] = useState(new Date());
+    const timerRef = useRef(null);
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timerRef.current);
+    }, []);
+
+    const hora = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const fecha = now.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    if (collapsed) {
+        // Modo colapsado: solo hora centrada, compacta
+        return (
+            <div className="flex flex-col items-center gap-0.5 mt-1">
+                <span className="text-[10px] font-black text-brand-red tabular-nums tracking-tight leading-none">
+                    {hora.slice(0, 5)}
+                </span>
+                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wide leading-none">
+                    {now.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}
+                </span>
+            </div>
+        );
+    }
+
+    // Modo expandido: hora grande + fecha debajo
+    return (
+        <div className="mt-1">
+            <p className="text-[11px] font-black text-brand-red tabular-nums tracking-tight leading-none">
+                {hora}
+            </p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide leading-none mt-0.5">
+                {fecha}
+            </p>
+        </div>
+    );
+};
 
 export const MENU_GROUPS = [
     {
@@ -76,7 +116,7 @@ export const MENU_GROUPS = [
             {
                 section: 'Operaciones', icon: CurrencyDollarIcon,
                 subs: [
-                    { name: 'Caja Operativa',        link: '/operacion/caja',    requiredPermission: 'operacion.store' },
+                    { name: 'Caja Operativa',           link: '/operacion/caja',   requiredPermission: 'operacion.store' },
                     { name: 'Historial de Movimientos', link: '/operacion/listar', requiredPermission: 'operacion.index' },
                 ],
             },
@@ -133,17 +173,17 @@ export const MENU_GROUPS = [
                     { name: 'Agregar Empleado', link: '/empleado/agregar', requiredPermission: 'empleado.store' },
                 ],
             },
-            { section: 'Feriados',        icon: Calendar1Icon, link: '/feriados/listar',  requiredPermission: 'feriado.index'   },
-            { section: 'Roles y Permisos', icon: Lock,          link: '/rol/listar',        requiredPermission: 'rol.index'       },
-            { section: 'Parámetros',       icon: SettingsIcon,  link: '/parametro/listar',  requiredPermission: 'parametro.index' },
+            { section: 'Feriados',         icon: Calendar1Icon, link: '/feriados/listar', requiredPermission: 'feriado.index'   },
+            { section: 'Roles y Permisos', icon: Lock,          link: '/rol/listar',       requiredPermission: 'rol.index'       },
+            { section: 'Parámetros',       icon: SettingsIcon,  link: '/parametro/listar', requiredPermission: 'parametro.index' },
         ]
     }
 ];
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
-    const [isOpen,       setIsOpen]       = useState(false);
-    const [openSection,  setOpenSection]  = useState(null);
-    const [showConfirm,  setShowConfirm]  = useState(false);
+    const [isOpen,      setIsOpen]      = useState(false);
+    const [openSection, setOpenSection] = useState(null);
+    const [showConfirm, setShowConfirm] = useState(false);
     const location = useLocation();
     const { can, logout } = useAuth();
 
@@ -240,22 +280,24 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 </button>
 
                 {/* HEADER */}
-                <div className={`flex items-center justify-center flex-shrink-0 border-b border-gray-100 transition-all duration-300 relative bg-white ${isCollapsed ? 'h-24 md:h-20' : 'h-24'}`}>
-                    {/* Logo colapsado */}
-                    <img
-                        src={logo}
-                        alt="Logo"
-                        className={`hidden md:block absolute w-12 h-12 object-contain transition-all duration-300 ${
-                            isCollapsed ? 'opacity-100 scale-100 delay-100' : 'opacity-0 scale-50 pointer-events-none'
-                        }`}
-                    />
-                    {/* Texto expandido */}
+                <div className={`flex items-center justify-center flex-shrink-0 border-b border-gray-100 transition-all duration-300 relative bg-white ${isCollapsed ? 'h-24 md:h-24' : 'h-24'}`}>
+
+                    {/* Modo colapsado — logo + reloj centrados */}
+                    <div className={`hidden md:flex flex-col items-center gap-0.5 absolute transition-all duration-300 ${
+                        isCollapsed ? 'opacity-100 scale-100 delay-100' : 'opacity-0 scale-50 pointer-events-none'
+                    }`}>
+                        <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
+                        <LiveClock collapsed />
+                    </div>
+
+                    {/* Modo expandido — logo + texto + reloj */}
                     <div className={`flex items-center gap-2 overflow-hidden transition-all duration-300 whitespace-nowrap
                         ${isCollapsed ? 'md:w-0 md:opacity-0' : 'w-auto opacity-100'}`}>
                         <img src={logo} alt="Logo" className="w-8 h-8 object-contain flex-shrink-0" />
                         <div className="leading-tight">
                             <p className="font-black text-sm text-brand-red uppercase tracking-tight">TALARA</p>
                             <p className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">Créditos e Inversiones</p>
+                            <LiveClock />
                         </div>
                     </div>
                 </div>
@@ -275,8 +317,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
                             <div className="space-y-0.5">
                                 {group.items.map((item, idx) => {
-                                    const isActive     = isSectionActive(item);
-                                    const isSubOpen    = item.subs && openSection === item.section;
+                                    const isActive      = isSectionActive(item);
+                                    const isSubOpen     = item.subs && openSection === item.section;
                                     const IconComponent = item.icon || CubeIcon;
 
                                     const base     = "flex items-center flex-nowrap w-full px-3 py-2.5 rounded-xl transition-all duration-200 group relative";
