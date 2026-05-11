@@ -80,9 +80,13 @@ import ListarFeriados from 'pages/Feriado/Index';
 import AgregarFeriado from 'pages/Feriado/Store';
 import EditarFeriado from 'pages/Feriado/Update';
 
-
 // ROL AND PERMISSIONS
 import ListarRoles from 'pages/Rol/Index';
+
+// UI HORARIOS SISTEMA
+import ListarHorarios from 'pages/HorarioSistema/Index';
+import AgregarHorario from 'pages/HorarioSistema/Store';
+import EditarHorario  from 'pages/HorarioSistema/Update';
 
 // SETTINGS
 import ListarParametros from 'pages/Parametro/Index';
@@ -91,11 +95,12 @@ import EditarParametro from 'pages/Parametro/Update';
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
+import SecureRoute from 'utilities/ProtectedRoutes/SecureRoute';
+
+// CONTEXT
+import { SecureModuleProvider } from 'context/SecureModuleContext';
 import { AuthProvider } from 'context/AuthContext';
 import { NotificacionProvider } from 'components/Shared/Notificaciones/NotificacionContext';
-import SecureRoute from 'utilities/ProtectedRoutes/SecureRoute';
-import { SecureModuleProvider } from 'context/SecureModuleContext';
-
 
 function AppContent() {
   return (
@@ -178,6 +183,11 @@ function AppContent() {
 
         {/* ROLES Y PERMISOS */}
         <Route path="/rol/listar" element={<ProtectedRoute requiredPermission="rol.index"  element={<SecureRoute element={<ListarRoles />} />} />} />   
+
+        <Route path="/horario-sistema/listar"     element={<ProtectedRoute requiredPermission="horarioSistema.index"  element={<SecureRoute element={<ListarHorarios />} />} />} />
+        <Route path="/horario-sistema/agregar"    element={<ProtectedRoute requiredPermission="horarioSistema.store"   element={<SecureRoute element={<AgregarHorario />} />} />} />
+        <Route path="/horario-sistema/editar/:id" element={<ProtectedRoute requiredPermission="horarioSistema.update"  element={<SecureRoute element={<EditarHorario />} />} />} />
+
         {/* SETTINGS */}
         <Route path="/parametro/listar" element={<ProtectedRoute requiredPermission="parametro.index" element={<SecureRoute element={<ListarParametros />} />} />} />   
         <Route path="/parametro/editar/:id" element={<ProtectedRoute requiredPermission="parametro.update" element={<SecureRoute element={<EditarParametro />} />} />} />   

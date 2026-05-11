@@ -9,7 +9,7 @@ import {
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import { useAuth } from 'context/AuthContext';
 import logo from 'assets/img/logo.png'; 
-import { Calendar1Icon, ChevronDownIcon, ChevronLeftIcon, CreditCardIcon, Lock, MapIcon, SettingsIcon, ShoppingBagIcon, UserPlusIcon } from 'lucide-react';
+import { Calendar1Icon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, SettingsIcon, ShoppingBagIcon, UserPlusIcon } from 'lucide-react';
 
 // ── Reloj en tiempo real ──────────────────────────────────────────────────────
 const LiveClock = ({ collapsed = false }) => {
@@ -175,6 +175,7 @@ export const MENU_GROUPS = [
             },
             { section: 'Feriados',         icon: Calendar1Icon, link: '/feriados/listar', requiredPermission: 'feriado.index'   },
             { section: 'Roles y Permisos', icon: Lock,          link: '/rol/listar',       requiredPermission: 'rol.index'       },
+            { section: 'Horarios Sistema', icon: ClockIcon,     link: '/horario-sistema/listar', requiredPermission: 'horarioSistema.index' },
             { section: 'Parámetros',       icon: SettingsIcon,  link: '/parametro/listar', requiredPermission: 'parametro.index' },
         ]
     }

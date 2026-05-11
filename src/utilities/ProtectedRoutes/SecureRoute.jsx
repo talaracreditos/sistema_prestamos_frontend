@@ -148,7 +148,7 @@ const SecureRoute = ({ element }) => {
                 verifying={verifying}
                 error={error}
                 onClearError={clearError}
-                onBack={() => navigate(-1)}
+                onBack={() => navigate('/home')}
             />
         );
     }
