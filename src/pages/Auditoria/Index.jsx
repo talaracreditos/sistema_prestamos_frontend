@@ -41,8 +41,9 @@ const DetalleModal = ({ isOpen, onClose, data }) => {
                     {/* Info general */}
                     <div className="grid grid-cols-2 gap-3">
                         <div className="bg-slate-50 rounded-xl p-3 space-y-1">
-                            <span className="text-slate-400 font-medium uppercase tracking-wide text-[10px]">Usuario</span>
-                            <p className="font-bold text-slate-700 text-sm">{data.usuario}</p>
+                            <span className="text-slate-400 font-medium uppercase tracking-wide text-[10px]">Nombre</span>
+                            <p className="font-bold text-slate-700 text-sm">{data.nombre_completo}</p>
+                            <p className="text-xs text-slate-400">{data.usuario}</p>
                         </div>
                         <div className="bg-slate-50 rounded-xl p-3 space-y-1">
                             <span className="text-slate-400 font-medium uppercase tracking-wide text-[10px]">IP</span>
@@ -125,7 +126,10 @@ const Index = () => {
                     <div className="p-1.5 bg-slate-100 rounded-full border border-slate-200">
                         <UserIcon className="w-4 h-4 text-slate-500" />
                     </div>
-                    <span className="text-sm font-bold text-slate-700">{row.usuario}</span>
+                    <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-700">{row.nombre_completo}</span>
+                        <span className="text-xs text-slate-400">{row.usuario}</span>
+                    </div>
                 </div>
             ),
         },
