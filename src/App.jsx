@@ -27,6 +27,11 @@ import AgregarCliente from 'pages/Cliente/Store';
 import EditarCliente from 'pages/Cliente/Update';
 import ListarClientes from 'pages/Cliente/Index';
 
+// UI CIIU
+import ListarCiius  from 'pages/Ciiu/Index';
+import AgregarCiiu  from 'pages/Ciiu/Store';
+import EditarCiiu   from 'pages/Ciiu/Update';
+
 // UI ENTIDADES BANCARIAS
 import AgregarEntidadBancaria from 'pages/EntidadBancaria/Store';
 import EditarEntidadBancaria from 'pages/EntidadBancaria/Update';
@@ -125,6 +130,11 @@ function AppContent() {
         <Route path="/cliente/editar/:id" element={<ProtectedRoute requiredPermission="cliente.update" element={<EditarCliente />} />} />
         <Route path="/cliente/listar" element={<ProtectedRoute requiredPermission="cliente.index" element={<ListarClientes />} />} />
 
+        {/* CIIU */}
+        <Route path="/ciiu/listar"       element={<ProtectedRoute requiredPermission="ciiu.index"  element={<ListarCiius />} />} />
+        <Route path="/ciiu/agregar"      element={<ProtectedRoute requiredPermission="ciiu.store"  element={<AgregarCiiu />} />} />
+        <Route path="/ciiu/editar/:id"   element={<ProtectedRoute requiredPermission="ciiu.update" element={<EditarCiiu  />} />} />
+ 
         {/* EMPLEADOS */}
         <Route path="/empleado/agregar" element={<ProtectedRoute requiredPermission="empleado.store" element={<AgregarEmpleado />} />} />
         <Route path="/empleado/editar/:id" element={<ProtectedRoute requiredPermission="empleado.update" element={<EditarEmpleado />} />} />

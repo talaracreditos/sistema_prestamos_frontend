@@ -10,7 +10,7 @@ import {
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import { useAuth } from 'context/AuthContext';
 import logo from 'assets/img/logo.png'; 
-import { Calendar1Icon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, SettingsIcon, ShoppingBagIcon, UserPlusIcon } from 'lucide-react';
+import { Calendar1Icon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, SettingsIcon, ShoppingBagIcon, TagIcon, UserPlusIcon } from 'lucide-react';
 
 // ── Reloj en tiempo real ──────────────────────────────────────────────────────
 const LiveClock = ({ collapsed = false }) => {
@@ -158,6 +158,13 @@ export const MENU_GROUPS = [
                 subs: [
                     { name: 'Listar Bancos', link: '/entidadBancaria/listar',  requiredPermission: 'entidadBancaria.index' },
                     { name: 'Agregar Banco', link: '/entidadBancaria/agregar', requiredPermission: 'entidadBancaria.store' },
+                ],
+            },
+            {
+                section: 'Códigos CIIU', icon: TagIcon,
+                subs: [
+                    { name: 'Listar CIIU', link: '/ciiu/listar',  requiredPermission: 'ciiu.index' },
+                    { name: 'Nuevo CIIU',  link: '/ciiu/agregar', requiredPermission: 'ciiu.store' },
                 ],
             },
             {
