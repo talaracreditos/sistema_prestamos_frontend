@@ -7,11 +7,11 @@ const UNLOCK_MS = 5 * 60 * 1000; // 5 minutos
 const SecureModuleContext = createContext(null);
 
 export function SecureModuleProvider({ children }) {
-    const [isUnlocked, setIsUnlocked]   = useState(false);
-    const [verifying,  setVerifying]    = useState(false);
-    const [error,      setError]        = useState(null);
-    const timerRef    = useRef(null);
-    const unlockedAt  = useRef(null); // ← timestamp de cuando se desbloqueó
+    const [isUnlocked, setIsUnlocked] = useState(false);
+    const [verifying,  setVerifying]  = useState(false);
+    const [error,      setError]      = useState(null);
+    const timerRef   = useRef(null);
+    const unlockedAt = useRef(null);
 
     const clearTimer = () => {
         if (timerRef.current) clearTimeout(timerRef.current);
@@ -25,8 +25,7 @@ export function SecureModuleProvider({ children }) {
 
     const startTimer = useCallback(() => {
         clearTimer();
-        unlockedAt.current = Date.now(); // ← guardar cuándo se desbloqueó
-
+        unlockedAt.current = Date.now();
         timerRef.current = setTimeout(() => lock(), UNLOCK_MS);
     }, [lock]);
 
@@ -72,4 +71,10 @@ export function SecureModuleProvider({ children }) {
             {children}
         </SecureModuleContext.Provider>
     );
+}
+
+export function useSecureModule() {
+    const ctx = useContext(SecureModuleContext);
+    if (!ctx) throw new Error('useSecureModule debe usarse dentro de <SecureModuleProvider>');
+    return ctx;
 }
