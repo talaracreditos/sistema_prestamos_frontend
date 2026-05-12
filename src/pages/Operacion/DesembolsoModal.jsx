@@ -122,6 +122,26 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                                         )}
                                     </div>
                                 )}
+
+                                {!prestamo.es_grupal && prestamo.cuentas_bancarias?.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-white/10">
+                                        <div className="flex items-center gap-1.5 mb-2">
+                                            <BuildingLibraryIcon className="w-3 h-3 text-yellow-400" />
+                                            <p className="text-[9px] font-black uppercase tracking-[.12em] text-slate-400">
+                                                Cuentas Bancarias
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            {prestamo.cuentas_bancarias.map((c, i) => (
+                                                <div key={i} className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                                    <p className="text-[9px] font-black uppercase tracking-wider text-yellow-500/80">{c.banco}</p>
+                                                    <p className="text-xs font-black tracking-widest text-white mt-0.5">{c.numero_cuenta}</p>
+                                                    {c.cci && <p className="text-[9px] font-bold text-slate-500 mt-0.5">CCI: {c.cci}</p>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Nro operación */}
