@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
 import HistorialMoraModal from 'components/Shared/Modals/HistorialMoraModal';
 import RefinanciamientoModal from './RefinanciamientoModal';
+import ReducirMoraModal from './ReducirMoraModal';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
 import {
     CalendarIcon, UserIcon, UserGroupIcon,
     InformationCircleIcon, UsersIcon,
     ArrowPathIcon, ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
-import { ArrowPathRoundedSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowPathRoundedSquareIcon, ScissorsIcon } from '@heroicons/react/24/outline';
 import { useAuth } from 'context/AuthContext';
 import { useViewPrestamoModal } from 'hooks/Prestamo/useViewPrestamoModal';
 
@@ -20,9 +21,7 @@ const CardSkeleton = ({ accent = 'slate' }) => {
         red:   'bg-brand-red/80',
         white: 'bg-white border border-slate-100',
     }[accent];
-
     const pulse = accent === 'red' ? 'bg-white/20' : 'bg-slate-200';
-
     return (
         <div className={`p-4 rounded-2xl animate-pulse ${bg}`}>
             <div className={`h-2.5 w-24 rounded-full mb-3 ${pulse}`} />
@@ -36,8 +35,13 @@ const CardSkeleton = ({ accent = 'slate' }) => {
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
     const { can } = useAuth();
-    const canRefinanciar = can('prestamo.refinanciar');
-    const canGeneratePdf = can('prestamo.generatePDF');
+    const canRefinanciar  = can('prestamo.refinanciar');
+    const canGeneratePdf  = can('prestamo.generatePDF');
+    const canReducirMora  = can('prestamo.reducirMora');
+
+    // ── Estado local para ReducirMoraModal ───────────────────────────────────
+    const [reducirMoraOpen, setReducirMoraOpen]   = useState(false);
+    const [cuotaParaReducir, setCuotaParaReducir] = useState(null);
 
     const {
         integranteSeleccionado,
@@ -62,6 +66,22 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         setHistorialModal,
         setRefModalOpen,
     } = useViewPrestamoModal({ data, onClose, onRefresh });
+
+    // ── Cuota con mora pendiente del cronograma activo (la primera) ──────────
+    const cuotaConMora = cronogramaActivo?.find(
+        c => !([0, 2, 6].includes(c.estado)) && parseFloat(c.mora ?? 0) > 0
+    ) ?? null;
+
+    const handleAbrirReducirMora = (cuota) => {
+        setCuotaParaReducir(cuota);
+        setReducirMoraOpen(true);
+    };
+
+    const handleSuccessReducirMora = () => {
+        setReducirMoraOpen(false);
+        setCuotaParaReducir(null);
+        if (onRefresh) onRefresh();
+    };
 
     return (
         <>
@@ -176,81 +196,48 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* Capital */}
                                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                     <p className="text-[10px] font-black uppercase text-slate-400 mb-1">
                                         {data.estado === 3 ? 'Capital Total' : 'Capital Pendiente'}
                                     </p>
-                                    <p className="text-xl font-black text-slate-800">
-                                        S/ {parseFloat(eco?.monto ?? 0).toFixed(2)}
-                                    </p>
-                                    <p className="text-[11px] font-bold text-slate-500 mt-1">
-                                        de S/ {parseFloat(eco?.monto_original ?? 0).toFixed(2)}
-                                    </p>
+                                    <p className="text-xl font-black text-slate-800">S/ {parseFloat(eco?.monto ?? 0).toFixed(2)}</p>
+                                    <p className="text-[11px] font-bold text-slate-500 mt-1">de S/ {parseFloat(eco?.monto_original ?? 0).toFixed(2)}</p>
                                     <div className="mt-3 w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                                        <div
-                                            className="h-full bg-slate-700 rounded-full transition-all duration-500"
-                                            style={{ width: `${((eco?.monto ?? 0) * 100) / (eco?.monto_original || 1)}%` }}
-                                        />
+                                        <div className="h-full bg-slate-700 rounded-full transition-all duration-500"
+                                            style={{ width: `${((eco?.monto ?? 0) * 100) / (eco?.monto_original || 1)}%` }} />
                                     </div>
                                 </div>
-
-                                {/* Interés */}
                                 <div className="p-4 bg-brand-gold-light/20 rounded-2xl border border-brand-gold/10">
-                                    <p className="text-[10px] font-black uppercase text-brand-gold-dark mb-1">
-                                        Interés Pendiente
-                                    </p>
-                                    <p className="text-xl font-black text-brand-gold-dark">
-                                        S/ {parseFloat(eco?.interes_monto ?? 0).toFixed(2)}
-                                    </p>
-                                    <p className="text-[11px] font-bold text-brand-gold-dark/70 mt-1">
-                                        de S/ {parseFloat(eco?.interes_original ?? 0).toFixed(2)}
-                                    </p>
+                                    <p className="text-[10px] font-black uppercase text-brand-gold-dark mb-1">Interés Pendiente</p>
+                                    <p className="text-xl font-black text-brand-gold-dark">S/ {parseFloat(eco?.interes_monto ?? 0).toFixed(2)}</p>
+                                    <p className="text-[11px] font-bold text-brand-gold-dark/70 mt-1">de S/ {parseFloat(eco?.interes_original ?? 0).toFixed(2)}</p>
                                     <div className="mt-3 w-full bg-brand-gold/20 rounded-full h-2 overflow-hidden">
-                                        <div
-                                            className="h-full bg-brand-gold rounded-full transition-all duration-500"
-                                            style={{ width: `${((eco?.interes_monto ?? 0) * 100) / (eco?.interes_original || 1)}%` }}
-                                        />
+                                        <div className="h-full bg-brand-gold rounded-full transition-all duration-500"
+                                            style={{ width: `${((eco?.interes_monto ?? 0) * 100) / (eco?.interes_original || 1)}%` }} />
                                     </div>
                                 </div>
-
-                                {/* Total */}
                                 <div className="p-4 bg-brand-red rounded-2xl shadow-xl shadow-brand-red/20">
                                     <p className="text-[10px] font-black uppercase text-white/70 mb-1">
                                         {data.estado === 3 ? 'Total Cobrado' : 'Saldo Pendiente'}
                                     </p>
-                                    <p className="text-xl font-black text-white">
-                                        S/ {parseFloat(eco?.total_prestamo ?? 0).toFixed(2)}
-                                    </p>
-                                    <p className="text-[11px] font-bold text-white/70 mt-1">
-                                        de S/ {parseFloat(eco?.total_original ?? 0).toFixed(2)}
-                                    </p>
+                                    <p className="text-xl font-black text-white">S/ {parseFloat(eco?.total_prestamo ?? 0).toFixed(2)}</p>
+                                    <p className="text-[11px] font-bold text-white/70 mt-1">de S/ {parseFloat(eco?.total_original ?? 0).toFixed(2)}</p>
                                     <div className="mt-3 w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                                        <div
-                                            className="h-full bg-white rounded-full transition-all duration-500"
-                                            style={{ width: `${((eco?.total_prestamo ?? 0) * 100) / (eco?.total_original || 1)}%` }}
-                                        />
+                                        <div className="h-full bg-white rounded-full transition-all duration-500"
+                                            style={{ width: `${((eco?.total_prestamo ?? 0) * 100) / (eco?.total_original || 1)}%` }} />
                                     </div>
                                 </div>
-
-                                {/* Cuota + Seguro */}
                                 <div className="p-4 bg-white rounded-2xl border border-slate-100 flex flex-col justify-between">
                                     <div>
                                         <p className="text-[10px] font-black uppercase text-slate-400 mb-1">
                                             {esVistaIntegrante ? 'Cuota Individual' : 'Valor Cuota'}
                                         </p>
-                                        <p className="text-xl font-black text-slate-800">
-                                            S/ {parseFloat(eco?.valor_cuota ?? 0).toFixed(2)}
-                                        </p>
-                                        <p className="text-[11px] font-bold text-slate-500 mt-1 uppercase">
-                                            {eco?.frecuencia}
-                                        </p>
+                                        <p className="text-xl font-black text-slate-800">S/ {parseFloat(eco?.valor_cuota ?? 0).toFixed(2)}</p>
+                                        <p className="text-[11px] font-bold text-slate-500 mt-1 uppercase">{eco?.frecuencia}</p>
                                     </div>
                                     <div className="mt-4 pt-3 border-t border-slate-100">
                                         <p className="text-[9px] font-black uppercase text-slate-400">Seguro</p>
-                                        <p className="text-sm font-black text-slate-700">
-                                            S/ {parseFloat(eco?.seguro || 0).toFixed(2)}
-                                        </p>
+                                        <p className="text-sm font-black text-slate-700">S/ {parseFloat(eco?.seguro || 0).toFixed(2)}</p>
                                         <p className={`text-[8px] font-black uppercase mt-1 ${eco?.seguro_financiado ? 'text-brand-gold-dark' : 'text-green-600'}`}>
                                             {eco?.seguro_financiado ? 'Financiado' : '✓ Ya Cobrado'}
                                         </p>
@@ -260,12 +247,23 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         )}
 
                         {/* 5. Header cronograma */}
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
                             <h4 className="flex items-center gap-2 text-[11px] font-black text-slate-700 uppercase tracking-widest px-1">
                                 <CalendarIcon className="w-4 h-4 text-brand-red" />
                                 {esVistaIntegrante ? `Cronograma — ${integranteNombre}` : 'Cronograma de Pagos y Saldos'}
                             </h4>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+
+                                {/* ── Botón Reducir Mora ── */}
+                                {canReducirMora && !prestamoCancelado && cuotaConMora && (
+                                    <button
+                                        onClick={() => handleAbrirReducirMora(cuotaConMora)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-orange-500/20"
+                                    >
+                                        <ScissorsIcon className="w-3.5 h-3.5" />
+                                        Reducir Mora
+                                    </button>
+                                )}
 
                                 {canRefinanciar && data.estado === 1 && !prestamoCancelado && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (
                                     <button
@@ -321,14 +319,18 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
             <HistorialMoraModal isOpen={!!historialModal} onClose={() => setHistorialModal(null)} data={historialModal} />
             <PdfModal isOpen={pdfOpen} onClose={handleCerrarPdf} title={pdfTitle} base64={pdfBase64} />
-            
-            {/* AQUÍ PASAMOS LOS INTEGRANTES */}
             <RefinanciamientoModal
                 isOpen={refModalOpen}
                 onClose={() => setRefModalOpen(false)}
                 data={refData}
-                integrantesGrupo={data?.integrantes} 
+                integrantesGrupo={data?.integrantes}
                 onSuccess={handleSuccessRefinanciamiento}
+            />
+            <ReducirMoraModal
+                isOpen={reducirMoraOpen}
+                onClose={() => { setReducirMoraOpen(false); setCuotaParaReducir(null); }}
+                cuota={cuotaParaReducir}
+                onSuccess={handleSuccessReducirMora}
             />
         </>
     );

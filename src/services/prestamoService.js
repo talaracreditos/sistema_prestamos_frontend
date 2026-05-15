@@ -41,9 +41,17 @@ export const combobox = async (tipoOperacion, search = '') => {
 };
 
 export const refinanciar = async (data) => {
-    const response = await fetchWithAuth(`${BASE_URL}/refinanciar`, { 
-        method: 'POST', 
-        body: JSON.stringify(data) 
+    const response = await fetchWithAuth(`${BASE_URL}/refinanciar`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+};
+
+export const reducirMora = async (data) => {
+    const response = await fetchWithAuth(`${BASE_URL}/reducir-mora`, {
+        method: 'POST',
+        body: JSON.stringify(data)
     });
     return handleResponse(response);
 };
