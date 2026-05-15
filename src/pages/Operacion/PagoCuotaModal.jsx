@@ -3,8 +3,20 @@ import ViewModal from 'components/Shared/Modals/ViewModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import {
     BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon,
-    UserGroupIcon, DocumentCheckIcon, XMarkIcon
+    UserGroupIcon, DocumentCheckIcon, XMarkIcon, SparklesIcon
 } from '@heroicons/react/24/outline';
+
+/* ─── Badge de excedente individual ─────────────────── */
+const ExcedenteBadge = ({ monto, label = 'Exc. propio disponible' }) => {
+    if (!monto || monto <= 0) return null;
+    return (
+        <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-200 rounded-xl px-3 py-1.5">
+            <SparklesIcon className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+            <span className="text-[10px] font-black text-purple-700 uppercase">{label}</span>
+            <span className="text-[10px] font-black text-purple-800 ml-auto">S/ {parseFloat(monto).toFixed(2)}</span>
+        </div>
+    );
+};
 
 const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const [metodo, setMetodo]             = useState('DEPOSITO');
@@ -18,21 +30,22 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
 
     const esGrupal = !!(cuota?.integrantes && cuota.integrantes.length > 0);
 
-    // ── Integrantes pendientes: los que llegan en cuota.integrantes
+    // Integrantes pendientes (no pagados ni refinanciados)
     const integrantesPendientes = cuota?.integrantes?.filter(i => ![2, 6].includes(i.estado)) ?? [];
-
-    // Si hay exactamente 1 integrante habilitado, mostrar distribución siempre
-    const soloUnIntegrante = esGrupal && integrantesPendientes.length === 1;
+    const soloUnIntegrante      = esGrupal && integrantesPendientes.length === 1;
 
     const totalAPagar = parseFloat(cuota?.saldo_pendiente ?? cuota?.monto ?? 0).toFixed(2);
     const mora        = parseFloat(cuota?.mora ?? 0);
 
-    // ── Validación mora por integrante (modo parcial grupal) ─────────────────
+    // Excedente individual (préstamo individual)
+    const excedenteIndividual = !esGrupal ? parseFloat(cuota?.excedente_anterior ?? 0) : 0;
+
+    // ── Validación mora por integrante ────────────────────────────────────────
     const integrantesSinCubrirMora = (esGrupal && esParcial)
         ? integrantesPendientes.filter(int => {
-            const moraPend    = parseFloat(int.mora_pendiente ?? 0);
+            const moraPend   = parseFloat(int.mora_pendiente ?? 0);
             if (moraPend <= 0) return false;
-            const esCompleto  = !distribucion[int.id] || distribucion[int.id] === '';
+            const esCompleto = !distribucion[int.id] || distribucion[int.id] === '';
             if (esCompleto) return false;
             return parseFloat(distribucion[int.id] || 0) < moraPend;
         })
@@ -51,14 +64,13 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
             setReferencia('');
             setArchivo(null);
             setPreview(null);
-            // Si hay 1 solo integrante habilitado → activar parcial automáticamente
             setEsParcial(soloUnIntegrante);
             setDistribucion({});
             setAlertLocal(null);
         }
     }, [isOpen, totalAPagar, soloUnIntegrante]);
 
-    // ── Sincronizar monto con distribución ────────────────────────────────────
+    // ── Calcular total distribuido en modo parcial grupal ─────────────────────
     const calcularTotalDistribuido = () => {
         if (integrantesPendientes.length === 0) return parseFloat(totalAPagar);
 
@@ -68,10 +80,10 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
         if (todosEnFull) return parseFloat(totalAPagar);
 
         return integrantesPendientes.reduce((acc, int) => {
-            const val         = distribucion[int.id];
-            const esCompleto  = !val || val === '';
-            const saldoCap    = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
-            const moraPend    = parseFloat(int.mora_pendiente ?? 0);
+            const val        = distribucion[int.id];
+            const esCompleto = !val || val === '';
+            const saldoCap   = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
+            const moraPend   = parseFloat(int.mora_pendiente ?? 0);
             return acc + (esCompleto
                 ? saldoCap + moraPend
                 : parseFloat(val || 0));
@@ -81,9 +93,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const totalDistribuido = calcularTotalDistribuido();
 
     useEffect(() => {
-        if (esGrupal && esParcial) {
-            setRecibido(totalDistribuido.toFixed(2));
-        }
+        if (esGrupal && esParcial) setRecibido(totalDistribuido.toFixed(2));
     }, [totalDistribuido, esGrupal, esParcial]);
 
     useEffect(() => {
@@ -106,9 +116,9 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData();
-        formData.append('cuota_id',        cuota.id);
-        formData.append('metodo_pago',     metodo);
-        formData.append('monto_recibido',  recibido);
+        formData.append('cuota_id',         cuota.id);
+        formData.append('metodo_pago',      metodo);
+        formData.append('monto_recibido',   recibido);
         formData.append('numero_operacion', referencia);
         if (archivo) formData.append('comprobante', archivo);
 
@@ -120,7 +130,8 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                     total_cuota:        parseFloat(int.saldo ?? int.saldo_capital ?? 0),
                     monto:              parseFloat(distribucion[int.id] || 0),
                     pago_completo:      !distribucion[int.id] || distribucion[int.id] === '',
-                    excedente_aplicado: parseFloat(int.excedente_aplicado ?? 0),
+                    // El excedente del integrante lo maneja el backend directamente
+                    // desde cuota_detalles.excedente_anterior — no necesitamos mandarlo
                 }))
             ));
         }
@@ -159,9 +170,11 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                     Mora ya cubierta: S/ {parseFloat(cuota.mora_pagada).toFixed(2)}
                                 </p>
                             )}
-                            {parseFloat(cuota?.excedente_anterior || 0) > 0 && (
-                                <p className="text-[10px] font-bold text-purple-400 mt-1">
-                                    Excedente aplicado: -S/ {parseFloat(cuota.excedente_anterior).toFixed(2)}
+                            {/* Excedente individual — préstamos individuales */}
+                            {excedenteIndividual > 0 && (
+                                <p className="text-[10px] font-bold text-purple-400 mt-1 flex items-center gap-1">
+                                    <SparklesIcon className="w-3 h-3" />
+                                    Excedente aplicado: -S/ {excedenteIndividual.toFixed(2)}
                                 </p>
                             )}
                             {parseFloat(cuota?.pago_acumulado) > 0 && (
@@ -176,7 +189,6 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                 <p className="text-sm font-black uppercase leading-snug text-white break-words">
                                     {cuota?.cliente ?? (esGrupal ? 'Préstamo Grupal' : 'Cliente')}
                                 </p>
-                                {/* Integrantes habilitados (nuevo flujo) */}
                                 {esGrupal && integrantesPendientes.length > 0 && (
                                     <p className="text-[9px] font-bold text-slate-400 mt-2">
                                         {integrantesPendientes.length} socio{integrantesPendientes.length > 1 ? 's' : ''} habilitado{integrantesPendientes.length > 1 ? 's' : ''} para pagar
@@ -201,7 +213,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             ))}
                         </div>
 
-                       {/* Campos */}
+                        {/* Campos */}
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">
@@ -224,7 +236,6 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                 )}
                             </div>
 
-                            {/* N° Operación solo para DEPOSITO */}
                             {metodo === 'DEPOSITO' && (
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">
@@ -265,7 +276,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             )}
                         </div>
 
-                        {/* Toggle pago parcial (solo si hay más de 1 integrante habilitado) */}
+                        {/* Toggle pago parcial grupal */}
                         {esGrupal && integrantesPendientes.length > 1 && (
                             <div onClick={() => setEsParcial(prev => !prev)}
                                 className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all select-none
@@ -289,9 +300,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             </div>
                         )}
 
-                        {/* Distribución por integrante:
-                            - Modo toggle: cuando hay >1 integrante y el toggle está activo
-                            - Siempre visible: cuando hay exactamente 1 integrante habilitado */}
+                        {/* Distribución por integrante */}
                         {esGrupal && (esParcial || soloUnIntegrante) && integrantesPendientes.length > 0 && (
                             <div className="border border-brand-gold/30 rounded-2xl overflow-hidden shadow-sm">
                                 <div className="bg-brand-gold-light px-4 py-2.5 border-b border-brand-gold/30">
@@ -304,63 +313,71 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                 </div>
                                 <div className="divide-y divide-slate-100 bg-white">
                                     {integrantesPendientes.map((int) => {
-                                        const val         = distribucion[int.id];
-                                        const esCompleto  = !val || val === '';
-                                        const saldoCap    = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
-                                        const moraPend    = parseFloat(int.mora_pendiente ?? 0);
-                                        const saldoTotal  = saldoCap + moraPend;
-                                        const montoPuesto = parseFloat(val || 0);
-                                        const pagaMas     = !esCompleto && montoPuesto >= saldoTotal;
+                                        const val              = distribucion[int.id];
+                                        const esCompleto       = !val || val === '';
+                                        const saldoCap         = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
+                                        const moraPend         = parseFloat(int.mora_pendiente ?? 0);
+                                        const saldoTotal       = saldoCap + moraPend;
+                                        const montoPuesto      = parseFloat(val || 0);
+                                        const pagaMas          = !esCompleto && montoPuesto >= saldoTotal;
+                                        // Excedente individual propio del integrante
+                                        const excedenteProp    = parseFloat(int.excedente_anterior ?? 0);
 
                                         return (
-                                            <div key={int.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-[11px] font-black text-slate-700 uppercase truncate">
-                                                        {int.nombre}
-                                                    </p>
-                                                    <div className="flex flex-col mt-0.5 gap-0.5">
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-[9px] text-slate-400 font-bold">
-                                                                Cuota: S/ {parseFloat(int.total_cuota || 0).toFixed(2)}
-                                                            </p>
-                                                            {parseFloat(int.pago_acumulado || 0) > 0 && (
-                                                                <p className="text-[9px] text-green-600 font-bold">
-                                                                    Pagó: S/ {parseFloat(int.pago_acumulado).toFixed(2)}
+                                            <div key={int.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-[11px] font-black text-slate-700 uppercase truncate">
+                                                            {int.nombre}
+                                                        </p>
+                                                        <div className="flex flex-col mt-0.5 gap-0.5">
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-[9px] text-slate-400 font-bold">
+                                                                    Cuota: S/ {parseFloat(int.total_cuota || 0).toFixed(2)}
                                                                 </p>
-                                                            )}
-                                                        </div>
-                                                        {parseFloat(int.excedente_aplicado ?? 0) > 0 && (
-                                                            <p className="text-[9px] text-purple-600 font-bold">
-                                                                Exc. aplicado: -S/ {parseFloat(int.excedente_aplicado).toFixed(2)}
-                                                            </p>
-                                                        )}
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-[9px] font-black text-slate-600">
-                                                                Falta: S/ {saldoCap.toFixed(2)}
-                                                            </p>
-                                                            {moraPend > 0 && (
-                                                                <p className="text-[9px] text-red-500 font-bold">
-                                                                    + Mora: S/ {moraPend.toFixed(2)}
+                                                                {parseFloat(int.pago_acumulado || 0) > 0 && (
+                                                                    <p className="text-[9px] text-green-600 font-bold">
+                                                                        Pagó: S/ {parseFloat(int.pago_acumulado).toFixed(2)}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-[9px] font-black text-slate-600">
+                                                                    Falta: S/ {saldoCap.toFixed(2)}
                                                                 </p>
-                                                            )}
+                                                                {moraPend > 0 && (
+                                                                    <p className="text-[9px] text-red-500 font-bold">
+                                                                        + Mora: S/ {moraPend.toFixed(2)}
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <input type="text" inputMode="decimal"
+                                                        value={val ?? ''}
+                                                        onChange={e => handleMontoIntegrante(int.id, e.target.value)}
+                                                        placeholder="Completo"
+                                                        className={`w-28 p-2 border rounded-xl text-xs font-black outline-none focus:ring-1 text-right transition-all
+                                                            ${esCompleto || pagaMas
+                                                                ? 'border-green-200 bg-green-50 text-green-700 placeholder-green-400 focus:ring-green-400'
+                                                                : 'border-brand-gold/50 bg-white text-brand-gold-dark focus:ring-brand-gold focus:border-brand-gold'}`}
+                                                    />
+                                                    <div className="w-14 text-right flex-shrink-0">
+                                                        {esCompleto || pagaMas
+                                                            ? <span className="text-[9px] font-black text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200">✓ FULL</span>
+                                                            : <span className="text-[9px] font-black text-brand-gold-dark bg-brand-gold-light px-1.5 py-0.5 rounded border border-brand-gold/30">PARCIAL</span>
+                                                        }
+                                                    </div>
                                                 </div>
-                                                <input type="text" inputMode="decimal"
-                                                    value={val ?? ''}
-                                                    onChange={e => handleMontoIntegrante(int.id, e.target.value)}
-                                                    placeholder="Completo"
-                                                    className={`w-28 p-2 border rounded-xl text-xs font-black outline-none focus:ring-1 text-right transition-all
-                                                        ${esCompleto || pagaMas
-                                                            ? 'border-green-200 bg-green-50 text-green-700 placeholder-green-400 focus:ring-green-400'
-                                                            : 'border-brand-gold/50 bg-white text-brand-gold-dark focus:ring-brand-gold focus:border-brand-gold'}`}
-                                                />
-                                                <div className="w-14 text-right flex-shrink-0">
-                                                    {esCompleto || pagaMas
-                                                        ? <span className="text-[9px] font-black text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200">✓ FULL</span>
-                                                        : <span className="text-[9px] font-black text-brand-gold-dark bg-brand-gold-light px-1.5 py-0.5 rounded border border-brand-gold/30">PARCIAL</span>
-                                                    }
-                                                </div>
+                                                {/* Excedente propio del integrante — informativo */}
+                                                {excedenteProp > 0 && (
+                                                    <div className="mt-1.5 ml-0">
+                                                        <ExcedenteBadge
+                                                            monto={excedenteProp}
+                                                            label="Exc. propio disponible"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     })}
@@ -436,7 +453,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                     </div>
                 </div>
 
-                {/* ── Panel derecho: preview voucher escritorio ──────────── */}
+                {/* ── Panel derecho: preview voucher ─────────────────────── */}
                 <div className="hidden md:flex md:w-[45%] bg-slate-50 relative items-center justify-center p-6 rounded-r-[32px]">
                     {preview ? (
                         <div className="relative w-full h-full flex items-center justify-center group">

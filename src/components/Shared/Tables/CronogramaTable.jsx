@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClockIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ChevronDownIcon, ChevronUpIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useCuotaData } from './hooks/useCuotaData';
 
 /* ─── Celda financiera ───────────────────────────────── */
@@ -35,7 +35,45 @@ const getStatusBadge = (estado) => (
     </span>
 );
 
-/* ─── Bloque de abonos compartido ────────────────────── */
+/* ─── Bloque excedentes (individual de integrante o global) ─── */
+/**
+ * excAnterior  → lo que venía de la cuota anterior (disponible)
+ * excAplicado  → se aplicó a capital (auditoría)
+ * excConsumido → se consumió en esta cuota
+ * excGenerado  → se generó aquí → pasa a la siguiente cuota
+ * label        → "Excedente propio" (integrante) | "Excedente" (global)
+ */
+const ExcedenteContent = ({ excAnterior, excAplicado, excConsumido, excGenerado, label = 'Excedente' }) => {
+    const hayAlgo = excAnterior > 0 || excAplicado > 0 || excConsumido > 0 || excGenerado > 0;
+    if (!hayAlgo) return <span className="text-[10px] text-slate-300 font-bold">—</span>;
+
+    return (
+        <div className="flex flex-col gap-0.5 items-end">
+            {excAnterior > 0 && (
+                <span className="text-[9px] font-bold text-purple-600 uppercase whitespace-nowrap">
+                    {label} anterior: S/ {excAnterior.toFixed(2)}
+                </span>
+            )}
+            {excAplicado > 0 && (
+                <span className="text-[9px] font-bold text-purple-700 uppercase whitespace-nowrap">
+                    Aplicado a capital: -S/ {excAplicado.toFixed(2)}
+                </span>
+            )}
+            {excConsumido > 0 && (
+                <span className="text-[9px] font-bold text-purple-500 uppercase whitespace-nowrap">
+                    Consumido: S/ {excConsumido.toFixed(2)}
+                </span>
+            )}
+            {excGenerado > 0 && (
+                <span className="text-[9px] font-bold text-orange-500 uppercase whitespace-nowrap">
+                    Generado → siguiente: S/ {excGenerado.toFixed(2)}
+                </span>
+            )}
+        </div>
+    );
+};
+
+/* ─── Bloque de abonos ───────────────────────────────── */
 const AbonosContent = ({ d, esVistaIntegrante }) => (
     <div className="flex flex-col gap-0.5 items-end min-w-[90px]">
         {d.mostrarRecibido && (
@@ -50,24 +88,13 @@ const AbonosContent = ({ d, esVistaIntegrante }) => (
         {d.moraPagada > 0 && (
             <span className="text-[9px] font-bold text-brand-gold-dark uppercase whitespace-nowrap">Mora cubierta: S/ {d.moraPagada.toFixed(2)}</span>
         )}
-        {d.excAnt > 0 && (
-            <span className="text-[9px] font-bold text-purple-600 uppercase whitespace-nowrap">
-                {esVistaIntegrante ? 'Excedente. aplicado' : 'Excedente. usado'}: -S/ {d.excAnt.toFixed(2)}
-            </span>
-        )}
-        {esVistaIntegrante && d.excConsInd > 0 && (
-            <span className="text-[9px] font-bold text-purple-600 uppercase whitespace-nowrap">Excedente. usado: -S/ {d.excConsInd.toFixed(2)}</span>
-        )}
-        {d.excGen > 0 && (
-            <span className="text-[9px] font-bold text-orange-500 uppercase whitespace-nowrap">Excedente: S/ {d.excGen.toFixed(2)}</span>
-        )}
         {!d.tieneAbonos && (
             <span className="text-[10px] text-slate-300 font-bold">—</span>
         )}
     </div>
 );
 
-/* ─── Celda de mora compartida ───────────────────────── */
+/* ─── Celda de mora ──────────────────────────────────── */
 const MoraContent = ({ d, cuota, nro, onHistorialModal }) => {
     if (d.moraTotal <= 0 || d.esInactiva) return <span className="text-slate-300 font-black text-[11px]">—</span>;
     return (
@@ -92,7 +119,7 @@ const MoraContent = ({ d, cuota, nro, onHistorialModal }) => {
     );
 };
 
-/* ─── Celda saldo real compartida ────────────────────── */
+/* ─── Celda saldo real ───────────────────────────────── */
 const SaldoContent = ({ d }) => {
     if (d.esInactiva) return (
         <span className="text-sm font-black italic text-slate-400 line-through whitespace-nowrap">S/ {d.saldo.toFixed(2)}</span>
@@ -112,11 +139,14 @@ const SaldoContent = ({ d }) => {
 };
 
 /* ─── Fila helper para cards ─────────────────────────── */
-const CardRow = ({ label, children, hidden }) => {
+const CardRow = ({ label, children, hidden, icon }) => {
     if (hidden) return null;
     return (
         <div className="flex items-start justify-between gap-2 py-1.5 border-b border-slate-100 last:border-0">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wide shrink-0 pt-0.5">{label}</span>
+            <div className="flex items-center gap-1 shrink-0 pt-0.5">
+                {icon && <span className="text-[9px]">{icon}</span>}
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wide">{label}</span>
+            </div>
             <div className="text-right">{children}</div>
         </div>
     );
@@ -160,6 +190,12 @@ const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, 
                             S/ {d.monto.toFixed(2)}
                         </span>
                         {getStatusBadge(d.estadoGlobal)}
+                        {/* Badge de excedente disponible */}
+                        {d.excAnterior > 0 && !d.esInactiva && (
+                            <span className="text-[8px] font-black text-purple-600 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                ✦ Exc. S/ {d.excAnterior.toFixed(2)}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -196,6 +232,44 @@ const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, 
                     {d.tieneAbonos && (
                         <CardRow label="Abonos">
                             <AbonosContent d={d} esVistaIntegrante={esVistaIntegrante} />
+                        </CardRow>
+                    )}
+                    {/* Excedente — siempre que haya algo */}
+                    {d.tieneExcedente && !d.esInactiva && (
+                        <CardRow label="Excedente" icon="✦">
+                            <ExcedenteContent
+                                excAnterior={d.excAnterior}
+                                excAplicado={d.excAplicado}
+                                excConsumido={d.excConsumido}
+                                excGenerado={d.excGenerado}
+                                label={esVistaIntegrante ? 'Exc. propio' : 'Excedente'}
+                            />
+                        </CardRow>
+                    )}
+                    {/* Integrantes grupal — excedente individual por integrante */}
+                    {!esVistaIntegrante && cuota.integrantes?.length > 0 && cuota.integrantes.some(
+                        int => (int.excedente_anterior > 0 || int.excedente_generado > 0)
+                    ) && (
+                        <CardRow label="Exc. integrantes" icon="✦">
+                            <div className="flex flex-col gap-1 items-end">
+                                {cuota.integrantes.filter(
+                                    int => int.excedente_anterior > 0 || int.excedente_generado > 0
+                                ).map(int => (
+                                    <div key={int.id} className="flex flex-col items-end">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase">{int.nombre}</span>
+                                        {int.excedente_anterior > 0 && (
+                                            <span className="text-[9px] font-bold text-purple-600 whitespace-nowrap">
+                                                Ant: S/ {parseFloat(int.excedente_anterior).toFixed(2)}
+                                            </span>
+                                        )}
+                                        {int.excedente_generado > 0 && (
+                                            <span className="text-[9px] font-bold text-orange-500 whitespace-nowrap">
+                                                Gen: S/ {parseFloat(int.excedente_generado).toFixed(2)}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </CardRow>
                     )}
                     {extraColumns.map((col) => (
@@ -260,6 +334,46 @@ const CuotaRow = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, e
             <td className="px-3 py-4">
                 <SaldoContent d={d} />
             </td>
+            {/* Columna excedente — individual o global */}
+            <td className="px-3 py-4">
+                {d.esInactiva ? (
+                    <span className="text-slate-300 font-black text-[11px]">—</span>
+                ) : (
+                    <ExcedenteContent
+                        excAnterior={d.excAnterior}
+                        excAplicado={d.excAplicado}
+                        excConsumido={d.excConsumido}
+                        excGenerado={d.excGenerado}
+                        label={esVistaIntegrante ? 'Exc. propio' : 'Excedente'}
+                    />
+                )}
+                {/* En vista grupal global: excedentes individuales por integrante */}
+                {!esVistaIntegrante && cuota.integrantes?.some(
+                    int => int.excedente_anterior > 0 || int.excedente_generado > 0
+                ) && (
+                    <div className="mt-1 flex flex-col gap-0.5">
+                        {cuota.integrantes.filter(
+                            int => int.excedente_anterior > 0 || int.excedente_generado > 0
+                        ).map(int => (
+                            <div key={int.id} className="flex items-center gap-1">
+                                <span className="text-[8px] font-black text-slate-400 uppercase truncate max-w-[60px]" title={int.nombre}>
+                                    {int.nombre.split(' ')[0]}:
+                                </span>
+                                {int.excedente_anterior > 0 && (
+                                    <span className="text-[8px] font-bold text-purple-500 whitespace-nowrap">
+                                        ant S/ {parseFloat(int.excedente_anterior).toFixed(2)}
+                                    </span>
+                                )}
+                                {int.excedente_generado > 0 && (
+                                    <span className="text-[8px] font-bold text-orange-400 whitespace-nowrap">
+                                        gen S/ {parseFloat(int.excedente_generado).toFixed(2)}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </td>
             <td className="px-3 py-4 text-center">{getStatusBadge(d.estadoGlobal)}</td>
             {extraColumns.map((col) => (
                 <td key={col.header} className="px-3 py-4 text-center">
@@ -287,7 +401,7 @@ const CronogramaTable = ({ cronograma = [], esVistaIntegrante = false, onHistori
 
             {/* ── Desktop: tabla ── */}
             <div className="hidden md:block overflow-hidden border border-slate-200 rounded-2xl shadow-sm overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[860px]">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
                     <thead className="bg-slate-50 text-[9px] font-black text-slate-500 uppercase border-b border-slate-100 whitespace-nowrap">
                         <tr>
                             <th className="px-3 py-4 text-center">N°</th>
@@ -299,6 +413,12 @@ const CronogramaTable = ({ cronograma = [], esVistaIntegrante = false, onHistori
                             <th className="px-3 py-4">Mora</th>
                             <th className="px-3 py-4">Abonos</th>
                             <th className="px-3 py-4">Saldo Real</th>
+                            <th className="px-3 py-4">
+                                <span className="flex items-center gap-1">
+                                    <SparklesIcon className="w-3 h-3 text-purple-400" />
+                                    Excedente
+                                </span>
+                            </th>
                             <th className="px-3 py-4 text-center">Estado</th>
                             {extraColumns.map((col) => (
                                 <th key={col.header} className="px-3 py-4 text-center">{col.header}</th>
