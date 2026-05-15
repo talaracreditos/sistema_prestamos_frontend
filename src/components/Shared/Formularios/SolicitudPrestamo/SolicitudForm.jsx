@@ -1,12 +1,12 @@
 import React from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useSolicitudForm } from './useSolicitudForm';
+import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 
-// Importa tus nuevas secciones
-import SectionClienteGrupo from './SectionClienteGrupo';
-import SectionCondiciones from './SectionCondiciones';
-import SectionAval from './SectionAval';
-import SectionNotas from './SectionNotas';
+import SectionClienteGrupo  from './SectionClienteGrupo';
+import SectionCondiciones   from './SectionCondiciones';
+import SectionAval          from './SectionAval';
+import SectionNotas         from './SectionNotas';
 
 const SolicitudForm = ({ 
     data, 
@@ -17,16 +17,11 @@ const SolicitudForm = ({
     updateCargoIntegrante,
     isUpdate = false 
 }) => {
-    
-    // Conecta el Hook
-    const { 
-        isBlocked, isMainBlocked, hasBlockedIntegrante, 
-        avalConfig 
-    } = useSolicitudForm(data, handleChange);
+    const { isBlocked, isMainBlocked, hasBlockedIntegrante, avalConfig } = useSolicitudForm(data, handleChange);
 
     return (
         <div className={`space-y-6 transition-all duration-300 ${isBlocked ? 'opacity-90' : ''}`}>
-            
+
             {/* ALERTA DE BLOQUEO GLOBAL */}
             {isBlocked && (
                 <div className="bg-brand-red text-white p-5 rounded-2xl flex items-center gap-4 animate-bounce shadow-xl border-2 border-brand-red-dark">
@@ -45,7 +40,7 @@ const SolicitudForm = ({
                 </div>
             )}
 
-            {/* SWITCH INDIVIDUAL / GRUPAL CON BRANDING */}
+            {/* SWITCH INDIVIDUAL / GRUPAL */}
             <div className="flex bg-slate-100 p-1 rounded-xl w-fit mx-auto border border-slate-200 shadow-inner">
                 <button 
                     type="button" 
@@ -63,6 +58,27 @@ const SolicitudForm = ({
                 >
                     Grupal
                 </button>
+            </div>
+
+            {/* SELECTOR DE ASESOR */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+                <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                    Asesor Responsable
+                </h3>
+                <EmpleadoSearchSelect
+                    rol="asesor"
+                    disabled={isBlocked}
+                    initialName={data.asesor_nombre || ''}
+                    onSelect={(asesor) => {
+                        handleChange('asesor_id',     asesor?.id             ?? '');
+                        handleChange('asesor_nombre', asesor?.nombre_completo ?? '');
+                    }}
+                />
+                {!data.asesor_id && (
+                    <p className="text-[9px] text-brand-red font-bold uppercase">
+                        * Selecciona un asesor para continuar
+                    </p>
+                )}
             </div>
 
             {/* SECCIONES MODULARES */}

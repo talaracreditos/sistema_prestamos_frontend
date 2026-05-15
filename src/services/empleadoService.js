@@ -51,3 +51,14 @@ export const toggleStatus = async (id) => {
   });
   return handleResponse(response);
 };
+
+export const combobox = async (page = 1, filters = {}) => {
+    const params = new URLSearchParams({
+        page:   page,
+        search: filters.search || '',
+        estado: filters.estado || '',
+        rol:    filters.rol    || '',
+    });
+    const response = await fetchWithAuth(`${BASE_URL}/combobox?${params.toString()}`, { method: 'GET' });
+    return handleResponse(response);
+};

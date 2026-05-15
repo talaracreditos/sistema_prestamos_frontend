@@ -15,27 +15,24 @@ export const useStore = () => {
         dni_status: null,
         grupo_id: '',
         integrantes: [],
+        asesor_id: '',  
+        asesor_nombre: '',  
         producto_id: '',
         monto_solicitado: 0,
         tasa_interes: '',
         cuotas_solicitadas: '',
         frecuencia: 'SEMANAL',
-
         seguro: '', 
         seguro_financiado: false, 
-        
         modalidad: '',
         observaciones: '',
         aval: null
     });
 
-    // 1. LÓGICA DE BLOQUEO
     const dniPrincipalVencido = formData.dni_status?.estado === 'VENCIDO';
     const dniIntegranteVencido = formData.es_grupal && formData.integrantes.some(i => i.dni_status?.estado === 'VENCIDO');
-
     const principalBloqueadoPorRiesgo = formData.es_grupal && 
         (formData.modalidad?.includes('GRUPAL') && (formData.modalidad?.includes('VIGENTE') || formData.modalidad?.includes('RCS')));
-
     const integranteBloqueadoPorRiesgo = formData.es_grupal && formData.integrantes.some(i => 
         i.modalidad?.includes('GRUPAL') && (i.modalidad?.includes('VIGENTE') || i.modalidad?.includes('RCS'))
     );
@@ -53,14 +50,14 @@ export const useStore = () => {
                 const newData = { ...prev, [field]: value };
                 if (field === 'es_grupal') {
                     if (value === true) {
-                        newData.modalidad = 'GRUPAL';
-                        newData.cliente_id = '';
+                        newData.modalidad     = 'GRUPAL';
+                        newData.cliente_id    = '';
                         newData.fechaVencimientoDni = '';
-                        newData.dni_status = null;
+                        newData.dni_status    = null;
                     } else {
-                        newData.modalidad = ''; 
-                        newData.grupo_id = ''; 
-                        newData.integrantes = []; 
+                        newData.modalidad     = ''; 
+                        newData.grupo_id      = ''; 
+                        newData.integrantes   = []; 
                     }
                 }
                 return newData;
@@ -82,35 +79,21 @@ export const useStore = () => {
             return {
                 ...prev,
                 integrantes: [...prev.integrantes, { 
-                    id: cliente.usuario_id, 
-                    nombre: cliente.nombre_completo, 
-                    modalidad: cliente.modalidad_cliente,
-                    monto: 0,
-                    cargo: cargo,
+                    id:                 cliente.usuario_id, 
+                    nombre:             cliente.nombre_completo, 
+                    modalidad:          cliente.modalidad_cliente,
+                    monto:              0,
+                    cargo:              cargo,
                     fechaVencimientoDni: cliente.fechaVencimientoDni,
-                    dni_status: cliente.dni_status
+                    dni_status:         cliente.dni_status
                 }]
             };
         });
     };
 
-    const removeIntegrante = (id) => {
-        setFormData(prev => ({ ...prev, integrantes: prev.integrantes.filter(i => i.id !== id) }));
-    };
-
-    const updateMontoIntegrante = (id, monto) => {
-        setFormData(prev => ({
-            ...prev,
-            integrantes: prev.integrantes.map(i => i.id === id ? { ...i, monto } : i)
-        }));
-    };
-
-    const updateCargoIntegrante = (id, cargo) => {
-        setFormData(prev => ({
-            ...prev,
-            integrantes: prev.integrantes.map(i => i.id === id ? { ...i, cargo } : i)
-        }));
-    };
+    const removeIntegrante    = (id) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.filter(i => i.id !== id) }));
+    const updateMontoIntegrante = (id, monto) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.map(i => i.id === id ? { ...i, monto } : i) }));
+    const updateCargoIntegrante = (id, cargo) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.map(i => i.id === id ? { ...i, cargo } : i) }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -118,12 +101,18 @@ export const useStore = () => {
             setAlert({ type: 'error', message: 'No se puede enviar la solicitud por restricciones de crédito o DNI.' });
             return;
         }
+        if (!formData.asesor_id) {
+            setAlert({ type: 'error', message: 'Debes seleccionar un asesor.' });
+            return;
+        }
         setLoading(true);
         try {
-            // 2. LIMPIEZA DEL PAYLOAD
             const payload = { ...formData };
-            // Asegurar que seguro sea numérico y no string vacío
-            payload.seguro = payload.seguro || 0; 
+            delete payload.asesor_nombre;
+            delete payload.fechaVencimientoDni;
+            delete payload.dni_status;
+
+            payload.seguro = payload.seguro || 0;
 
             if (payload.es_grupal) {
                 payload.modalidad = 'GRUPAL';
@@ -147,5 +136,8 @@ export const useStore = () => {
         }
     };
 
-    return { formData, loading, alert, setAlert, handleChange, handleSubmit, isBlocked, addIntegrante, removeIntegrante, updateMontoIntegrante, updateCargoIntegrante };
+    return { 
+        formData, loading, alert, setAlert, handleChange, handleSubmit, isBlocked, 
+        addIntegrante, removeIntegrante, updateMontoIntegrante, updateCargoIntegrante 
+    };
 };
