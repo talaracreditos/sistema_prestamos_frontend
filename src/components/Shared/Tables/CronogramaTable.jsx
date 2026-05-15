@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClockIcon, ChevronDownIcon, ChevronUpIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { useCuotaData } from './hooks/useCuotaData';
 
 /* ─── Celda financiera ───────────────────────────────── */
@@ -152,10 +152,100 @@ const CardRow = ({ label, children, hidden, icon }) => {
     );
 };
 
+/* ─── Bloque de excedentes por integrante (vista grupal global) ─── */
+/**
+ * Se muestra en TODAS las cuotas que tengan al menos un integrante con
+ * excedente_generado (cuota pagada) o excedente_anterior/aplicado/consumido
+ * (cuota donde se usó). El backend ahora manda integrantes también en pagadas.
+ */
+const ExcedentesIntegrantes = ({ integrantes }) => {
+    const conExcedente = integrantes?.filter(
+        int => int.excedente_anterior > 0 || int.excedente_generado > 0 ||
+               int.excedente_aplicado > 0 || int.excedente_consumido > 0
+    );
+    if (!conExcedente?.length) return null;
+
+    return (
+        <div className="flex flex-col gap-0.5">
+            {conExcedente.map(int => (
+                <div key={int.id} className="flex flex-col items-end">
+                    <span className="text-[8px] font-black text-slate-400 uppercase">{int.nombre.split(' ')[0]}:</span>
+                    {int.excedente_generado > 0 && (
+                        <span className="text-[8px] font-bold text-orange-400 whitespace-nowrap">
+                            Generado S/ {parseFloat(int.excedente_generado).toFixed(2)}
+                        </span>
+                    )}
+                    {int.excedente_anterior > 0 && (
+                        <span className="text-[8px] font-bold text-purple-500 whitespace-nowrap">
+                            Anterior S/ {parseFloat(int.excedente_anterior).toFixed(2)}
+                        </span>
+                    )}
+                    {int.excedente_aplicado > 0 && (
+                        <span className="text-[8px] font-bold text-purple-700 whitespace-nowrap">
+                            Aplicado -S/ {parseFloat(int.excedente_aplicado).toFixed(2)}
+                        </span>
+                    )}
+                    {int.excedente_consumido > 0 && (
+                        <span className="text-[8px] font-bold text-purple-400 whitespace-nowrap">
+                            Consumido S/ {parseFloat(int.excedente_consumido).toFixed(2)}
+                        </span>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+/* Versión card (para móvil) — más verbosa */
+const ExcedentesIntegrantesCard = ({ integrantes }) => {
+    const conExcedente = integrantes?.filter(
+        int => int.excedente_anterior > 0 || int.excedente_generado > 0 ||
+               int.excedente_aplicado > 0 || int.excedente_consumido > 0
+    );
+    if (!conExcedente?.length) return null;
+
+    return (
+        <div className="flex flex-col gap-1 items-end">
+            {conExcedente.map(int => (
+                <div key={int.id} className="flex flex-col items-end">
+                    <span className="text-[9px] font-black text-slate-500 uppercase">{int.nombre}</span>
+                    {int.excedente_generado > 0 && (
+                        <span className="text-[9px] font-bold text-orange-500 whitespace-nowrap">
+                            Generado: S/ {parseFloat(int.excedente_generado).toFixed(2)}
+                        </span>
+                    )}
+                    {int.excedente_anterior > 0 && (
+                        <span className="text-[9px] font-bold text-purple-600 whitespace-nowrap">
+                            Anterior: S/ {parseFloat(int.excedente_anterior).toFixed(2)}
+                        </span>
+                    )}
+                    {int.excedente_aplicado > 0 && (
+                        <span className="text-[9px] font-bold text-purple-700 whitespace-nowrap">
+                            Aplicado: -S/ {parseFloat(int.excedente_aplicado).toFixed(2)}
+                        </span>
+                    )}
+                    {int.excedente_consumido > 0 && (
+                        <span className="text-[9px] font-bold text-purple-400 whitespace-nowrap">
+                            Consumido: S/ {parseFloat(int.excedente_consumido).toFixed(2)}
+                        </span>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+};
+
 /* ─── Card móvil ─────────────────────────────────────── */
 const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, extraColumns }) => {
     const [expanded, setExpanded] = React.useState(false);
     const d = useCuotaData(cuota, i, esVistaIntegrante);
+
+    // ¿Hay excedentes de integrantes que mostrar? (incluye cuotas pagadas)
+    const hayExcedentesIntegrantes = !esVistaIntegrante &&
+        cuota.integrantes?.some(
+            int => int.excedente_anterior > 0 || int.excedente_generado > 0 ||
+                   int.excedente_aplicado > 0  || int.excedente_consumido > 0
+        );
 
     const borderColor = d.esCancelada
         ? 'border-l-slate-300'
@@ -193,7 +283,7 @@ const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, 
                         {/* Badge de excedente disponible */}
                         {d.excAnterior > 0 && !d.esInactiva && (
                             <span className="text-[8px] font-black text-purple-600 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                ✦ Exc. S/ {d.excAnterior.toFixed(2)}
+                                Exc. S/ {d.excAnterior.toFixed(2)}
                             </span>
                         )}
                     </div>
@@ -234,7 +324,7 @@ const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, 
                             <AbonosContent d={d} esVistaIntegrante={esVistaIntegrante} />
                         </CardRow>
                     )}
-                    {/* Excedente — siempre que haya algo */}
+                    {/* Excedente individual — vista integrante o préstamo individual */}
                     {d.tieneExcedente && !d.esInactiva && (
                         <CardRow label="Excedente" icon="✦">
                             <ExcedenteContent
@@ -246,30 +336,12 @@ const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, 
                             />
                         </CardRow>
                     )}
-                    {/* Integrantes grupal — excedente individual por integrante */}
-                    {!esVistaIntegrante && cuota.integrantes?.length > 0 && cuota.integrantes.some(
-                        int => (int.excedente_anterior > 0 || int.excedente_generado > 0)
-                    ) && (
+                    {/* Excedentes de integrantes — vista grupal global.
+                        Se muestra en TODAS las cuotas (pagadas y pendientes)
+                        donde algún integrante tenga excedentes. */}
+                    {hayExcedentesIntegrantes && (
                         <CardRow label="Exc. integrantes" icon="✦">
-                            <div className="flex flex-col gap-1 items-end">
-                                {cuota.integrantes.filter(
-                                    int => int.excedente_anterior > 0 || int.excedente_generado > 0
-                                ).map(int => (
-                                    <div key={int.id} className="flex flex-col items-end">
-                                        <span className="text-[9px] font-black text-slate-500 uppercase">{int.nombre}</span>
-                                        {int.excedente_anterior > 0 && (
-                                            <span className="text-[9px] font-bold text-purple-600 whitespace-nowrap">
-                                                Ant: S/ {parseFloat(int.excedente_anterior).toFixed(2)}
-                                            </span>
-                                        )}
-                                        {int.excedente_generado > 0 && (
-                                            <span className="text-[9px] font-bold text-orange-500 whitespace-nowrap">
-                                                Gen: S/ {parseFloat(int.excedente_generado).toFixed(2)}
-                                            </span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+                            <ExcedentesIntegrantesCard integrantes={cuota.integrantes} />
                         </CardRow>
                     )}
                     {extraColumns.map((col) => (
@@ -331,14 +403,12 @@ const CuotaRow = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, e
             <td className="px-3 py-4">
                 <AbonosContent d={d} esVistaIntegrante={esVistaIntegrante} />
             </td>
-            <td className="px-3 py-4">
-                <SaldoContent d={d} />
-            </td>
-            {/* Columna excedente — individual o global */}
+            {/* Columna excedente */}
             <td className="px-3 py-4">
                 {d.esInactiva ? (
                     <span className="text-slate-300 font-black text-[11px]">—</span>
                 ) : (
+                    /* Vista integrante o préstamo individual: excedente propio */
                     <ExcedenteContent
                         excAnterior={d.excAnterior}
                         excAplicado={d.excAplicado}
@@ -347,32 +417,15 @@ const CuotaRow = ({ cuota, i, cronograma, esVistaIntegrante, onHistorialModal, e
                         label={esVistaIntegrante ? 'Exc. propio' : 'Excedente'}
                     />
                 )}
-                {/* En vista grupal global: excedentes individuales por integrante */}
-                {!esVistaIntegrante && cuota.integrantes?.some(
-                    int => int.excedente_anterior > 0 || int.excedente_generado > 0
-                ) && (
-                    <div className="mt-1 flex flex-col gap-0.5">
-                        {cuota.integrantes.filter(
-                            int => int.excedente_anterior > 0 || int.excedente_generado > 0
-                        ).map(int => (
-                            <div key={int.id} className="flex items-center gap-1">
-                                <span className="text-[8px] font-black text-slate-400 uppercase truncate max-w-[60px]" title={int.nombre}>
-                                    {int.nombre.split(' ')[0]}:
-                                </span>
-                                {int.excedente_anterior > 0 && (
-                                    <span className="text-[8px] font-bold text-purple-500 whitespace-nowrap">
-                                        ant S/ {parseFloat(int.excedente_anterior).toFixed(2)}
-                                    </span>
-                                )}
-                                {int.excedente_generado > 0 && (
-                                    <span className="text-[8px] font-bold text-orange-400 whitespace-nowrap">
-                                        gen S/ {parseFloat(int.excedente_generado).toFixed(2)}
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                {/* Vista grupal global: excedentes de cada integrante.
+                    Se renderiza en TODAS las cuotas (pagadas y pendientes)
+                    donde haya excedentes — el backend ahora los manda siempre. */}
+                {!esVistaIntegrante && (
+                    <ExcedentesIntegrantes integrantes={cuota.integrantes} />
                 )}
+            </td>
+            <td className="px-3 py-4">
+                <SaldoContent d={d} />
             </td>
             <td className="px-3 py-4 text-center">{getStatusBadge(d.estadoGlobal)}</td>
             {extraColumns.map((col) => (
@@ -412,13 +465,8 @@ const CronogramaTable = ({ cronograma = [], esVistaIntegrante = false, onHistori
                             <th className="px-3 py-4">Seguro</th>
                             <th className="px-3 py-4">Mora</th>
                             <th className="px-3 py-4">Abonos</th>
+                            <th className="px-3 py-4">Excedente</th>
                             <th className="px-3 py-4">Saldo Real</th>
-                            <th className="px-3 py-4">
-                                <span className="flex items-center gap-1">
-                                    <SparklesIcon className="w-3 h-3 text-purple-400" />
-                                    Excedente
-                                </span>
-                            </th>
                             <th className="px-3 py-4 text-center">Estado</th>
                             {extraColumns.map((col) => (
                                 <th key={col.header} className="px-3 py-4 text-center">{col.header}</th>

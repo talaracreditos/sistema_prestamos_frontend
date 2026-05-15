@@ -11,7 +11,6 @@ const ExcedenteBadge = ({ monto, label = 'Exc. propio disponible' }) => {
     if (!monto || monto <= 0) return null;
     return (
         <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-200 rounded-xl px-3 py-1.5">
-            <SparklesIcon className="w-3.5 h-3.5 text-purple-500 shrink-0" />
             <span className="text-[10px] font-black text-purple-700 uppercase">{label}</span>
             <span className="text-[10px] font-black text-purple-800 ml-auto">S/ {parseFloat(monto).toFixed(2)}</span>
         </div>
