@@ -9,14 +9,9 @@ import ViewModal from 'components/Shared/Modals/ViewModal';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import ViewPrestamoModal from './ViewPrestamoModal';
 import { 
-    BanknotesIcon, 
-    EyeIcon, 
-    PhotoIcon,
-    ArrowPathIcon,
-    UserGroupIcon,
-    UserIcon,
-    BriefcaseIcon,
-    TrashIcon
+    BanknotesIcon, EyeIcon, PhotoIcon,
+    ArrowPathIcon, UserGroupIcon, UserIcon,
+    BriefcaseIcon, TrashIcon
 } from '@heroicons/react/24/outline';
 
 const Index = () => {
@@ -24,6 +19,7 @@ const Index = () => {
         loading, prestamos, paginationInfo, filters, alert, setAlert,
         handleFilterChange, handleFilterSubmit, handleFilterClear, fetchPrestamos,
         handleView, isViewOpen, setIsViewOpen, viewData, viewLoading,
+        handleRefreshView,
         handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
         isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading
     } = useIndex();
@@ -113,37 +109,24 @@ const Index = () => {
             { header: 'Acciones', render: (row) => {
                 const canShow = can('prestamo.show');
                 const hasActions = canShow || row.abono_url || (canDelete && !row.desembolsado && row.estado !== 2);
-                
                 if (!hasActions) return null;
-                
                 return (
                     <div className="flex gap-2 items-center justify-end">
                         {canShow && (
-                            <button 
-                                onClick={() => handleView(row.id)} 
-                                title="Ver Cronograma" 
-                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
-                            >
+                            <button onClick={() => handleView(row.id)} title="Ver Cronograma"
+                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
                                 <EyeIcon className="w-4 h-4" />
                             </button>
                         )}
-
                         {row.abono_url && (
-                            <button 
-                                onClick={() => handleOpenAbono(row.abono_url)}
-                                title="Ver Comprobante" 
-                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl border border-transparent hover:border-emerald-100 transition-all shadow-sm"
-                            >
+                            <button onClick={() => handleOpenAbono(row.abono_url)} title="Ver Comprobante"
+                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl border border-transparent hover:border-emerald-100 transition-all shadow-sm">
                                 <PhotoIcon className="w-4 h-4" />
                             </button>
                         )}
-
                         {canDelete && !row.desembolsado && row.estado !== 2 && (
-                            <button
-                                onClick={() => openDeleteModal(row.id)}
-                                title="Cancelar Préstamo"
-                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
-                            >
+                            <button onClick={() => openDeleteModal(row.id)} title="Cancelar Préstamo"
+                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
                                 <TrashIcon className="w-4 h-4" />
                             </button>
                         )}
@@ -151,7 +134,6 @@ const Index = () => {
                 );
             }}
         ];
-
         return cols;
     }, [handleView, handleOpenAbono, openDeleteModal, canDelete, can]);
 
@@ -174,18 +156,13 @@ const Index = () => {
                 onClose={() => setIsViewOpen(false)} 
                 data={viewData} 
                 isLoading={viewLoading} 
-                onRefresh={() => fetchPrestamos(paginationInfo.currentPage)} 
+                onRefresh={handleRefreshView}
             />
 
             <ViewModal isOpen={isAbonoModalOpen} onClose={() => setIsAbonoModalOpen(false)} title="Voucher de Abono Bancario">
                 <div className="flex justify-center bg-slate-50 rounded-3xl overflow-hidden border-4 border-white shadow-xl">
                     {selectedAbonoUrl ? (
-                        <img 
-                            src={selectedAbonoUrl} 
-                            alt="Abono" 
-                            className="max-w-full h-auto object-contain"
-                            style={{ maxHeight: '75vh' }}
-                        />
+                        <img src={selectedAbonoUrl} alt="Abono" className="max-w-full h-auto object-contain" style={{ maxHeight: '75vh' }} />
                     ) : (
                         <div className="py-20 text-center">
                             <ArrowPathIcon className="w-10 h-10 animate-spin text-brand-red mx-auto" />

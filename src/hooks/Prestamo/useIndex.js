@@ -6,7 +6,7 @@ export const useIndex = () => {
     const [loading, setLoading] = useState(true);
     const [prestamos, setPrestamos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
-    
+
     const [filters, setFilters] = useState({ search: '', estado: '1' });
     const filtersRef = useRef(filters);
     const [alert, setAlert] = useState(null);
@@ -14,6 +14,7 @@ export const useIndex = () => {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [viewData, setViewData] = useState(null);
     const [viewLoading, setViewLoading] = useState(false);
+    const viewIdRef = useRef(null); // ← guardar el id del préstamo abierto
 
     const [isAbonoModalOpen, setIsAbonoModalOpen] = useState(false);
     const [selectedAbonoUrl, setSelectedAbonoUrl] = useState(null);
@@ -30,7 +31,7 @@ export const useIndex = () => {
             setPaginationInfo({
                 currentPage: response.current_page,
                 totalPages: response.last_page,
-                total: response.total
+                total: response.total,
             });
         } catch (err) {
             setAlert(handleApiError(err));
@@ -44,6 +45,7 @@ export const useIndex = () => {
     const handleView = async (id) => {
         setIsViewOpen(true);
         setViewLoading(true);
+        viewIdRef.current = id;
         try {
             const response = await show(id);
             setViewData(response.data || response);
@@ -54,6 +56,22 @@ export const useIndex = () => {
             setViewLoading(false);
         }
     };
+
+    // ── Recargar solo el préstamo abierto (sin cerrar el modal) ──────────────
+    const handleRefreshView = useCallback(async () => {
+        if (!viewIdRef.current) return;
+        setViewLoading(true);
+        try {
+            const response = await show(viewIdRef.current);
+            setViewData(response.data || response);
+        } catch (err) {
+            setAlert(handleApiError(err));
+        } finally {
+            setViewLoading(false);
+        }
+        // También refresca la lista en segundo plano
+        fetchPrestamos(paginationInfo.currentPage);
+    }, [fetchPrestamos, paginationInfo.currentPage]);
 
     const handleOpenAbono = (url) => {
         setSelectedAbonoUrl(url);
@@ -92,7 +110,8 @@ export const useIndex = () => {
         loading, prestamos, paginationInfo, filters, alert, setAlert,
         handleFilterChange, handleFilterSubmit, handleFilterClear, fetchPrestamos,
         handleView, isViewOpen, setIsViewOpen, viewData, viewLoading,
+        handleRefreshView, // ← nuevo
         handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
-        isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading
+        isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading,
     };
 };
