@@ -22,7 +22,12 @@ export const ResumenPago = ({ cuota, totalAPagar, mora, excedenteIndividual, esG
             </span>
         </div>
         <h2 className="text-4xl font-black italic tracking-tighter text-brand-gold">S/ {totalAPagar}</h2>
-        {mora > 0 && <p className="text-[10px] font-bold text-red-400 mt-1">Incluye mora: S/ {mora.toFixed(2)}</p>}
+        {mora > 0 && (
+            <p className="text-[10px] font-bold text-slate-400 mt-1">
+                Cuota: S/ {(parseFloat(totalAPagar) - mora).toFixed(2)}
+                <span className="text-red-400 ml-1">+ Mora: S/ {mora.toFixed(2)}</span>
+            </p>
+        )}
         {parseFloat(cuota?.mora_pagada || 0) > 0 && <p className="text-[10px] font-bold text-orange-400 mt-1">Mora ya cubierta: S/ {parseFloat(cuota.mora_pagada).toFixed(2)}</p>}
         {excedenteIndividual > 0 && (
             <p className="text-[10px] font-bold text-purple-400 mt-1 flex items-center gap-1">
@@ -71,6 +76,7 @@ export const DistribucionGrupal = ({ distribucion, handleMontoIntegrante, integr
                                     <div className="flex items-center gap-2">
                                         <p className="text-[9px] font-black text-slate-600">Falta: S/ {saldoCap.toFixed(2)}</p>
                                         {moraPend > 0 && <p className="text-[9px] text-red-500 font-bold">+ Mora: S/ {moraPend.toFixed(2)}</p>}
+                                        {moraPend > 0 && <p className="text-[9px] font-black text-slate-800">= S/ {(saldoCap + moraPend).toFixed(2)}</p>}
                                     </div>
                                 </div>
                             </div>
