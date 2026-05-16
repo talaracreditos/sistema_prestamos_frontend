@@ -58,12 +58,6 @@ export const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorial
                     </div>
                 </div>
 
-                {/* Saldo real */}
-                <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-[10px] font-black text-slate-400 uppercase">Saldo a pagar:</span>
-                    <SaldoContent d={d} />
-                </div>
-
                 {/* Mora pendiente + botón reducir — visible sin expandir */}
                 {d.moraPend > 0 && !d.esInactiva && (
                     <div className="flex items-center justify-between mt-1.5">
@@ -87,6 +81,12 @@ export const CuotaCard = ({ cuota, i, cronograma, esVistaIntegrante, onHistorial
                         )}
                     </div>
                 )}
+
+                {/* Saldo real */}
+                <div className="flex items-center gap-1.5 mt-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">Saldo a pagar:</span>
+                    <SaldoContent d={d} />
+                </div>
 
                 {(d.esCancelada || d.esRefinanciada) && (
                     <span className={`mt-1.5 inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${d.esCancelada ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-500'}`}>
