@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useIndex } from 'hooks/Traslado/useIndex';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
@@ -11,6 +11,13 @@ const Index = () => {
         loading, traslados, paginationInfo, filters, alert, setAlert,
         fetchTraslados, handleFilterChange, handleFilterSubmit, handleFilterClear,
     } = useIndex();
+
+    const [comboKey, setComboKey] = useState(Date.now());
+
+    const onClearFilters = () => {
+        handleFilterClear();
+        setComboKey(Date.now());
+    };
 
     const columns = useMemo(() => [
         {
@@ -91,6 +98,7 @@ const Index = () => {
             colSpan: 'col-span-12 sm:col-span-4',
             render: () => (
                 <EmpleadoSearchSelect
+                    key={comboKey}
                     rol="asesor"
                     onSelect={(a) => handleFilterChange('asesor_origen_id', a ? a.id : '')}
                     clearOnSelect={false}
@@ -102,6 +110,7 @@ const Index = () => {
             colSpan: 'col-span-12 sm:col-span-4',
             render: () => (
                 <EmpleadoSearchSelect
+                    key={comboKey + 1}
                     rol="asesor"
                     onSelect={(a) => handleFilterChange('asesor_destino_id', a ? a.id : '')}
                     clearOnSelect={false}
@@ -122,7 +131,8 @@ const Index = () => {
             <Table
                 columns={columns} data={traslados} loading={loading}
                 filterConfig={filterConfig} filters={filters}
-                onFilterChange={handleFilterChange} onFilterSubmit={handleFilterSubmit} onFilterClear={handleFilterClear}
+                onFilterChange={handleFilterChange} onFilterSubmit={handleFilterSubmit}
+                onFilterClear={onClearFilters}
                 pagination={{ ...paginationInfo, onPageChange: fetchTraslados }}
             />
         </div>
