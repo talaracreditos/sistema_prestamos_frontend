@@ -1,26 +1,23 @@
 import React, { useState } from 'react';
 import { BuildingLibraryIcon, CheckBadgeIcon, XMarkIcon, IdentificationIcon } from '@heroicons/react/24/outline';
+import AlertMessage from 'components/Shared/Errors/AlertMessage';
 
-const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading }) => {
+const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading, alert, onClearAlert }) => {
     const [codigoRecaudo, setCodigoRecaudo] = useState('');
 
     if (!isOpen) return null;
 
     const handleConfirm = () => {
-        // Le mandamos el código al onConfirm
         onConfirm(solicitud.id, 2, 'CUENTA CORRIENTE', codigoRecaudo.trim());
     };
 
     return (
         <div className="fixed inset-0 z-[999] overflow-y-auto">
-            {/* Overlay oscuro */}
             <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
 
-            {/* Contenido del Modal */}
             <div className="flex items-center justify-center min-h-screen p-4">
                 <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100">
-                    
-                    {/* Botón cerrar */}
+
                     <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 z-10 transition-colors">
                         <XMarkIcon className="w-6 h-6" />
                     </button>
@@ -38,10 +35,19 @@ const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading 
 
                     {/* Body */}
                     <div className="p-6 text-center space-y-5">
+
+                        {/* Alert de error dentro del modal */}
+                        <AlertMessage
+                            type={alert?.type}
+                            message={alert?.message}
+                            details={alert?.details}
+                            onClose={onClearAlert}
+                        />
+
                         <p className="text-sm font-bold text-slate-600">
                             ¿Estás seguro de aprobar esta solicitud por <span className="text-black font-black">S/ {solicitud?.monto_solicitado}</span>?
                         </p>
-                        
+
                         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3 justify-center">
                             <BuildingLibraryIcon className="w-6 h-6 text-blue-600" />
                             <div className="text-left">
@@ -50,7 +56,6 @@ const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading 
                             </div>
                         </div>
 
-                        {/* 🔥 INPUT PARA EL CÓDIGO DE RECAUDO */}
                         <div className="text-left">
                             <label className="flex items-center gap-1.5 text-xs font-black text-slate-700 uppercase mb-2">
                                 <IdentificationIcon className="w-4 h-4 text-brand-red" />
@@ -75,7 +80,7 @@ const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading 
                         <button onClick={onClose} disabled={loading} className="flex-1 px-4 py-3 text-xs font-black text-slate-400 uppercase hover:text-slate-600 transition-colors disabled:opacity-50">
                             Cancelar
                         </button>
-                        <button 
+                        <button
                             disabled={loading || !codigoRecaudo.trim()}
                             onClick={handleConfirm}
                             className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs shadow-xl hover:bg-black transition-all disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none active:scale-95 flex justify-center items-center gap-2"
