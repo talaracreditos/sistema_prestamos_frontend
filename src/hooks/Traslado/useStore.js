@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { prestamosPorAsesor, store } from 'services/trasladoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
@@ -9,12 +10,14 @@ const filtrosVacios = {
 };
 
 export const useStore = () => {
+    const navigate = useNavigate();
     const [loading, setLoading]                   = useState(false);
     const [loadingPrestamos, setLoadingPrestamos] = useState(false);
     const [alert, setAlert]                       = useState(null);
     const [prestamos, setPrestamos]               = useState([]);
     const [selectedIds, setSelectedIds]           = useState([]);
     const [filtrosPrestamos, setFiltrosPrestamos] = useState(filtrosVacios);
+    const [showPinModal, setShowPinModal]         = useState(false);
 
     const [formData, setFormData] = useState({
         asesor_origen_id:  null,
@@ -77,7 +80,8 @@ export const useStore = () => {
     const handleChange = (field, value) =>
         setFormData(prev => ({ ...prev, [field]: value }));
 
-    const handleSubmit = async (e) => {
+    // Validaciones previas — abre el modal PIN si todo ok
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (selectedIds.length === 0)    return setAlert({ type: 'error', message: 'Selecciona al menos un préstamo.' });
         if (!formData.asesor_destino_id) return setAlert({ type: 'error', message: 'Selecciona un asesor de destino.' });
@@ -85,19 +89,23 @@ export const useStore = () => {
             return setAlert({ type: 'error', message: 'El asesor de destino debe ser diferente al origen.' });
 
         setAlert(null);
+        setShowPinModal(true);
+    };
+
+    // Llamado desde el ConfirmModal con el PIN
+    const handleConfirmConPin = async (pin) => {
+        setShowPinModal(false);
         setLoading(true);
         try {
             await store({
                 prestamo_ids:      selectedIds,
                 asesor_destino_id: formData.asesor_destino_id,
                 motivo:            formData.motivo,
+                pin,
             });
             const n = selectedIds.length;
             setAlert({ type: 'success', message: `${n} préstamo${n > 1 ? 's' : ''} trasladado${n > 1 ? 's' : ''} correctamente.` });
-            setFormData({ asesor_origen_id: null, asesor_destino_id: null, motivo: '' });
-            setPrestamos([]);
-            setSelectedIds([]);
-            setFiltrosPrestamos(filtrosVacios);
+            setTimeout(() => navigate('/traslado/listar'), 1500);
         } catch (err) {
             setAlert(handleApiError(err));
         } finally {
@@ -108,10 +116,10 @@ export const useStore = () => {
     return {
         loading, loadingPrestamos, alert, setAlert,
         formData, prestamos, selectedIds,
-        filtrosPrestamos,
+        filtrosPrestamos, showPinModal, setShowPinModal,
         handleSelectAsesorOrigen, handleSelectAsesorDestino,
         handleTogglePrestamo, handleToggleTodos,
         handleFiltroChange, handleFiltroSubmit, handleFiltroClear,
-        handleChange, handleSubmit,
+        handleChange, handleSubmit, handleConfirmConPin,
     };
 };

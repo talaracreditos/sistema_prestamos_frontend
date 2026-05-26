@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from 'hooks/Traslado/useStore';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
+import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import {
     ArrowsRightLeftIcon, UserIcon, DocumentTextIcon,
@@ -25,11 +26,11 @@ const Store = () => {
     const {
         loading, loadingPrestamos, alert, setAlert,
         formData, prestamos, selectedIds,
-        filtrosPrestamos,
+        filtrosPrestamos, showPinModal, setShowPinModal,
         handleSelectAsesorOrigen, handleSelectAsesorDestino,
         handleTogglePrestamo, handleToggleTodos,
         handleFiltroChange, handleFiltroSubmit, handleFiltroClear,
-        handleChange, handleSubmit,
+        handleChange, handleSubmit, handleConfirmConPin,
     } = useStore();
 
     const [showFiltros, setShowFiltros] = useState(false);
@@ -252,6 +253,17 @@ const Store = () => {
                     </button>
                 </div>
             </form>
+
+            {showPinModal && (
+                <ConfirmModal
+                    title="Autorizar Traslado"
+                    message={`Se trasladarán ${selectedIds.length} préstamo${selectedIds.length > 1 ? 's' : ''}. Ingresa el PIN para confirmar.`}
+                    confirmText="Confirmar Traslado"
+                    requirePin={true}
+                    onConfirm={handleConfirmConPin}
+                    onCancel={() => setShowPinModal(false)}
+                />
+            )}
         </div>
     );
 };
