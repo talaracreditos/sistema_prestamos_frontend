@@ -33,7 +33,6 @@ const Index = () => {
         handleFilterClear();
         setAsesorKey(Date.now());
     };
-
     const filterConfig = useMemo(() => {
         const config = [];
         if (role !== 'cliente') {
@@ -76,7 +75,7 @@ const Index = () => {
             { 
                 header: 'ID', 
                 render: (row) => (
-                    <span className="font-mono text-[14px] font-black px-2 py-1 rounded text-slate-600">
+                    <span className="font-mono text-[12px] font-black px-2 py-1 rounded text-slate-600">
                         {row.id}
                     </span>
                 )
@@ -84,7 +83,7 @@ const Index = () => {
             { 
                 header: 'Cod. Recaudo', 
                 render: (row) => (
-                    <span className="font-mono text-[14px] font-black px-2 py-1 rounded text-slate-600">
+                    <span className="font-mono text-[12px] font-black px-2 py-1 rounded text-slate-600">
                         {row.codigo_recaudo}
                     </span>
                 )
@@ -117,6 +116,11 @@ const Index = () => {
                     <span className="text-xs font-black text-slate-700">{row.cuotas_detalle}</span>
                     <span className="text-[8px] text-slate-400 uppercase font-bold">{row.frecuencia}</span>
                 </div>
+            )},
+            { header: 'Fecha Inicio', render: (row) => (
+                <span className="text-xs font-bold text-slate-600 whitespace-nowrap">
+                    {row.fecha_inicio ?? '—'}
+                </span>
             )},
             { header: 'Estado', render: (row) => {
                 const colors = { 
@@ -173,6 +177,7 @@ const Index = () => {
                 onFilterClear={onClearFilters}
                 filters={filters} filterConfig={filterConfig}
             />
+
 
             <ViewPrestamoModal 
                 isOpen={isViewOpen} 
