@@ -301,7 +301,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                 cronograma={cronogramaActivo}
                                 esVistaIntegrante={esVistaIntegrante}
                                 onHistorialModal={setHistorialModal}
-                                onReducirMora={canReducirMora && !prestamoCancelado ? handleAbrirReducirMora : undefined}
+                                onReducirMora={canReducirMora && !prestamoCancelado && data.estado === 1 ? handleAbrirReducirMora : undefined}
                             />
                         )}
 
