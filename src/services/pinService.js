@@ -23,3 +23,8 @@ export const store = async (data) => {
     });
     return handleResponse(response);
 };
+
+export const destroy = async (id) => {
+    const response = await fetchWithAuth(`${BASE_URL}/delete/${id}`, { method: 'DELETE' });
+    return handleResponse(response);
+};

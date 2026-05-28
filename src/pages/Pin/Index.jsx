@@ -4,13 +4,16 @@ import { useAuth } from 'context/AuthContext';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
+import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
-import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const Index = () => {
     const {
         loading, pins, paginationInfo, filters, alert, setAlert, comboKey,
         fetchPins, handleFilterChange, handleFilterSubmit, handleFilterClear,
+        isConfirmOpen, setIsConfirmOpen,
+        openInhabilitarModal, handleConfirmInhabilitar,
     } = useIndex();
 
     const { can } = useAuth();
@@ -56,11 +59,11 @@ const Index = () => {
         {
             header: 'Estado',
             render: (row) => (
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border
-                    ${row.vigente
+                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${
+                    row.vigente
                         ? 'bg-green-50 text-green-700 border-green-200'
                         : 'bg-slate-50 text-slate-500 border-slate-200'
-                    }`}>
+                }`}>
                     {row.vigente ? 'VIGENTE' : 'INACTIVO'}
                 </span>
             ),
@@ -81,6 +84,19 @@ const Index = () => {
                 );
             },
         },
+        {
+            header: 'Acciones',
+            render: (row) => row.vigente ? (
+                <button
+                    onClick={() => openInhabilitarModal(row.id)}
+                    title="Inhabilitar PIN"
+                    className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-all border border-transparent hover:border-brand-red/20"
+                >
+                    <TrashIcon className="w-4 h-4" />
+                </button>
+            ) : null,
+        },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ], []);
 
     const filterConfig = [
@@ -133,6 +149,17 @@ const Index = () => {
                 onFilterClear={handleFilterClear}
                 pagination={{ ...paginationInfo, onPageChange: fetchPins }}
             />
+
+            {isConfirmOpen && (
+                <ConfirmModal
+                    title="¿Inhabilitar PIN?"
+                    message="El PIN quedará inactivo de inmediato y no podrá usarse más. Esta acción no se puede deshacer."
+                    confirmText="Sí, Inhabilitar"
+                    requirePin={false}
+                    onConfirm={handleConfirmInhabilitar}
+                    onCancel={() => setIsConfirmOpen(false)}
+                />
+            )}
         </div>
     );
 };

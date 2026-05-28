@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { index } from 'services/pinService';
+import { index, destroy } from 'services/pinService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
 export const useIndex = () => {
@@ -10,8 +10,11 @@ export const useIndex = () => {
     const [alert, setAlert]                   = useState(null);
     const filtersRef                          = useRef(filters);
 
-    // Para resetear comboboxes al limpiar
     const [comboKey, setComboKey] = useState(Date.now());
+
+    // ── Confirm modal ─────────────────────────────────────────────────────────
+    const [isConfirmOpen,  setIsConfirmOpen]  = useState(false);
+    const [pinToInhabilitar, setPinToInhabilitar] = useState(null);
 
     const fetchPins = useCallback(async (page = 1) => {
         setLoading(true);
@@ -36,8 +39,33 @@ export const useIndex = () => {
         fetchPins(1);
     };
 
+    // Abre el modal de confirmación
+    const openInhabilitarModal = (id) => {
+        setPinToInhabilitar(id);
+        setIsConfirmOpen(true);
+    };
+
+    // Ejecuta tras confirmar
+    const handleConfirmInhabilitar = async () => {
+        if (!pinToInhabilitar) return;
+        setIsConfirmOpen(false);
+        setLoading(true);
+        try {
+            await destroy(pinToInhabilitar);
+            setAlert({ type: 'success', message: 'PIN inhabilitado correctamente.' });
+            fetchPins(paginationInfo.currentPage);
+        } catch (err) {
+            setAlert(handleApiError(err));
+        } finally {
+            setPinToInhabilitar(null);
+            setLoading(false);
+        }
+    };
+
     return {
         loading, pins, paginationInfo, filters, alert, setAlert, comboKey,
         fetchPins, handleFilterChange, handleFilterSubmit, handleFilterClear,
+        isConfirmOpen, setIsConfirmOpen,
+        openInhabilitarModal, handleConfirmInhabilitar,
     };
 };
