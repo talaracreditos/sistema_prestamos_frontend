@@ -6,41 +6,41 @@ import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 export const useStore = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [alert, setAlert] = useState(null);
+    const [alert,   setAlert]   = useState(null);
+
+    // ── Estado renovación ─────────────────────────────────────────────────────
+    const [esRenovacion,   setEsRenovacion]   = useState(false);
+    const [prestamoOrigen, setPrestamoOrigen] = useState(null);
+    const [comboKey,       setComboKey]       = useState(Date.now());
 
     const [formData, setFormData] = useState({
-        es_grupal: false,
-        cliente_id: '',
-        fechaVencimientoDni: '',
-        dni_status: null,
-        grupo_id: '',
-        integrantes: [],
-        asesor_id: '',  
-        asesor_nombre: '',  
-        producto_id: '',
-        monto_solicitado: 0,
-        tasa_interes: '',
+        es_grupal:          false,
+        cliente_id:         '',
+        fechaVencimientoDni:'',
+        dni_status:         null,
+        grupo_id:           '',
+        integrantes:        [],
+        asesor_id:          '',
+        asesor_nombre:      '',
+        producto_id:        '',
+        producto_nombre:    '',
+        grupo_nombre:       '',
+        monto_solicitado:   0,
+        tasa_interes:       '',
         cuotas_solicitadas: '',
-        frecuencia: 'SEMANAL',
-        seguro: '', 
-        seguro_financiado: false, 
-        modalidad: '',
-        observaciones: '',
-        aval: null
+        frecuencia:         'SEMANAL',
+        seguro:             '',
+        seguro_financiado:  false,
+        modalidad:          '',
+        observaciones:      '',
+        aval:               null,
+        prestamo_origen_id: '',
     });
 
-    const dniPrincipalVencido = formData.dni_status?.estado === 'VENCIDO';
-    const dniIntegranteVencido = formData.es_grupal && formData.integrantes.some(i => i.dni_status?.estado === 'VENCIDO');
-    const principalBloqueadoPorRiesgo = formData.es_grupal && 
-        (formData.modalidad?.includes('GRUPAL') && (formData.modalidad?.includes('VIGENTE') || formData.modalidad?.includes('RCS')));
-    const integranteBloqueadoPorRiesgo = formData.es_grupal && formData.integrantes.some(i => 
-        i.modalidad?.includes('GRUPAL') && (i.modalidad?.includes('VIGENTE') || i.modalidad?.includes('RCS'))
-    );
+    // ── Solo lo que es exclusivo de este hook ─────────────────────────────────
+    const esRenovacionActiva = !!formData.prestamo_origen_id;
 
-    const isMainBlocked = dniPrincipalVencido || principalBloqueadoPorRiesgo;
-    const hasBlockedIntegrante = dniIntegranteVencido || integranteBloqueadoPorRiesgo;
-    const isBlocked = isMainBlocked || hasBlockedIntegrante;
-
+    // ── handleChange ─────────────────────────────────────────────────────────
     const handleChange = (field, value) => {
         if (field.includes('.')) {
             const [obj, key] = field.split('.');
@@ -50,14 +50,14 @@ export const useStore = () => {
                 const newData = { ...prev, [field]: value };
                 if (field === 'es_grupal') {
                     if (value === true) {
-                        newData.modalidad     = 'GRUPAL';
-                        newData.cliente_id    = '';
+                        newData.modalidad           = 'GRUPAL';
+                        newData.cliente_id          = '';
                         newData.fechaVencimientoDni = '';
-                        newData.dni_status    = null;
+                        newData.dni_status          = null;
                     } else {
-                        newData.modalidad     = ''; 
-                        newData.grupo_id      = ''; 
-                        newData.integrantes   = []; 
+                        newData.modalidad   = '';
+                        newData.grupo_id    = '';
+                        newData.integrantes = [];
                     }
                 }
                 return newData;
@@ -65,6 +65,7 @@ export const useStore = () => {
         }
     };
 
+    // ── Monto grupal = suma integrantes ───────────────────────────────────────
     useEffect(() => {
         if (formData.es_grupal) {
             const total = formData.integrantes.reduce((acc, i) => acc + parseFloat(i.monto || 0), 0);
@@ -72,30 +73,113 @@ export const useStore = () => {
         }
     }, [formData.integrantes, formData.es_grupal]);
 
+    // ── Integrantes ───────────────────────────────────────────────────────────
     const addIntegrante = (cliente) => {
-        if (!cliente || formData.integrantes.find(i => i.id === cliente.usuario_id)) return;
+        const id = cliente?.usuario_id ?? cliente?.id;
+        if (!id || formData.integrantes.find(i => i.id === id)) return;
         setFormData(prev => {
-            const cargo = prev.integrantes.length === 0 ? 'PRESIDENTE' : 'INTEGRANTE';
+            const cargo = cliente.cargo ?? (prev.integrantes.length === 0 ? 'PRESIDENTE' : 'INTEGRANTE');
             return {
                 ...prev,
-                integrantes: [...prev.integrantes, { 
-                    id:                 cliente.usuario_id, 
-                    nombre:             cliente.nombre_completo, 
-                    modalidad:          cliente.modalidad_cliente,
-                    monto:              0,
-                    cargo:              cargo,
-                    fechaVencimientoDni: cliente.fechaVencimientoDni,
-                    dni_status:         cliente.dni_status
-                }]
+                integrantes: [...prev.integrantes, {
+                    id,
+                    nombre:              cliente.nombre_completo ?? cliente.nombre ?? '',
+                    modalidad:           cliente.modalidad_cliente ?? cliente.modalidad ?? '',
+                    monto:               parseFloat(cliente.monto || 0),
+                    cargo,
+                    fechaVencimientoDni: cliente.fechaVencimientoDni ?? null,
+                    dni_status:          cliente.dni_status ?? null,
+                    puede_excluirse:     cliente.puede_excluirse ?? true,
+                    saldo_pendiente:     cliente.saldo_pendiente ?? 0,
+                }],
             };
         });
     };
 
-    const removeIntegrante    = (id) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.filter(i => i.id !== id) }));
+    const removeIntegrante      = (id) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.filter(i => i.id !== id) }));
     const updateMontoIntegrante = (id, monto) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.map(i => i.id === id ? { ...i, monto } : i) }));
     const updateCargoIntegrante = (id, cargo) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.map(i => i.id === id ? { ...i, cargo } : i) }));
 
-    const handleSubmit = async (e) => {
+    const handleRemoveIntegrante = (id) => {
+        if (esRenovacionActiva) {
+            const int = formData.integrantes.find(i => i.id === id);
+            if (int && !int.puede_excluirse) return;
+        }
+        removeIntegrante(id);
+    };
+
+    // ── Lógica renovación ─────────────────────────────────────────────────────
+    const resetRenovacion = () => {
+        setPrestamoOrigen(null);
+        setComboKey(Date.now());
+        setFormData(prev => ({
+            ...prev,
+            prestamo_origen_id: '',
+            modalidad:          '',
+            es_grupal:          false,
+            grupo_id:           '',
+            grupo_nombre:       '',
+            cliente_id:         '',
+            integrantes:        [],
+            producto_id:        '',
+            producto_nombre:    '',
+            asesor_id:          '',
+            asesor_nombre:      '',
+        }));
+    };
+
+    const handleToggleRenovacion = (checked) => {
+        setEsRenovacion(checked);
+        if (!checked) resetRenovacion();
+    };
+
+    const handleSelectPrestamoOrigen = (prestamo) => {
+        if (!prestamo) { setPrestamoOrigen(null); handleChange('prestamo_origen_id', ''); return; }
+
+        setPrestamoOrigen(prestamo);
+
+        const updates = {
+            prestamo_origen_id: prestamo.id,
+            modalidad:          'RSS',
+            asesor_id:          prestamo.asesor_id      ?? '',
+            asesor_nombre:      prestamo.asesor_nombre  ?? '',
+            producto_id:        prestamo.producto_id    ?? '',
+            producto_nombre:    prestamo.producto_nombre ?? '',
+        };
+
+        if (prestamo.es_grupal) {
+            updates.es_grupal    = true;
+            updates.grupo_id     = prestamo.grupo_id    ?? '';
+            updates.grupo_nombre = prestamo.grupo_nombre ?? '';
+            updates.cliente_id   = '';
+            updates.integrantes  = [];
+        } else {
+            updates.es_grupal   = false;
+            updates.cliente_id  = prestamo.cliente_id ?? '';
+            updates.grupo_id    = '';
+            updates.integrantes = [];
+            if (prestamo.modalidad_cliente) updates.modalidad = prestamo.modalidad_cliente;
+        }
+
+        setFormData(prev => ({ ...prev, ...updates }));
+
+        if (prestamo.es_grupal) {
+            prestamo.integrantes?.forEach(int => addIntegrante({
+                id:                  int.id,
+                nombre:              int.nombre,
+                modalidad:           int.modalidad ?? '',
+                monto:               0,
+                cargo:               int.cargo,
+                dni_status:          int.dni_status ?? null,
+                fechaVencimientoDni: int.fechaVencimientoDni ?? null,
+                puede_excluirse:     int.puede_excluirse ?? false,
+                saldo_pendiente:     int.saldo_pendiente ?? 0,
+            }));
+        }
+    };
+
+    // ── Submit — recibe isBlocked desde el form ───────────────────────────────
+    const handleSubmit = async (e, isBlocked) => {
         e.preventDefault();
         if (isBlocked) {
             setAlert({ type: 'error', message: 'No se puede enviar la solicitud por restricciones de crédito o DNI.' });
@@ -105,39 +189,55 @@ export const useStore = () => {
             setAlert({ type: 'error', message: 'Debes seleccionar un asesor.' });
             return;
         }
+        if (esRenovacion && !formData.prestamo_origen_id) {
+            setAlert({ type: 'error', message: 'Debes seleccionar el préstamo a renovar.' });
+            return;
+        }
+
         setLoading(true);
         try {
             const payload = { ...formData };
             delete payload.asesor_nombre;
             delete payload.fechaVencimientoDni;
             delete payload.dni_status;
+            delete payload.producto_nombre;
+            delete payload.grupo_nombre;
 
             payload.seguro = payload.seguro || 0;
+            if (!payload.prestamo_origen_id) delete payload.prestamo_origen_id;
 
-            if (payload.es_grupal) {
+            if (payload.prestamo_origen_id) {
+                payload.modalidad = 'RSS';
+            } else if (payload.es_grupal) {
                 payload.modalidad = 'GRUPAL';
+            } else if (payload.modalidad?.includes('VIGENTE') || payload.modalidad?.includes('RCS')) {
+                payload.modalidad = 'RCS';
+            } else if (payload.modalidad?.includes('RSS')) {
+                payload.modalidad = 'RSS';
             } else {
-                if (payload.modalidad?.includes('VIGENTE') || payload.modalidad?.includes('RCS')) {
-                    payload.modalidad = 'RCS'; 
-                } else if (payload.modalidad?.includes('RSS')) {
-                    payload.modalidad = 'RSS';
-                } else {
-                    payload.modalidad = 'NUEVO';
-                }
+                payload.modalidad = 'NUEVO';
             }
 
             await store(payload);
             setAlert({ type: 'success', message: 'Solicitud enviada con éxito.' });
             setTimeout(() => navigate('/solicitudPrestamo/listar'), 1500);
-        } catch (err) { 
-            setAlert(handleApiError(err)); 
-        } finally { 
-            setLoading(false); 
+        } catch (err) {
+            setAlert(handleApiError(err));
+        } finally {
+            setLoading(false);
         }
     };
 
-    return { 
-        formData, loading, alert, setAlert, handleChange, handleSubmit, isBlocked, 
-        addIntegrante, removeIntegrante, updateMontoIntegrante, updateCargoIntegrante 
+    return {
+        formData, loading, alert, setAlert,
+        handleChange, handleSubmit,
+        addIntegrante, handleRemoveIntegrante,
+        updateMontoIntegrante, updateCargoIntegrante,
+        // renovación
+        esRenovacion, prestamoOrigen, comboKey,
+        handleToggleRenovacion,
+        handleSelectPrestamoOrigen,
+        handleLimpiarOrigen: resetRenovacion,
+        esRenovacionActiva
     };
 };
