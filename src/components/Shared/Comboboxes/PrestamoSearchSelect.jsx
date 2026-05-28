@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { combobox } from 'services/prestamoService';
 import { MagnifyingGlassIcon, XMarkIcon, BanknotesIcon, UserIcon, IdentificationIcon } from '@heroicons/react/24/outline';
 
-const PrestamoSearchSelect = ({ onSelect, disabled, tipoOperacion = 'cobro', initialName = '' }) => {
+const PrestamoSearchSelect = ({ onSelect, disabled, tipoOperacion = 'cobro', initialName = '', resetKey }) => {
     const [inputValue, setInputValue] = useState(initialName);
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -10,7 +10,6 @@ const PrestamoSearchSelect = ({ onSelect, disabled, tipoOperacion = 'cobro', ini
     
     const wrapperRef = useRef(null);
 
-    // Cerrar sugerencias al hacer click fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setShowSuggestions(false);
@@ -25,6 +24,14 @@ const PrestamoSearchSelect = ({ onSelect, disabled, tipoOperacion = 'cobro', ini
         if (onSelect) onSelect(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tipoOperacion]);
+
+    // ── Limpiar cuando el padre fuerza reset ──────────────────────────────────
+    useEffect(() => {
+        if (resetKey === undefined) return;
+        setInputValue('');
+        setSuggestions([]);
+        setShowSuggestions(false);
+    }, [resetKey]);
 
     const fetchPrestamos = async (term = '') => {
         setLoading(true);
@@ -43,9 +50,7 @@ const PrestamoSearchSelect = ({ onSelect, disabled, tipoOperacion = 'cobro', ini
     const handleChange = (e) => {
         const texto = e.target.value;
         setInputValue(texto);
-        
         if (texto.trim().length >= 2) {
-            // Buscamos en la BD si hay al menos 2 letras
             fetchPrestamos(texto);
         } else if (texto.trim() === '') {
             setSuggestions([]);
@@ -107,7 +112,6 @@ const PrestamoSearchSelect = ({ onSelect, disabled, tipoOperacion = 'cobro', ini
                             <li 
                                 key={prestamo.id} 
                                 onClick={() => handleSelect(prestamo)} 
-                                // 🔥 Hover corporativo
                                 className="px-4 py-3 cursor-pointer rounded-lg border border-transparent hover:border-brand-red/20 hover:bg-brand-red-light transition-all"
                             >
                                 <div className="flex items-center justify-between">

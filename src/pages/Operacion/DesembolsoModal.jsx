@@ -11,6 +11,14 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
         return () => { document.body.style.overflow = ''; };
     }, [isOpen]);
 
+    useEffect(() => {
+        if (!isOpen) {
+            setFile(null);
+            setPreview(null);
+            setNroOperacion('');
+        }
+    }, [isOpen]);
+
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
         if (selected) { setFile(selected); setPreview(URL.createObjectURL(selected)); }

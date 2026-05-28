@@ -31,7 +31,8 @@ const Store = () => {
     } = useStore();
 
     const [isDesembolsoModalOpen, setIsDesembolsoModalOpen] = useState(false);
-    const [historialModal, setHistorialModal] = useState(null);
+    const [historialModal, setHistorialModal]               = useState(null);
+    const [comboResetKey, setComboResetKey]                 = useState(0);  // ← reset combobox
 
     if (loading && sesionActiva === undefined) return <LoadingScreen />;
 
@@ -65,12 +66,9 @@ const Store = () => {
             ) : (
                 <div className="mt-6 space-y-6 animate-in fade-in duration-500">
 
-                    {/* ── Header cajero (¡Ahora con colores corporativos!) ── */}
+                    {/* ── Header cajero ── */}
                     <div className="flex flex-col md:flex-row items-center justify-between bg-brand-red p-6 md:p-8 rounded-[32px] shadow-xl text-white gap-6 border border-brand-red-dark relative overflow-hidden">
-                        
-                        {/* Brillo decorativo de fondo */}
                         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-brand-red-light opacity-10 rounded-full blur-3xl pointer-events-none"></div>
-
                         <div className="flex items-center gap-4 z-10">
                             <div className="p-3 bg-brand-red-dark rounded-2xl shadow-inner border border-brand-red-dark/50">
                                 <BanknotesIcon className="w-8 h-8 text-brand-gold" />
@@ -130,6 +128,7 @@ const Store = () => {
                             tipoOperacion={tipoOperacion}
                             onSelect={handleSelectPrestamo}
                             disabled={loading}
+                            resetKey={comboResetKey}
                         />
 
                         {/* Desembolso */}
@@ -179,6 +178,7 @@ const Store = () => {
                 onConfirm={async (fd) => {
                     await handleDesembolsar(fd);
                     setIsDesembolsoModalOpen(false);
+                    setComboResetKey(k => k + 1);  // ← fuerza limpieza del combobox
                 }}
                 loading={loading}
             />
