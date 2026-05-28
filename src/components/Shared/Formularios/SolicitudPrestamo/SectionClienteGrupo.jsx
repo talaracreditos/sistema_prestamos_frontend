@@ -6,7 +6,8 @@ import { UserIcon, UserGroupIcon, ShieldCheckIcon, TrashIcon, ExclamationTriangl
 
 const SectionClienteGrupo = ({ 
     data, handleChange, isBlocked, isMainBlocked, isUpdate, 
-    addIntegrante, removeIntegrante, updateMontoIntegrante, updateCargoIntegrante
+    addIntegrante, removeIntegrante, updateMontoIntegrante, updateCargoIntegrante,
+    idsOrigenRenovacion = [],
 }) => {
 
     const isPresidenteTaken = (currentId) => data.integrantes.some(i => i.cargo === 'PRESIDENTE' && i.id !== currentId);
@@ -36,7 +37,6 @@ const SectionClienteGrupo = ({
     return (
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 className="text-sm font-black text-slate-700 uppercase mb-4 flex items-center gap-2">
-                {/* Ícono dinámico pero siempre con los colores de la marca */}
                 {data.es_grupal ? <UserGroupIcon className="w-5 h-5 text-brand-gold-dark" /> : <UserIcon className="w-5 h-5 text-brand-red" />} 
                 {data.es_grupal ? 'Configuración de Grupo' : 'Información del Cliente'}
             </h3>
@@ -101,8 +101,11 @@ const SectionClienteGrupo = ({
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {data.integrantes.map((int) => {
-                                    const isRed = int.modalidad === 'RCS' || int.modalidad?.includes('VIGENTE') || int.dni_status?.estado === 'VENCIDO';
-                                    const isYellow = int.dni_status?.estado === 'POR_VENCER' && !isRed;
+                                    const esDeOrigen  = idsOrigenRenovacion.includes(int.id);
+                                    const tieneRiesgo = int.modalidad === 'RCS' || int.modalidad?.includes('VIGENTE') || int.dni_status?.estado === 'VENCIDO';
+
+                                    const isRed    = tieneRiesgo && !esDeOrigen;
+                                    const isYellow = (int.dni_status?.estado === 'POR_VENCER' && !isRed) || (tieneRiesgo && esDeOrigen);
 
                                     return (
                                         <tr key={int.id} className={isRed ? 'bg-red-50/50' : (isYellow ? 'bg-yellow-50/50' : 'hover:bg-slate-50')}>
@@ -110,14 +113,14 @@ const SectionClienteGrupo = ({
                                                 <div className="flex items-center gap-2">
                                                     <span className={`font-bold uppercase text-[11px] ${isRed ? 'text-red-700' : 'text-slate-700'}`}>{int.nombre}</span>
                                                     <span className={`px-2 py-0.5 rounded text-[11px] font-black border ${
-                                                        isRed ? 'bg-red-100 text-red-600 border-red-200' : 
+                                                        isRed    ? 'bg-red-100 text-red-600 border-red-200' : 
                                                         isYellow ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 
-                                                        'bg-green-50 text-green-600 border-green-100'
+                                                                   'bg-green-50 text-green-600 border-green-100'
                                                     }`}>
                                                         {int.dni_status?.estado === 'VENCIDO' 
                                                             ? `DNI VENCIDO (${int.dni_status.fecha_texto})` 
                                                             : (isYellow 
-                                                                ? `VENCE EN ${int.dni_status.dias_restantes} DÍAS (${int.dni_status.fecha_texto})` 
+                                                                ? `VENCE EN ${int.dni_status?.dias_restantes} DÍAS (${int.dni_status?.fecha_texto})` 
                                                                 : int.modalidad)}
                                                     </span>
                                                 </div>

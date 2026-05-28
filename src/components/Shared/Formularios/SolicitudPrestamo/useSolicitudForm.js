@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import peruData from 'utilities/data/peruData';
 import { onlyLetters, onlyNumbers } from 'utilities/Validations/validations';
 
@@ -12,27 +12,35 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
         onLimpiarOrigen    = null,
     } = opciones;
 
-    const esRenovacionActiva     = esRenovacion && !!prestamoOrigen;
-    // Bloquear TODO el form si marcó renovación pero aún no eligió préstamo
+    const esRenovacionActiva         = esRenovacion && !!prestamoOrigen;
     const formBloqueadoPorRenovacion = esRenovacion && !prestamoOrigen;
 
+    // ── IDs del préstamo origen (para excluirlos del bloqueo de riesgo) ───────
+    const idsOrigenSet = useMemo(() => {
+        if (!prestamoOrigen?.integrantes) return new Set();
+        return new Set(prestamoOrigen.integrantes.map(i => i.id));
+    }, [prestamoOrigen]);
+
     // ── Bloqueos riesgo/DNI ───────────────────────────────────────────────────
-    const dniPrincipalVencido      = data.dni_status?.estado === 'VENCIDO';
-    const dniIntegranteVencido     = data.es_grupal && data.integrantes?.some(i => i.dni_status?.estado === 'VENCIDO');
+    const dniPrincipalVencido  = data.dni_status?.estado === 'VENCIDO';
+    const dniIntegranteVencido = data.es_grupal && data.integrantes?.some(i => i.dni_status?.estado === 'VENCIDO');
+
     const principalBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
         data.modalidad?.includes('GRUPAL') &&
         (data.modalidad?.includes('VIGENTE') || data.modalidad?.includes('RCS'));
-    const integranteBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
+
+    // Solo bloquea integrantes NUEVOS (no pertenecen al préstamo origen)
+    const integranteBloqueadoPorRiesgo = data.es_grupal &&
         data.integrantes?.some(i =>
             i.modalidad?.includes('GRUPAL') &&
-            (i.modalidad?.includes('VIGENTE') || i.modalidad?.includes('RCS'))
+            (i.modalidad?.includes('VIGENTE') || i.modalidad?.includes('RCS')) &&
+            !idsOrigenSet.has(i.id)
         );
 
-    const isMainBlocked       = dniPrincipalVencido || principalBloqueadoPorRiesgo;
+    const isMainBlocked        = dniPrincipalVencido || principalBloqueadoPorRiesgo;
     const hasBlockedIntegrante = dniIntegranteVencido || integranteBloqueadoPorRiesgo;
-    const isBlocked           = isMainBlocked || hasBlockedIntegrante;
+    const isBlocked            = isMainBlocked || hasBlockedIntegrante;
 
-    // Bloqueo efectivo para deshabilitar campos del form
     const bloqueado = isBlocked || formBloqueadoPorRenovacion;
 
     // ── Descuento informativo ─────────────────────────────────────────────────
@@ -91,8 +99,8 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
         onSelectPrestamo,
         onLimpiarOrigen,
         // bloqueos
-        bloqueado,      // para deshabilitar campos (riesgo + renovación sin préstamo)
-        isBlocked,      // solo riesgo/DNI (para el banner de error)
+        bloqueado,
+        isBlocked,
         isMainBlocked,
         hasBlockedIntegrante,
         // aval

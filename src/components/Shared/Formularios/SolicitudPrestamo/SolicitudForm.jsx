@@ -164,6 +164,7 @@ const SolicitudForm = ({
                         removeIntegrante={removeIntegrante}
                         updateMontoIntegrante={updateMontoIntegrante}
                         updateCargoIntegrante={updateCargoIntegrante}
+                        idsOrigenRenovacion={prestamoOrigenEfectivo?.integrantes?.map(i => i.id) ?? []}
                     />
 
                     <SectionCondiciones
