@@ -59,7 +59,7 @@ const Index = () => {
                                 : 'text-slate-400'
                         }`}>
                             {row.tipo === 'DESGLOSE_REFINANCIADO' ? (
-                                <>Saldo refinanciado de Pago <span className="text-blue-600 font-black">#{row.pago_origen_id}</span></>
+                                <>Saldo refinanciado conservado de Pago <span className="text-blue-600 font-black">#{row.pago_origen_id}</span></>
                             ) : (
                                 <>Excedente de Pago <span className="text-amber-600 font-black">#{row.pago_origen_id}</span></>
                             )}
