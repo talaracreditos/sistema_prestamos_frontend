@@ -19,29 +19,3 @@ export const cobrarCuota = async (formData) => {
     });
     return handleResponse(response);
 };
-
-export const index = async (page = 1, filters = {}) => {
-    const params = new URLSearchParams({
-        page: page,
-        search: filters.search || '',
-        tipo: filters.tipo || ''
-    });
-    const response = await fetchWithAuth(`${BASE_URL}/index?${params.toString()}`, { method: 'GET' });
-    return handleResponse(response);
-};
-
-export const getPdfOperacion = async (id) => {
-    const response = await fetchWithAuth(`${BASE_URL}/pdf/${id}`, { method: 'GET' });
-    return handleResponse(response);
-};
-
-export const destroy = async (id, pin = null) => {
-    const body = pin ? JSON.stringify({ pin }) : undefined;
-    const response = await fetchWithAuth(`${BASE_URL}/delete/${id}`, {
-        method: 'DELETE',
-        headers: body ? { 'Content-Type': 'application/json' } : {},
-        body,
-    });
-    return handleResponse(response);
-};
- 

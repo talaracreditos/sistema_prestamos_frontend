@@ -69,7 +69,9 @@ import ListarSesiones from 'pages/CajaSesion/Index';
 
 // UI OPERACIONES
 import RegistrarOperacion from 'pages/Operacion/Store';
-import ListarOperaciones from 'pages/Operacion/Index';
+
+//UI CAJA MOVIMIENTOS
+import ListarMovimientos from 'pages/CajaMovimiento/Index';
 
 // UI PAGOS
 import ListarPagos from 'pages/Pago/Index';
@@ -192,7 +194,9 @@ function AppContent() {
 
         {/* OPERACIONES */}
         <Route path="/operacion/caja" element={<ProtectedRoute requiredPermission="operacion.store" element={<RegistrarOperacion />} />} />
-        <Route path="/operacion/listar" element={<ProtectedRoute requiredPermission="operacion.index" element={<ListarOperaciones />} />} />
+
+        {/* CAJA MOVIMIENTOS */}
+        <Route path="/caja/movimientos" element={<ProtectedRoute requiredPermission="cajaMovimiento.index" element={<ListarMovimientos />} />} />
 
         {/* PAGOS */}
         <Route path="/pago/listar" element={<ProtectedRoute requiredPermission="pago.index" element={<ListarPagos />} />} />
