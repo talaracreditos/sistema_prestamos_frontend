@@ -89,12 +89,24 @@ const Index = () => {
                             <div className="mt-1.5 flex flex-col gap-1">
                                 {row.pagos_cascada.map(hijo => (
                                     <div key={hijo.pago_id} className="flex items-center gap-1.5">
-                                        <span className="text-[7px] font-black text-amber-500 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded uppercase">
-                                            Excedente
+                                        {hijo.tipo === 'DESGLOSE_REFINANCIADO' ? (
+                                            <span className="text-[7px] font-black text-blue-500 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded uppercase">
+                                                Refinanciado
+                                            </span>
+                                        ) : (
+                                            <span className="text-[7px] font-black text-amber-500 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded uppercase">
+                                                Excedente
+                                            </span>
+                                        )}
+                                        <span className={`text-[9px] font-bold font-mono ${
+                                            hijo.tipo === 'DESGLOSE_REFINANCIADO' ? 'text-blue-700' : 'text-amber-700'
+                                        }`}>
+                                            Pago #{hijo.pago_id}
                                         </span>
-                                        <span className="text-[9px] font-bold text-amber-700 font-mono">Pago #{hijo.pago_id}</span>
                                         <span className="text-[9px] text-slate-400 font-bold">Cuota #{hijo.cuota_nro}</span>
-                                        <span className="text-[9px] font-black text-emerald-600">S/ {parseFloat(hijo.monto).toFixed(2)}</span>
+                                        <span className="text-[9px] font-black text-emerald-600">
+                                            S/ {parseFloat(hijo.monto).toFixed(2)}
+                                        </span>
                                     </div>
                                 ))}
                             </div>

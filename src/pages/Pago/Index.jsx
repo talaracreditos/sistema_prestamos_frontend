@@ -53,8 +53,16 @@ const Index = () => {
                 <div className="flex flex-col">
                     <span className="font-mono text-[14px] font-black text-slate-600">#{row.id}</span>
                     {row.pago_origen_id && (
-                        <span className="text-[11px] font-bold text-slate-400 mt-0.5">
-                            Excedente de Pago <span className="text-amber-600 font-black">#{row.pago_origen_id}</span>
+                        <span className={`text-[11px] font-bold mt-0.5 ${
+                            row.tipo === 'DESGLOSE_REFINANCIADO'
+                                ? 'text-blue-500'
+                                : 'text-slate-400'
+                        }`}>
+                            {row.tipo === 'DESGLOSE_REFINANCIADO' ? (
+                                <>Saldo refinanciado de Pago <span className="text-blue-600 font-black">#{row.pago_origen_id}</span></>
+                            ) : (
+                                <>Excedente de Pago <span className="text-amber-600 font-black">#{row.pago_origen_id}</span></>
+                            )}
                         </span>
                     )}
                     <span className="text-[9px] text-slate-400 font-bold whitespace-nowrap mt-0.5">{row.fecha}</span>
@@ -163,7 +171,6 @@ const Index = () => {
                             <PrinterIcon className={`w-4 h-4 ${pdfLoading ? 'animate-spin' : ''}`} />
                         </button>
                     )}
-                    {/* Solo pagos padre (sin pago_origen_id) y aprobados pueden anularse */}
                     {row.estado === 1 && !row.pago_origen_id && canDelete && (
                         <button onClick={() => openAnularModal(row)} title="Anular Pago"
                             className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
