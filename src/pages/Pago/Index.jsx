@@ -176,7 +176,7 @@ const Index = () => {
     ], [can, canDelete, esCliente, pdfLoading, handleViewPdf, openAnularModal]);
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
+        <div className="container mx-auto p-6">
             <PageHeader title="Control de Pagos" icon={BanknotesIcon} />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 

@@ -134,7 +134,7 @@ const Index = () => {
     ];
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 w-full max-w-full xl:max-w-7xl">
+        <div className="container mx-auto p-4 sm:p-6 w-full max-w-full">
             <PageHeader
                 title="PINs de Autorización"
                 icon={ShieldCheckIcon}

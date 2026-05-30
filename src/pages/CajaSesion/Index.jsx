@@ -107,7 +107,7 @@ const Index = () => {
     ];
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
+        <div className="container mx-auto p-6">
             <PageHeader title="Historial de Turnos de Caja" icon={ClockIcon} buttonText="Ir a Caja" buttonLink="/operacion/caja" />
             <AlertMessage type={alert?.type} message={alert?.message} onClose={() => setAlert(null)} />
             <Table

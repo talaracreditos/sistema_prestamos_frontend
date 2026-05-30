@@ -168,7 +168,7 @@ const Index = () => {
     if (loading && prestamos.length === 0) return <LoadingScreen />;
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
+        <div className="container mx-auto p-4 sm:p-6">
             <PageHeader title="Cartera de Préstamos" icon={BanknotesIcon} />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
             
