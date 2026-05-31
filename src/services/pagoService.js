@@ -7,10 +7,12 @@ const BASE_URL = `${API_BASE_URL}/api/pagos`;
 export const index = async (page = 1, filters = {}) => {
     const params = new URLSearchParams({
         page,
-        search:      filters.search      || '',
-        estado:      filters.estado      ?? '',
+        search:       filters.search       || '',
+        prestamo_id:  filters.prestamo_id  || '',
+        cliente:      filters.cliente      || '',
+        estado:       filters.estado       ?? '',
         fecha_inicio: filters.fecha_inicio || '',
-        fecha_fin:   filters.fecha_fin   || '',
+        fecha_fin:    filters.fecha_fin    || '',
     });
     const response = await fetchWithAuth(`${BASE_URL}/index?${params.toString()}`, { method: 'GET' });
     return handleResponse(response);

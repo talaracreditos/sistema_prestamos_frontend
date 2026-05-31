@@ -2,12 +2,14 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { index, pdf, destroy } from 'services/pagoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
+const FILTERS_INITIAL = { search: '', prestamo_id: '', cliente: '', estado: '', fecha_inicio: '', fecha_fin: '' };
+
 export const useIndex = () => {
     const [loading,        setLoading]        = useState(true);
     const [pagos,          setPagos]          = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
-    const [filters,        setFilters]        = useState({ search: '', estado: '' });
-    const filtersRef = useRef(filters);
+    const [filters,        setFilters]        = useState(FILTERS_INITIAL);
+    const filtersRef = useRef(FILTERS_INITIAL);
 
     const [alert,          setAlert]          = useState(null);
     const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
@@ -15,12 +17,10 @@ export const useIndex = () => {
     const [pdfTitle,       setPdfTitle]       = useState('');
     const [pdfLoading,     setPdfLoading]     = useState(false);
 
-    // ── Anulación ─────────────────────────────────────────────────────────────
-    const [isAnularModalOpen,  setIsAnularModalOpen]  = useState(false);
-    const [pagoToAnular,       setPagoToAnular]       = useState(null);
-    const [anularLoading,      setAnularLoading]      = useState(false);
+    const [isAnularModalOpen, setIsAnularModalOpen] = useState(false);
+    const [pagoToAnular,      setPagoToAnular]      = useState(null);
+    const [anularLoading,     setAnularLoading]     = useState(false);
 
-    // ── Fetch ─────────────────────────────────────────────────────────────────
     const fetchPagos = useCallback(async (page = 1) => {
         setLoading(true);
         try {
@@ -42,7 +42,6 @@ export const useIndex = () => {
 
     useEffect(() => { fetchPagos(1); }, [fetchPagos]);
 
-    // ── PDF ───────────────────────────────────────────────────────────────────
     const handleViewPdf = async (id) => {
         setPdfLoading(true);
         try {
@@ -57,17 +56,14 @@ export const useIndex = () => {
         }
     };
 
-    // ── Filtros ───────────────────────────────────────────────────────────────
     const handleFilterSubmit = () => { filtersRef.current = filters; fetchPagos(1); };
     const handleFilterClear  = () => {
-        const initial = { search: '', estado: '' };
-        setFilters(initial);
-        filtersRef.current = initial;
+        setFilters(FILTERS_INITIAL);
+        filtersRef.current = FILTERS_INITIAL;
         fetchPagos(1);
     };
 
-    // ── Anular ────────────────────────────────────────────────────────────────
-    const openAnularModal  = (pago) => { setPagoToAnular(pago); setIsAnularModalOpen(true); };
+    const openAnularModal = (pago) => { setPagoToAnular(pago); setIsAnularModalOpen(true); };
 
     const handleConfirmAnular = async (pin) => {
         if (!pagoToAnular) return;
