@@ -18,6 +18,7 @@ import {
     BanknotesIcon,
     ArrowUpCircleIcon,
     ArrowDownCircleIcon,
+    ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
@@ -27,7 +28,7 @@ const Store = () => {
         prestamoSeleccionado, handleSelectPrestamo, prestamoDetalle, handleDesembolsar,
         isPagoModalOpen, setIsPagoModalOpen, cuotaSeleccionada, openPagoModal, handleConfirmarPago,
         isAbrirModalOpen, setIsAbrirModalOpen, isCerrarModalOpen, setIsCerrarModalOpen,
-        handleAbrirSesion, handleCerrarSesion, isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64,
+        handleAbrirSesion, handleCerrarSesion, isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64, handleRefresh
     } = useStore();
 
     const [isDesembolsoModalOpen, setIsDesembolsoModalOpen] = useState(false);
@@ -152,12 +153,24 @@ const Store = () => {
 
                         {/* Cobro — OperacionForm */}
                         {prestamoSeleccionado && tipoOperacion === 'cobro' && prestamoDetalle && (
-                            <OperacionForm
-                                prestamoDetalle={prestamoDetalle}
-                                loading={loading}
-                                openPagoModal={openPagoModal}
-                                onHistorialModal={setHistorialModal}
-                            />
+                            <>
+                                <div className="flex justify-end mt-6 mb-2">
+                                    <button
+                                        onClick={handleRefresh}
+                                        disabled={loading}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all disabled:opacity-50"
+                                    >
+                                        <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                                        Actualizar
+                                    </button>
+                                </div>
+                                <OperacionForm
+                                    prestamoDetalle={prestamoDetalle}
+                                    loading={loading}
+                                    openPagoModal={openPagoModal}
+                                    onHistorialModal={setHistorialModal}
+                                />
+                            </>
                         )}
                     </div>
                 </div>

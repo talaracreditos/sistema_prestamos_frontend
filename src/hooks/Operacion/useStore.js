@@ -72,21 +72,32 @@ export const useStore = () => {
         }
     };
 
+    const cargarDetallePrestamo = useCallback(async (prestamo) => {
+        if (!prestamo) return;
+        setLoading(true);
+        try {
+            const res = await getPrestamoDetails(prestamo.id);
+            setPrestamoDetalle(res.data || res);
+        } catch (err) {
+            setAlert(handleApiError(err, "No se pudo cargar el cronograma."));
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const handleSelectPrestamo = useCallback(async (prestamo) => {
         setPrestamoSeleccionado(prestamo);
         setPrestamoDetalle(null);
         if (prestamo && tipoOperacion === 'cobro') {
-            setLoading(true);
-            try {
-                const res = await getPrestamoDetails(prestamo.id);
-                setPrestamoDetalle(res.data || res);
-            } catch (err) {
-                setAlert(handleApiError(err, "No se pudo cargar el cronograma."));
-            } finally {
-                setLoading(false);
-            }
+            await cargarDetallePrestamo(prestamo);
         }
-    }, [tipoOperacion]);
+    }, [tipoOperacion, cargarDetallePrestamo]);
+
+    // Refresca el detalle del préstamo actualmente seleccionado
+    const handleRefresh = useCallback(async () => {
+        if (!prestamoSeleccionado || tipoOperacion !== 'cobro') return;
+        await cargarDetallePrestamo(prestamoSeleccionado);
+    }, [prestamoSeleccionado, tipoOperacion, cargarDetallePrestamo]);
 
     const handleDesembolsar = async (formData) => {
         setLoading(true);
@@ -125,7 +136,7 @@ export const useStore = () => {
         } catch (err) {
             const error = handleApiError(err);
             if (setAlertLocal) {
-                setAlertLocal(error); // error se muestra dentro del modal
+                setAlertLocal(error);
             } else {
                 setAlert(error);
             }
@@ -137,7 +148,8 @@ export const useStore = () => {
     return {
         loading, sesionActiva, alert, setAlert,
         tipoOperacion, setTipoOperacion,
-        prestamoSeleccionado, handleSelectPrestamo, prestamoDetalle, handleDesembolsar,
+        prestamoSeleccionado, handleSelectPrestamo, prestamoDetalle,
+        handleDesembolsar, handleRefresh,
         isPagoModalOpen, setIsPagoModalOpen, cuotaSeleccionada, openPagoModal, handleConfirmarPago,
         isAbrirModalOpen, setIsAbrirModalOpen,
         isCerrarModalOpen, setIsCerrarModalOpen,
