@@ -4,11 +4,17 @@ import { useDashboardSaldoCapital } from 'hooks/Dashboard/useDashboardSaldoCapit
 import { exportSaldoCapitalDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
-import { ChartBarIcon, MagnifyingGlassIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import {
+    ChartBarIcon, MagnifyingGlassIcon, XMarkIcon,
+    ChevronLeftIcon, ChevronRightIcon, ArrowTrendingUpIcon,
+    ArrowTrendingDownIcon,
+} from '@heroicons/react/24/outline';
 
-const fmt   = n => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
-const DIAS  = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const fmt    = n => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
+const fmtVar = n => { const v = parseFloat(n || 0); return (v >= 0 ? '+' : '') + v.toLocaleString('es-PE', { minimumFractionDigits: 2 }); };
+const DIAS   = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MESES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MESES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 const ASESOR_COLORS = [
     { bg: 'bg-red-100',    text: 'text-red-700',    dot: 'bg-red-500',    bar: 'bg-red-500'    },
@@ -98,8 +104,8 @@ const DayCell = ({ fecha, eventos, asesorColorMap, esHoy, esMesActual }) => {
 
     return (
         <div ref={ref}
-            className={`relative min-h-[72px] p-1.5 border border-slate-100 rounded-lg flex flex-col
-                ${esMesActual ? 'bg-white' : 'bg-slate-50/50'}
+            className={`relative min-h-[72px] p-1.5 border rounded-lg flex flex-col
+                ${esMesActual ? 'bg-white border-slate-100' : 'bg-slate-200/90 border-slate-300/60 opacity-40'}
                 ${esHoy ? 'ring-2 ring-brand-red ring-offset-1' : ''}
                 ${tieneEventos ? 'cursor-pointer hover:border-slate-300 transition-colors' : ''}
             `}
@@ -215,8 +221,11 @@ const Calendario = ({ eventos, asesorColorMap, onMesChange }) => {
 };
 
 // ── Chip de asesor ────────────────────────────────────────────────────────────
-const AsesorChip = ({ asesor, color, desembolsadoMes, meta }) => {
-    const pct      = meta > 0 ? Math.min(100, Math.round((desembolsadoMes / meta) * 100)) : null;
+const AsesorChip = ({ asesor, color, mesVisible, metas }) => {
+    const metaKey  = `${asesor.asesor_id}_${mesVisible.month + 1}_${mesVisible.year}`;
+    const meta     = metas[metaKey] ?? 0;
+    const desemb   = asesor.desembolsos ?? 0;
+    const pct      = meta > 0 ? Math.min(100, Math.round((desemb / meta) * 100)) : null;
     const completa = pct !== null && pct >= 100;
 
     return (
@@ -226,24 +235,125 @@ const AsesorChip = ({ asesor, color, desembolsadoMes, meta }) => {
                 <p className={`text-[10px] font-black uppercase tracking-tight truncate ${color.text}`}>{asesor.nombre}</p>
             </div>
             <div className="flex items-center justify-between gap-2">
-                <span className={`text-[11px] font-black ${color.text}`}>↑ S/{fmt(desembolsadoMes)}</span>
+                <span className={`text-[11px] font-black ${color.text}`}>↑ S/{fmt(desemb)}</span>
                 {meta > 0 && (
                     <span className={`text-[9px] font-black flex-shrink-0 ${completa ? 'text-green-600' : color.text}`}>
-                        {completa ? '✓' : ''} {pct}% de S/{fmt(meta)}
+                        {completa ? '✓ ' : ''}{pct}% de S/{fmt(meta)}
                     </span>
                 )}
             </div>
             {meta > 0 && (
                 <div className="w-full h-1.5 bg-white/60 rounded-full overflow-hidden">
-                    <div
-                        className={`h-full rounded-full transition-all duration-500 ${completa ? 'bg-green-500' : color.bar}`}
-                        style={{ width: `${pct}%` }}
-                    />
+                    <div className={`h-full rounded-full transition-all duration-500 ${completa ? 'bg-green-500' : color.bar}`}
+                        style={{ width: `${pct}%` }} />
                 </div>
             )}
-            {meta === 0 && (
-                <span className={`text-[9px] ${color.text} opacity-50`}>Sin meta configurada</span>
+            {meta === 0 && <span className={`text-[9px] ${color.text} opacity-50`}>Sin meta configurada</span>}
+        </div>
+    );
+};
+
+// ── Tarjeta de saldo ──────────────────────────────────────────────────────────
+// isDark=true  → fondo oscuro (saldo global)
+// isDark=false → fondo colorido (por asesor)
+const SaldoCard = ({ label, inicial, actual, variacion, desembolsos, capital, color, isDark = false }) => {
+    const varPositiva   = parseFloat(variacion) >= 0;
+    const subLabelColor = isDark ? 'text-slate-500'  : 'text-slate-400';
+    const valueColor    = isDark ? 'text-white'       : (color?.text ?? 'text-slate-900');
+    const labelColor    = isDark ? 'text-slate-400'   : (color?.text ?? 'text-slate-500');
+    const dividerColor  = isDark ? 'border-white/10'  : 'border-slate-200/60';
+    const footerDesemb  = isDark ? 'text-blue-400'    : 'text-blue-600';
+    const footerCap     = isDark ? 'text-emerald-400' : 'text-emerald-600';
+
+    return (
+        <div className={`flex flex-col px-4 py-3 rounded-2xl border w-full
+            ${color?.border ?? 'border-slate-100'}
+            ${color?.bg     ?? 'bg-white'}
+        `}>
+            {/* Nombre asesor */}
+            {label && (
+                <div className="flex items-center gap-1.5 mb-3">
+                    {color?.dot && <div className={`w-2 h-2 rounded-full flex-shrink-0 ${color.dot}`} />}
+                    <p className={`text-[10px] font-black uppercase tracking-widest truncate ${labelColor}`}>{label}</p>
+                </div>
             )}
+
+            {/* Métricas apiladas verticalmente — label a la izquierda, valor a la derecha */}
+            <div className="flex flex-col gap-2">
+                {/* Inicial */}
+                <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[9px] font-black uppercase tracking-widest flex-shrink-0 ${subLabelColor}`}>Inicial</span>
+                    <span className={`text-sm font-black ${valueColor}`}>S/ {fmt(inicial)}</span>
+                </div>
+                {/* Separador */}
+                <div className={`h-px ${dividerColor} bg-current opacity-20`} />
+                {/* Actual */}
+                <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[9px] font-black uppercase tracking-widest flex-shrink-0 ${subLabelColor}`}>Actual</span>
+                    <span className={`text-sm font-black ${valueColor}`}>S/ {fmt(actual)}</span>
+                </div>
+                {/* Separador */}
+                <div className={`h-px ${dividerColor} bg-current opacity-20`} />
+                {/* Variación */}
+                <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[9px] font-black uppercase tracking-widest flex-shrink-0 ${subLabelColor}`}>Variación</span>
+                    <span className={`text-sm font-black flex items-center gap-1 ${varPositiva ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {varPositiva
+                            ? <ArrowTrendingUpIcon   className="w-3.5 h-3.5 flex-shrink-0" />
+                            : <ArrowTrendingDownIcon className="w-3.5 h-3.5 flex-shrink-0" />}
+                        S/ {fmtVar(variacion)}
+                    </span>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-3 pt-2 border-t ${dividerColor}`}>
+                <span className={`text-[9px] font-black whitespace-nowrap ${footerDesemb}`}>↑ Desemb. S/{fmt(desembolsos)}</span>
+                <span className={`text-[9px] font-black whitespace-nowrap ${footerCap}`}>↓ Capital S/{fmt(capital)}</span>
+            </div>
+        </div>
+    );
+};
+
+// ── Selector de meses ─────────────────────────────────────────────────────────
+// El loop va de -36 a +6 relativo al mes actual, por lo que en 2027, 2028, etc.
+// los botones se generan automáticamente sin cambiar nada.
+// Calculado una sola vez al cargar el módulo — no cambia durante la sesión
+const _HOY_MES_REF = new Date();
+const _ITEMS_MESES = (() => {
+    const arr = [];
+    for (let i = -36; i <= 6; i++) {
+        const d = new Date(_HOY_MES_REF.getFullYear(), _HOY_MES_REF.getMonth() + i, 1);
+        arr.push({ mes: d.getMonth() + 1, anio: d.getFullYear() });
+    }
+    return arr;
+})();
+
+const MesSelector = ({ mesesSeleccionados, onToggle }) => {
+    const isSelected = ({ mes, anio }) =>
+        mesesSeleccionados.some(m => m.mes === mes && m.anio === anio);
+
+    return (
+        <div className="flex flex-col gap-1">
+            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Rango de meses</label>
+            <div className="flex flex-wrap gap-1 max-w-lg">
+                {_ITEMS_MESES.map(({ mes, anio }) => {
+                    const sel = isSelected({ mes, anio });
+                    return (
+                        <button
+                            key={`${anio}-${mes}`}
+                            onClick={() => onToggle({ mes, anio })}
+                            className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all
+                                ${sel
+                                    ? 'bg-brand-red text-white shadow-sm'
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                }`}
+                        >
+                            {MESES_CORTO[mes - 1]} {anio}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 };
@@ -254,7 +364,9 @@ const SaldoCapitalCard = () => {
     const {
         loading, data,
         asesoresSeleccionados,
+        mesesSeleccionados,
         handleAgregarAsesor, handleQuitarAsesor,
+        handleToggleMes, handleQuitarMes,
         handleFiltrar, handleLimpiar,
     } = useDashboardSaldoCapital();
 
@@ -265,6 +377,7 @@ const SaldoCapitalCard = () => {
     const eventos  = useMemo(() => data?.eventos  ?? {}, [data]);
     const asesores = useMemo(() => data?.asesores ?? [], [data]);
     const metas    = useMemo(() => data?.metas    ?? {}, [data]);
+    const saldo    = useMemo(() => data?.saldo    ?? { inicial: 0, actual: 0, variacion: 0, desembolsos: 0, capital: 0 }, [data]);
 
     const asesorColorMap = useMemo(() => {
         const map = {};
@@ -272,13 +385,11 @@ const SaldoCapitalCard = () => {
         return map;
     }, [asesores]);
 
-    // Desembolsado por asesor en el mes visible
     const desembolsadoMesPorAsesor = useMemo(() => {
-        const map  = {};
-        const year = mesVisible.year;
-        const month = String(mesVisible.month + 1).padStart(2, '0');
+        const map    = {};
+        const year   = mesVisible.year;
+        const month  = String(mesVisible.month + 1).padStart(2, '0');
         const prefix = `${year}-${month}-`;
-
         Object.entries(eventos).forEach(([fecha, ev]) => {
             if (!fecha.startsWith(prefix)) return;
             (ev.desembolsos ?? []).forEach(d => {
@@ -288,7 +399,6 @@ const SaldoCapitalCard = () => {
         return map;
     }, [eventos, mesVisible]);
 
-    // Total desembolsado global del mes
     const totalDesembolsadoMes = useMemo(() =>
         Object.values(desembolsadoMesPorAsesor).reduce((s, v) => s + v, 0),
     [desembolsadoMesPorAsesor]);
@@ -300,13 +410,26 @@ const SaldoCapitalCard = () => {
         }, 0),
     [asesores, metas, mesVisible]);
 
+    const asesoresConDesembolso = useMemo(() =>
+        asesores.map(a => ({ ...a, desembolsos: desembolsadoMesPorAsesor[a.asesor_id] ?? 0 })),
+    [asesores, desembolsadoMesPorAsesor]);
+
+    const tieneFiltroMeses       = mesesSeleccionados.length > 0;
+    const tieneAsesoresFiltrados = asesoresSeleccionados.length > 0;
+
     const exportFilters = {
-        ...(asesoresSeleccionados.length > 0
-            ? { asesor_ids: asesoresSeleccionados.map(a => a.id).join(',') }
-            : {}),
+        ...(tieneAsesoresFiltrados ? { asesor_ids: asesoresSeleccionados.map(a => a.id).join(',') } : {}),
+        ...(tieneFiltroMeses       ? { meses: JSON.stringify(mesesSeleccionados) }                  : {}),
     };
 
     const onLimpiar = () => { setComboKey(Date.now()); handleLimpiar(); };
+
+    const labelRangoMeses = tieneFiltroMeses
+        ? [...mesesSeleccionados]
+            .sort((a, b) => a.anio * 100 + a.mes - (b.anio * 100 + b.mes))
+            .map(m => `${MESES_CORTO[m.mes - 1]} ${m.anio}`)
+            .join(', ')
+        : null;
 
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-visible">
@@ -318,7 +441,10 @@ const SaldoCapitalCard = () => {
                     </div>
                     <div>
                         <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">Saldo Capital</h2>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Calendario de desembolsos y cobros de capital</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            Calendario de desembolsos y cobros de capital
+                            {labelRangoMeses && <span className="ml-1 text-brand-red">· {labelRangoMeses}</span>}
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
@@ -331,23 +457,26 @@ const SaldoCapitalCard = () => {
 
             {!collapsed && (
                 <>
-                    {/* Filtro asesor */}
+                    {/* Filtros */}
                     <div className="px-6 py-3 border-b border-slate-50 bg-slate-50/50 flex flex-wrap items-end gap-3">
                         <div className="flex flex-col gap-1">
                             <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Asesor</label>
                             <EmpleadoSearchSelect key={comboKey} rol="ASESOR" onSelect={handleAgregarAsesor} clearOnSelect={true} placeholder="Agregar asesor..." />
                         </div>
-                        <button onClick={handleFiltrar} disabled={loading}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-brand-red text-white text-[10px] font-black uppercase rounded-lg hover:bg-brand-red-dark transition-all disabled:opacity-50">
-                            <MagnifyingGlassIcon className="w-3.5 h-3.5" /> Filtrar
-                        </button>
-                        <button onClick={onLimpiar}
-                            className="flex items-center gap-1 px-3 py-2 text-slate-400 hover:text-brand-red text-[10px] font-black uppercase rounded-lg border border-slate-200 hover:border-brand-red/30 transition-all">
-                            <XMarkIcon className="w-3.5 h-3.5" /> Limpiar
-                        </button>
+                        <MesSelector mesesSeleccionados={mesesSeleccionados} onToggle={handleToggleMes} />
+                        <div className="flex items-end gap-2">
+                            <button onClick={handleFiltrar} disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-brand-red text-white text-[10px] font-black uppercase rounded-lg hover:bg-brand-red-dark transition-all disabled:opacity-50">
+                                <MagnifyingGlassIcon className="w-3.5 h-3.5" /> Filtrar
+                            </button>
+                            <button onClick={onLimpiar}
+                                className="flex items-center gap-1 px-3 py-2 text-slate-400 hover:text-brand-red text-[10px] font-black uppercase rounded-lg border border-slate-200 hover:border-brand-red/30 transition-all">
+                                <XMarkIcon className="w-3.5 h-3.5" /> Limpiar
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Tags asesores seleccionados */}
+                    {/* Tags asesores */}
                     {asesoresSeleccionados.length > 0 && (
                         <div className="px-6 py-2 border-b border-slate-50 bg-white flex flex-wrap gap-2">
                             {asesoresSeleccionados.map((a, i) => {
@@ -365,26 +494,89 @@ const SaldoCapitalCard = () => {
                         </div>
                     )}
 
-                    {/* Chips por asesor — desembolsos del mes visible vs meta */}
+                    {/* Tags meses */}
+                    {mesesSeleccionados.length > 0 && (
+                        <div className="px-6 py-2 border-b border-slate-50 bg-white flex flex-wrap gap-2 items-center">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Rango:</span>
+                            {[...mesesSeleccionados]
+                                .sort((a, b) => a.anio * 100 + a.mes - (b.anio * 100 + b.mes))
+                                .map(m => (
+                                    <span key={`${m.anio}-${m.mes}`}
+                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-brand-red/10 text-brand-red">
+                                        {MESES_CORTO[m.mes - 1]} {m.anio}
+                                        <button onClick={() => handleQuitarMes(m)} className="hover:opacity-70">
+                                            <XMarkIcon className="w-3 h-3" />
+                                        </button>
+                                    </span>
+                                ))}
+                        </div>
+                    )}
+
+                    {/* ── Saldo global ───────────────────────────────────────── */}
+                    {!loading && (
+                        <div className="px-6 py-4 border-b border-slate-50">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                Saldo global {tieneFiltroMeses ? `· ${labelRangoMeses}` : '(total cartera)'}
+                            </p>
+                            <SaldoCard
+                                inicial={saldo.inicial}
+                                actual={saldo.actual}
+                                variacion={saldo.variacion}
+                                desembolsos={saldo.desembolsos}
+                                capital={saldo.capital}
+                                color={{ bg: 'bg-slate-900', border: 'border-slate-700' }}
+                                isDark
+                            />
+                        </div>
+                    )}
+
+                    {/* ── Saldo por asesor ───────────────────────────────────── */}
+                    {!loading && asesores.length > 0 && (
+                        <div className="px-6 py-4 border-b border-slate-50">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                Saldo por asesor {tieneFiltroMeses ? `· ${labelRangoMeses}` : '(total cartera)'}
+                            </p>
+                            {/*
+                                1 col  < 640px
+                                2 cols 640–1023px
+                                3 cols 1024–1279px
+                                4 cols ≥ 1280px
+                            */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                {asesores.map((a, i) => {
+                                    const color = ASESOR_COLORS[i % ASESOR_COLORS.length];
+                                    return (
+                                        <SaldoCard
+                                            key={a.asesor_id}
+                                            label={a.nombre}
+                                            inicial={a.saldo_inicial}
+                                            actual={a.saldo_actual}
+                                            variacion={a.variacion}
+                                            desembolsos={a.desembolsos}
+                                            capital={a.capital}
+                                            color={{ ...color, border: 'border-slate-100' }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Chips meta ─────────────────────────────────────────── */}
                     {asesores.length > 0 && (
                         <div className="px-6 py-3 border-b border-slate-50 bg-white flex flex-wrap gap-2">
-                            {asesores.map((a, i) => {
-                                const color        = ASESOR_COLORS[i % ASESOR_COLORS.length];
-                                const desemb       = desembolsadoMesPorAsesor[a.asesor_id] ?? 0;
-                                const metaKey      = `${a.asesor_id}_${mesVisible.month + 1}_${mesVisible.year}`;
-                                const meta         = metas[metaKey] ?? 0;
+                            {asesoresConDesembolso.map((a, i) => {
+                                const color = ASESOR_COLORS[i % ASESOR_COLORS.length];
                                 return (
                                     <AsesorChip
                                         key={a.asesor_id}
                                         asesor={a}
                                         color={color}
-                                        desembolsadoMes={desemb}
-                                        meta={meta}
+                                        mesVisible={mesVisible}
+                                        metas={metas}
                                     />
                                 );
                             })}
-
-                            {/* Total global del mes */}
                             <div className="flex flex-col gap-1.5 px-3 py-2 rounded-xl bg-slate-900 min-w-[160px]">
                                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
                                     Total {MESES[mesVisible.month]}
@@ -392,17 +584,13 @@ const SaldoCapitalCard = () => {
                                 <div className="flex items-center justify-between gap-2">
                                     <span className="text-[11px] font-black text-white">↑ S/{fmt(totalDesembolsadoMes)}</span>
                                     {totalMetaMes > 0 && (
-                                        <span className="text-[9px] font-black text-slate-300 flex-shrink-0">
-                                            de S/{fmt(totalMetaMes)}
-                                        </span>
+                                        <span className="text-[9px] font-black text-slate-300 flex-shrink-0">de S/{fmt(totalMetaMes)}</span>
                                     )}
                                 </div>
                                 {totalMetaMes > 0 && (
                                     <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full bg-brand-gold transition-all duration-500"
-                                            style={{ width: `${Math.min(100, Math.round((totalDesembolsadoMes / totalMetaMes) * 100))}%` }}
-                                        />
+                                        <div className="h-full rounded-full bg-brand-gold transition-all duration-500"
+                                            style={{ width: `${Math.min(100, Math.round((totalDesembolsadoMes / totalMetaMes) * 100))}%` }} />
                                     </div>
                                 )}
                             </div>
