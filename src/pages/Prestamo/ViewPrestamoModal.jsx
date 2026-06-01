@@ -34,9 +34,10 @@ const CardSkeleton = ({ accent = 'slate' }) => {
 
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
-    const [reducirMoraOpen, setReducirMoraOpen]               = useState(false);
-    const [cuotaParaReducir, setCuotaParaReducir]             = useState(null);
-    const [cambiarPresidenteOpen, setCambiarPresidenteOpen]   = useState(false);
+    const [reducirMoraOpen, setReducirMoraOpen]             = useState(false);
+    const [cuotaParaReducir, setCuotaParaReducir]           = useState(null);
+    const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
+    const [refreshing, setRefreshing]                       = useState(false);
 
     const {
         canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente,
@@ -66,6 +67,17 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const integranteTienePendientes = esVistaIntegrante
         ? (cronogramaActivo ?? []).some(c => ![2, 6, 0].includes(c.estado))
         : false;
+
+    // ── Actualizar datos del préstamo sin cerrar el modal ─────────────────────
+    const handleRefresh = async () => {
+        if (!onRefresh) return;
+        setRefreshing(true);
+        try {
+            await onRefresh();
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     const handleAbrirReducirMora = (cuota) => {
         setCuotaParaReducir(cuota);
@@ -277,9 +289,20 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </span>
                                 )}
 
+                                {/* ── Botón Actualizar ── */}
+                                <button
+                                    onClick={handleRefresh}
+                                    disabled={refreshing || loadingPdf || loadingIntegrante}
+                                    title="Recargar datos del préstamo"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg transition-all border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    <ArrowPathIcon className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                                    {refreshing ? 'Actualizando...' : 'Actualizar'}
+                                </button>
+
                                 {!prestamoCancelado && canGeneratePdf && (
-                                    <button onClick={handleDescargarCronograma} disabled={loadingPdf}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red hover:bg-brand-red-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-red/20">
+                                    <button onClick={handleDescargarCronograma} disabled={loadingPdf || refreshing}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red hover:bg-brand-red-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-red/20 disabled:opacity-40 disabled:cursor-not-allowed">
                                         {loadingPdf
                                             ? <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
                                             : <ArrowDownTrayIcon className="w-3.5 h-3.5" />
