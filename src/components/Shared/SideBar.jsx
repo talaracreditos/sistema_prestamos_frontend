@@ -76,12 +76,7 @@ export const MENU_GROUPS = [
     {
         groupName: 'Portal de Pagos',
         items: [
-            {
-                section: 'Pagos', icon: CreditCardIcon,
-                subs: [
-                    { name: 'Ver Pagos', link: '/pago/listar', requiredPermission: 'pago.index' },
-                ],
-            }
+             { section: 'Pagos', icon: CreditCardIcon, link: '/pago/listar', requiredPermission: 'pago.index' },
         ]
     },
     {
