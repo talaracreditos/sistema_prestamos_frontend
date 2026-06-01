@@ -3,12 +3,12 @@ import { index, destroy } from 'services/metaAsesorService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
 export const MESES = [
-    { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' },
-    { value: 3, label: 'Marzo' }, { value: 4, label: 'Abril' },
-    { value: 5, label: 'Mayo' }, { value: 6, label: 'Junio' },
-    { value: 7, label: 'Julio' }, { value: 8, label: 'Agosto' },
-    { value: 9, label: 'Setiembre' }, { value: 10, label: 'Octubre' },
-    { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
+    { value: 1,  label: 'Enero'      }, { value: 2,  label: 'Febrero'   },
+    { value: 3,  label: 'Marzo'      }, { value: 4,  label: 'Abril'     },
+    { value: 5,  label: 'Mayo'       }, { value: 6,  label: 'Junio'     },
+    { value: 7,  label: 'Julio'      }, { value: 8,  label: 'Agosto'    },
+    { value: 9,  label: 'Setiembre'  }, { value: 10, label: 'Octubre'   },
+    { value: 11, label: 'Noviembre'  }, { value: 12, label: 'Diciembre' },
 ];
 
 const anioActual = new Date().getFullYear();
@@ -23,11 +23,20 @@ export const useIndex = () => {
     const [filters, setFilters]       = useState({ mes: '', anio: anioActual, asesor_id: '' });
     const filtersRef                  = useRef(filters);
 
-    const fetchMetas = useCallback(async (f = filtersRef.current) => {
+    // Paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages,  setTotalPages]  = useState(1);
+    const [total,       setTotal]       = useState(0);
+
+    const fetchMetas = useCallback(async (f = filtersRef.current, page = 1) => {
         setLoading(true);
         try {
-            const res = await index(f);
-            setMetas(res.data || res);
+            const res  = await index(f, page);
+            const body = res.data || res;
+            setMetas(body.data         ?? []);
+            setTotal(body.total        ?? 0);
+            setTotalPages(body.last_page   ?? 1);
+            setCurrentPage(body.current_page ?? 1);
         } catch (err) {
             setAlert(handleApiError(err));
         } finally {
@@ -42,23 +51,27 @@ export const useIndex = () => {
 
     const handleFilterSubmit = () => {
         filtersRef.current = filters;
-        fetchMetas(filters);
+        fetchMetas(filters, 1);   // volver a página 1 al filtrar
     };
 
     const handleFilterClear = () => {
         const reset = { mes: '', anio: anioActual, asesor_id: '' };
         setFilters(reset);
         filtersRef.current = reset;
-        fetchMetas(reset);
+        fetchMetas(reset, 1);
     };
 
-    const handleAskDelete    = (id) => { setSelectedId(id); setShowDelete(true); };
+    const handlePageChange = (page) => {
+        fetchMetas(filtersRef.current, page);
+    };
+
+    const handleAskDelete     = (id) => { setSelectedId(id); setShowDelete(true); };
     const handleConfirmDelete = async () => {
         setShowDelete(false);
         try {
             await destroy(selectedId);
             setAlert({ type: 'success', message: 'Meta eliminada correctamente.' });
-            fetchMetas();
+            fetchMetas(filtersRef.current, currentPage);
         } catch (err) {
             setAlert(handleApiError(err));
         }
@@ -67,8 +80,13 @@ export const useIndex = () => {
     return {
         loading, metas, alert, setAlert,
         filters, showDelete, setShowDelete,
-        MESES, ANIOS,
-        fetchMetas,
+        // paginación
+        pagination: {
+            currentPage,
+            totalPages,
+            total,
+            onPageChange: handlePageChange,
+        },
         handleFilterChange, handleFilterSubmit, handleFilterClear,
         handleAskDelete, handleConfirmDelete,
     };

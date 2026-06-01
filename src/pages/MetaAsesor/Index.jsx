@@ -12,6 +12,7 @@ const Index = () => {
     const {
         loading, metas, alert, setAlert,
         filters, showDelete, setShowDelete,
+        pagination,
         handleFilterChange, handleFilterSubmit, handleFilterClear,
         handleAskDelete, handleConfirmDelete,
     } = useIndex();
@@ -81,7 +82,7 @@ const Index = () => {
             />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 
-            {/* Filtros manuales — no usa filterConfig del Table por el EmpleadoSearchSelect */}
+            {/* Filtros */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <select
@@ -102,7 +103,6 @@ const Index = () => {
                         {ANIOS.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
 
-                    {/* Combobox asesor — filtra solo asesores (rol=ASESOR) */}
                     <EmpleadoSearchSelect
                         rol="asesor"
                         onSelect={emp => handleFilterChange('asesor_id', emp?.id ?? '')}
@@ -127,7 +127,17 @@ const Index = () => {
                 </div>
             </div>
 
-            <Table columns={columns} data={metas} loading={loading} />
+            <Table
+                columns={columns}
+                data={metas}
+                loading={loading}
+                pagination={{
+                    currentPage:  pagination.currentPage,
+                    totalPages:   pagination.totalPages,
+                    onPageChange: pagination.onPageChange,
+                    total:        pagination.total,
+                }}
+            />
 
             {showDelete && (
                 <ConfirmModal
