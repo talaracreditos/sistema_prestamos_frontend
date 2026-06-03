@@ -1,36 +1,41 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSaldoCapitalDashboard } from 'services/dashboardService';
 
-/**
- * mesesSeleccionados: [{ mes: number (1-12), anio: number }]
- */
+const hoy = new Date();
+const MES_DEFAULT  = hoy.getMonth() + 1;
+const ANIO_DEFAULT = hoy.getFullYear();
+
 export const useDashboardSaldoCapital = () => {
     const [loading, setLoading] = useState(true);
     const [data,    setData]    = useState(null);
+    const [mes,     setMes]     = useState(MES_DEFAULT);
+    const [anio,    setAnio]    = useState(ANIO_DEFAULT);
     const [asesoresSeleccionados, setAsesoresSeleccionados] = useState([]);
-    const [mesesSeleccionados,    setMesesSeleccionados]    = useState([]);   // [{mes,anio}]
 
-    const fetchData = useCallback(async (asesorIds = [], meses = []) => {
+    const fetchData = useCallback(async (m = MES_DEFAULT, a = ANIO_DEFAULT, asesorIds = []) => {
         setLoading(true);
         try {
-            const filters = {};
+            const filters = { mes: m, anio: a };
             if (asesorIds.length > 0) filters.asesor_ids = asesorIds.join(',');
-            if (meses.length > 0)     filters.meses      = JSON.stringify(meses);
             const json = await getSaldoCapitalDashboard(filters);
             setData(json.data || json);
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    useEffect(() => { fetchData(); }, [fetchData]);
+    useEffect(() => { fetchData(MES_DEFAULT, ANIO_DEFAULT); }, [fetchData]);
 
     const handleFiltrar = () =>
-        fetchData(asesoresSeleccionados.map(a => a.id), mesesSeleccionados);
+        fetchData(mes, anio, asesoresSeleccionados.map(a => a.id));
 
     const handleLimpiar = () => {
+        setMes(MES_DEFAULT);
+        setAnio(ANIO_DEFAULT);
         setAsesoresSeleccionados([]);
-        setMesesSeleccionados([]);
-        fetchData([], []);
+        fetchData(MES_DEFAULT, ANIO_DEFAULT, []);
     };
 
     const handleAgregarAsesor = (asesor) => {
@@ -38,7 +43,7 @@ export const useDashboardSaldoCapital = () => {
         setAsesoresSeleccionados(prev =>
             prev.find(a => a.id === asesor.id) ? prev : [
                 ...prev,
-                { id: asesor.id, nombre: asesor.nombre_completo ?? asesor.nombre ?? `Asesor #${asesor.id}` }
+                { id: asesor.id, nombre: asesor.nombre_completo ?? asesor.nombre ?? `Asesor #${asesor.id}` },
             ]
         );
     };
@@ -46,24 +51,12 @@ export const useDashboardSaldoCapital = () => {
     const handleQuitarAsesor = (id) =>
         setAsesoresSeleccionados(prev => prev.filter(a => a.id !== id));
 
-    const handleToggleMes = ({ mes, anio }) => {
-        setMesesSeleccionados(prev => {
-            const existe = prev.find(m => m.mes === mes && m.anio === anio);
-            return existe
-                ? prev.filter(m => !(m.mes === mes && m.anio === anio))
-                : [...prev, { mes, anio }];
-        });
-    };
-
-    const handleQuitarMes = ({ mes, anio }) =>
-        setMesesSeleccionados(prev => prev.filter(m => !(m.mes === mes && m.anio === anio)));
-
     return {
         loading, data,
+        mes, setMes,
+        anio, setAnio,
         asesoresSeleccionados,
-        mesesSeleccionados,
         handleAgregarAsesor, handleQuitarAsesor,
-        handleToggleMes, handleQuitarMes,
         handleFiltrar, handleLimpiar,
     };
 };
