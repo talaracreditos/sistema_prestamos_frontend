@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useIndex } from 'hooks/Pago/useIndex';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
@@ -21,7 +21,7 @@ const Index = () => {
 
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedVoucher, setSelectedVoucher] = useState(null);
-    const openVoucher = (url) => { setSelectedVoucher(url); setIsViewModalOpen(true); };
+    const openVoucher = useCallback((url) => { setSelectedVoucher(url); setIsViewModalOpen(true); }, []);
 
     const filterConfig = useMemo(() => [
         {
