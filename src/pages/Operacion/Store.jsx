@@ -28,7 +28,7 @@ const Store = () => {
         prestamoSeleccionado, handleSelectPrestamo, prestamoDetalle, handleDesembolsar,
         isPagoModalOpen, setIsPagoModalOpen, cuotaSeleccionada, openPagoModal, handleConfirmarPago,
         isAbrirModalOpen, setIsAbrirModalOpen, isCerrarModalOpen, setIsCerrarModalOpen,
-        handleAbrirSesion, handleCerrarSesion, isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64, handleRefresh
+        handleAbrirSesion, handleCerrarSesion, isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64, handleRefresh, verifySesion
     } = useStore();
 
     const [isDesembolsoModalOpen, setIsDesembolsoModalOpen] = useState(false);
@@ -89,8 +89,8 @@ const Store = () => {
                                 </span>
                             </div>
                             <button
-                                onClick={() => setIsCerrarModalOpen(true)}
-                                className="bg-brand-red-dark hover:bg-brand-gold hover:text-brand-red-dark px-6 py-3 rounded-xl font-black uppercase text-[10px] transition-all border border-brand-red-dark hover:border-brand-gold hover:shadow-lg active:scale-95"
+                                onClick={() => { verifySesion(); setIsCerrarModalOpen(true); }}
+                                className="..."
                             >
                                 Cerrar Turno
                             </button>

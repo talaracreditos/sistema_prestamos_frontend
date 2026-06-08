@@ -157,6 +157,6 @@ export const useStore = () => {
         isAbrirModalOpen, setIsAbrirModalOpen,
         isCerrarModalOpen, setIsCerrarModalOpen,
         handleAbrirSesion, handleCerrarSesion,
-        isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64
+        isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64, verifySesion
     };
 };
