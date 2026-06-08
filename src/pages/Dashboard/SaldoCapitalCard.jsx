@@ -341,13 +341,28 @@ const SaldoCapitalCard = () => {
                     </div>
 
                     {/* ── Nota meta ─────────────────────────────────────────── */}
-                    <div className="px-6 pb-4">
-                        <p className="text-[12px] text-slate-400 italic">
-                            * Meta = crecimiento de cartera del mes. Objetivo = Saldo Inicial + Meta.
-                            Avance = Saldo Actual ÷ Objetivo × 100.
-                            Saldo inicial a 0 el primer mes de operación.
+                    <div className="px-6 pb-4 space-y-1">
+                        <p className="text-[11px] text-slate-500 font-black uppercase tracking-widest mb-1">Glosario</p>
+                        <p className="text-[11px] text-slate-400">
+                            <span className="font-black text-slate-600">Saldo Inicial:</span> Capital pendiente de cobro al cierre del mes anterior — cuotas no pagadas de préstamos desembolsados antes del inicio del mes.
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                            <span className="font-black text-slate-600">Saldo Actual:</span> Capital pendiente de cobro a la fecha de corte — cuotas no pagadas de todos los préstamos activos del periodo.
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                            <span className="font-black text-slate-600">Variación:</span> Saldo Actual − Saldo Inicial. Positivo = cartera creció, negativo = cartera se redujo.
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                            <span className="font-black text-slate-600">Meta Crecim.:</span> Monto objetivo de crecimiento de cartera fijado para el asesor en el mes.
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                            <span className="font-black text-slate-600">Objetivo:</span> Saldo Inicial + Meta — cartera total que debe alcanzar el asesor al cierre del mes.
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                            <span className="font-black text-slate-600">Avance:</span> (Saldo Actual ÷ Objetivo) × 100. Verde = meta alcanzada o superada.
                         </p>
                     </div>
+
                 </>
             )}
         </div>
