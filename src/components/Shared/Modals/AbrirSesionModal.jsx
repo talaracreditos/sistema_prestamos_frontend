@@ -33,7 +33,7 @@ const AbrirSesionModal = ({ isOpen, onClose, onConfirm, loading }) => {
     const canSubmit = cajaId && montoApertura !== '' && pin.length === 6;
 
     return (
-        <ViewModal isOpen={isOpen} onClose={onClose} title="Aperturar Turno de Caja">
+        <ViewModal isOpen={isOpen} onClose={onClose} hideFooter={true} title="Aperturar Turno de Caja">
             <form onSubmit={handleSubmit} className="space-y-5">
 
                 {/* Caja */}

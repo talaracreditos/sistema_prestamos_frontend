@@ -179,6 +179,7 @@ const Index = () => {
                 onClose={() => setIsViewOpen(false)} 
                 title="Ficha del Empleado"
                 isLoading={viewLoading}
+                hideFooter={true}
             >
                 {viewData && (
                     <div className="space-y-6">

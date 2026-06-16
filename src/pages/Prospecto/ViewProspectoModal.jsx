@@ -109,6 +109,7 @@ const ViewProspectoModal = ({ isOpen, onClose, data, isLoading, onSeguimientoSuc
                 title={`Expediente #${data?.id?.toString().padStart(6, '0') ?? ''}`}
                 isLoading={isLoading}
                 size="2xl"
+                hideFooter={true}
             >
                 {data && (
                     <div className="flex flex-col md:flex-row gap-5 min-h-0">

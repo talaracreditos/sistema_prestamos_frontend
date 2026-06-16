@@ -38,7 +38,7 @@ const FichaClienteModal = ({ isOpen, onClose, data, isLoading }) => {
 
     return (
         <>
-            <ViewModal isOpen={isOpen} onClose={onClose} title="Ficha Detallada del Cliente" isLoading={isLoading}>
+            <ViewModal isOpen={isOpen} onClose={onClose} hideFooter={true} title="Ficha Detallada del Cliente" isLoading={isLoading}>
                 {data && (
                     <div className="space-y-6 relative">
                         

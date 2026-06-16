@@ -33,7 +33,7 @@ const SeguimientoModal = ({ isOpen, onClose, prospecto, onSuccess }) => {
     };
 
     return (
-        <ViewModal isOpen={isOpen} onClose={onClose} title="Registrar Seguimiento" size="md">
+        <ViewModal isOpen={isOpen} onClose={onClose} hideFooter={true} title="Registrar Seguimiento" size="md">
             <div className="space-y-5">
 
                 {/* Estado actual */}

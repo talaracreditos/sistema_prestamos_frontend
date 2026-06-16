@@ -75,6 +75,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                 title={`Detalle de Préstamo #${data?.id?.toString().padStart(5, '0')}`}
                 isLoading={isLoading}
                 size="xl"
+                hideFooter = {true}
             >
                 {data && (
                     <div className="space-y-6">

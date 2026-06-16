@@ -13,7 +13,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const handleClose = () => { if (!loading) handlers.reset(); };
 
     return (
-        <ViewModal isOpen={isOpen} hideFooter onClose={handleClose} title={`Cobrar Cuota N° ${cuota?.nro}`} size="2xl">
+        <ViewModal isOpen={isOpen} hideFooter={true} onClose={handleClose} title={`Cobrar Cuota N° ${cuota?.nro}`} size="2xl">
             {/* Overlay bloqueante mientras carga */}
             {loading && (
                 <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-[inherit] gap-3">

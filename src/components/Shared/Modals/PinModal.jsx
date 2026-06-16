@@ -66,7 +66,7 @@ const PinModal = ({
     const completo = digits.join('').length === 6;
 
     return (
-        <ViewModal isOpen={isOpen} onClose={onClose} hideFooter title={title} size="sm">
+        <ViewModal isOpen={isOpen} onClose={onClose} hideFooter={true} title={title} size="sm">
             <div className="flex flex-col items-center gap-5 py-4">
                 <div className="p-4 rounded-2xl bg-brand-red-light border border-brand-red/20">
                     <ShieldCheckIcon className="w-8 h-8 text-brand-red" />

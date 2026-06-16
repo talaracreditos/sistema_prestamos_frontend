@@ -9,6 +9,7 @@ const DetalleTurnoModal = ({ isOpen, onClose, detalle, loading }) => {
             onClose={onClose}
             title={loading ? 'Cargando turno...' : `Detalle de Turno: ${detalle?.caja_nombre ?? 'S/N'}`}
             isLoading={loading}
+            hideFooter={true}
         >
             {detalle && (
                 <div className="space-y-6">
