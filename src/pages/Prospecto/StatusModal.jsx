@@ -30,7 +30,7 @@ const StatusModal = ({ isOpen, onClose, prospecto, onSuccess }) => {
     };
 
     return (
-        <ViewModal isOpen={isOpen} onClose={onClose} title="Aprobar / Rechazar Prospecto" size="md">
+        <ViewModal isOpen={isOpen} onClose={onClose} hideFooter={true} title="Aprobar / Rechazar Prospecto" size="md">
             <div className="space-y-5">
 
                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
