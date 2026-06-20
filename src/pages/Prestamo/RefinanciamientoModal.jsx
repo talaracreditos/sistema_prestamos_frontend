@@ -19,7 +19,7 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
     const handleClose = () => { if (!loading) onClose(); };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} title="Refinanciar Integrante" size="lg">
+        <Modal isOpen={isOpen} onClose={handleClose} hideFooter={true} title="Refinanciar Integrante" size="lg">
             {loading && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-3 rounded-[inherit]">
                     <div className="w-8 h-8 border-4 border-brand-gold/20 border-t-brand-gold rounded-full animate-spin" />
