@@ -162,7 +162,7 @@ const ProspectoForm = ({ data, onChange, isEditing = false }) => {
                             className={inputClass} />
                     </div>
                     <div className="sm:col-span-2">
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Correo Electrónico</label>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Correo Electrónico (Opcional)</label>
                         <input type="email" value={data.correo || ''} onChange={(e) => onChange('correo', toUpper(e.target.value))}
                             className={inputClass} />
                     </div>
