@@ -7,8 +7,8 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ViewProspectoModal from './ViewProspectoModal';
 import ConvertirProspectoModal from './ConvertirProspectoModal';
 import { EstadoBadge } from 'components/Shared/Formularios/Prospecto/ProspectoForm';
-import ZonaSearchSelect from 'components/Shared/Formularios/ZonaSearchSelect';
-import EmpleadoSearchSelect from 'components/Shared/Formularios/EmpleadoSearchSelect';
+import ZonaSearchSelect from 'components/Shared/Comboboxes/ZonaSearchSelect';
+import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import {
     UsersIcon, EyeIcon, PencilSquareIcon, ArrowRightCircleIcon,
     PhoneIcon, CalendarDaysIcon, UserIcon, BuildingOfficeIcon,
