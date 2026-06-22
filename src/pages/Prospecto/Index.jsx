@@ -7,6 +7,8 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ViewProspectoModal from './ViewProspectoModal';
 import ConvertirProspectoModal from './ConvertirProspectoModal';
 import { EstadoBadge } from 'components/Shared/Formularios/Prospecto/ProspectoForm';
+import ZonaSearchSelect from 'components/Shared/Formularios/ZonaSearchSelect';
+import EmpleadoSearchSelect from 'components/Shared/Formularios/EmpleadoSearchSelect';
 import {
     UsersIcon, EyeIcon, PencilSquareIcon, ArrowRightCircleIcon,
     PhoneIcon, CalendarDaysIcon, UserIcon, BuildingOfficeIcon,
@@ -23,7 +25,6 @@ const Index = () => {
         handleFilterChange, handleFilterSubmit, handleFilterClear,
     } = useIndex();
 
-    // ── Estado del modal de conversión ────────────────────────────────────────
     const [convertirOpen,       setConvertirOpen]       = useState(false);
     const [prospectoAConvertir, setProspectoAConvertir] = useState(null);
 
@@ -37,6 +38,33 @@ const Index = () => {
         setProspectoAConvertir(null);
         fetchProspectos(paginationInfo.currentPage);
     };
+
+    // ── Filtros extra (zona y asesor) fuera del filterConfig normal ───────────
+    const extraFilters = (
+        <div className="grid grid-cols-12 gap-3 mt-3">
+            <div className="col-span-12 md:col-span-6">
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wide">Zona</label>
+                <ZonaSearchSelect
+                    initialName={filters._zonaNombre || ''}
+                    onSelect={(zona) => {
+                        handleFilterChange('zona_id', zona?.id || '');
+                        handleFilterChange('_zonaNombre', zona?.nombre || '');
+                    }}
+                />
+            </div>
+            <div className="col-span-12 md:col-span-6">
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wide">Asesor</label>
+                <EmpleadoSearchSelect
+                    initialName={filters._asesorNombre || ''}
+                    rol="asesor"
+                    onSelect={(emp) => {
+                        handleFilterChange('asesor_id', emp?.id || '');
+                        handleFilterChange('_asesorNombre', emp?.nombre_completo || '');
+                    }}
+                />
+            </div>
+        </div>
+    );
 
     const filterConfig = useMemo(() => [
         { name: 'search', type: 'text', label: 'Buscar (Nombre/DNI/RUC/Teléfono)', placeholder: 'Ej: Juan, 12345678...', colSpan: 'col-span-12 md:col-span-5' },
@@ -149,7 +177,6 @@ const Index = () => {
                             </Link>
                         )}
 
-                        {/* Abre el modal en vez de navegar a otra página */}
                         {puedeConvertir && (
                             <button
                                 onClick={() => handleAbrirConvertir(row.id)}
@@ -190,6 +217,7 @@ const Index = () => {
                 onFilterChange={handleFilterChange}
                 onFilterSubmit={handleFilterSubmit}
                 onFilterClear={handleFilterClear}
+                extraFilters={extraFilters}
                 pagination={{ ...paginationInfo, onPageChange: fetchProspectos }}
             />
 
@@ -201,7 +229,6 @@ const Index = () => {
                 onSeguimientoSuccess={handleSeguimientoSuccess}
             />
 
-            {/* Modal conversión — separado del flujo de cliente */}
             <ConvertirProspectoModal
                 isOpen={convertirOpen}
                 onClose={() => { setConvertirOpen(false); setProspectoAConvertir(null); }}

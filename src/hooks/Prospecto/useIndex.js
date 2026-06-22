@@ -6,7 +6,7 @@ export const useIndex = () => {
     const [loading, setLoading]               = useState(true);
     const [prospectos, setProspectos]         = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
-    const [filters, setFilters]               = useState({ search: '', estado: '', tipo: '' });
+    const [filters, setFilters]               = useState({ search: '', estado: '', tipo: '', zona_id: '', asesor_id: '' });
     const filtersRef                          = useRef(filters);
     const [alert, setAlert]                   = useState(null);
 
@@ -51,7 +51,7 @@ export const useIndex = () => {
     const handleFilterChange = (name, val) => setFilters(prev => ({ ...prev, [name]: val }));
     const handleFilterSubmit = () => { filtersRef.current = filters; fetchProspectos(1); };
     const handleFilterClear  = () => {
-        const reset = { search: '', estado: '', tipo: '' };
+        const reset = { search: '', estado: '', tipo: '', zona_id: '', asesor_id: '' };
         setFilters(reset); filtersRef.current = reset; fetchProspectos(1);
     };
 
