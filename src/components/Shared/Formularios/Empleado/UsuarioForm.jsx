@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserIcon, KeyIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { toUpper } from 'utilities/Validations/validations';
-import RolSearchSelect from 'components/Shared/Formularios/Empleado/RolSearchSelect';
+import RolSearchSelect from 'components/Shared/Comboboxes/RolSearchSelect';
 
 const UsuarioForm = ({ form, setForm, handleNestedChange, isEditing = false }) => {
     const pass    = form.usuario.password || '';
