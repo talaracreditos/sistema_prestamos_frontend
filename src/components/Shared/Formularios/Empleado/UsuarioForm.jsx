@@ -1,8 +1,9 @@
 import React from 'react';
 import { UserIcon, KeyIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { toUpper } from 'utilities/Validations/validations';
+import RolSearchSelect from 'components/Shared/Formularios/Empleado/RolSearchSelect';
 
-const UsuarioForm = ({ form, handleNestedChange, isEditing = false }) => {
+const UsuarioForm = ({ form, setForm, handleNestedChange, isEditing = false }) => {
     const pass    = form.usuario.password || '';
     const confirm = form.usuario.password_confirmation || '';
     const noCoinciden = pass && confirm && pass !== confirm;
@@ -78,6 +79,13 @@ const UsuarioForm = ({ form, handleNestedChange, isEditing = false }) => {
                     {noCoinciden && (
                         <p className="text-[10px] text-brand-red mt-2 font-bold animate-pulse">⚠ Las contraseñas no coinciden.</p>
                     )}
+                </div>
+
+                <div className="md:col-span-2">
+                    <RolSearchSelect
+                        form={form}
+                        setForm={setForm}
+                    />
                 </div>
             </div>
         </div>
