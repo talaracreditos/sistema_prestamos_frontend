@@ -84,9 +84,23 @@ const ProspectoForm = ({ data, onChange, isEditing = false }) => {
                                     className={inputClass} required readOnly={!isEditing && !!data.dni} />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Vencimiento DNI *</label>
-                                <input type="date" value={data.fechaVencimientoDni || ''} onChange={(e) => onChange('fechaVencimientoDni', e.target.value)}
-                                    className={inputClass} required />
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                                    Vencimiento DNI {!data.no_caduca && '*'}
+                                </label>
+                                <input type="date" value={data.fechaVencimientoDni || ''}
+                                    onChange={(e) => onChange('fechaVencimientoDni', e.target.value)}
+                                    className={`${inputClass} ${data.no_caduca ? 'opacity-40 cursor-not-allowed bg-slate-100' : ''}`}
+                                    required={!data.no_caduca}
+                                    disabled={!!data.no_caduca} />
+                                <label className="flex items-center gap-1.5 mt-1.5 cursor-pointer select-none">
+                                    <input type="checkbox" checked={!!data.no_caduca}
+                                        onChange={(e) => {
+                                            onChange('no_caduca', e.target.checked);
+                                            if (e.target.checked) onChange('fechaVencimientoDni', '');
+                                        }}
+                                        className="w-3.5 h-3.5 accent-brand-red" />
+                                    <span className="text-[9px] font-black text-slate-500 uppercase">DNI no caduca (mayor de 60 años)</span>
+                                </label>
                             </div>
                             <div className="sm:col-span-2">
                                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nombres *</label>

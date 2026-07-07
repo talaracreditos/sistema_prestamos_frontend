@@ -39,8 +39,25 @@ const DatosPersonalesForm = ({ data, handleNestedChange, isEditing = false }) =>
                     <>
                         <div><label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">DNI *</label>
                             <input type="text" value={c.dni || ''} onChange={(e) => onC('dni', onlyNumbers(e.target.value, 8))} className={inputClass} required /></div>
-                        <div><label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Vencimiento DNI *</label>
-                            <input type="date" value={c.fechaVencimientoDni || ''} onChange={(e) => onC('fechaVencimientoDni', e.target.value)} className={inputClass} required /></div>
+                        <div>
+                            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                                Vencimiento DNI {!c.no_caduca && '*'}
+                            </label>
+                            <input type="date" value={c.fechaVencimientoDni || ''}
+                                onChange={(e) => onC('fechaVencimientoDni', e.target.value)}
+                                className={`${inputClass} ${c.no_caduca ? 'opacity-40 cursor-not-allowed bg-slate-100' : ''}`}
+                                required={!c.no_caduca}
+                                disabled={!!c.no_caduca} />
+                            <label className="flex items-center gap-1.5 mt-1.5 cursor-pointer select-none">
+                                <input type="checkbox" checked={!!c.no_caduca}
+                                    onChange={(e) => {
+                                        onC('no_caduca', e.target.checked);
+                                        if (e.target.checked) onC('fechaVencimientoDni', '');
+                                    }}
+                                    className="w-3.5 h-3.5 accent-brand-red" />
+                                <span className="text-[9px] font-black text-slate-500 uppercase">DNI no caduca (mayor de 60 años)</span>
+                            </label>
+                        </div>
                         <div><label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">F. Nacimiento *</label>
                             <input type="date" value={c.fechaNacimiento || ''} onChange={(e) => onC('fechaNacimiento', e.target.value)} className={inputClass} required /></div>
                         <div><label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sexo *</label>

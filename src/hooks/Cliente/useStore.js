@@ -13,7 +13,7 @@ const generarUsername = (nombre, apellidoPaterno, apellidoMaterno) => {
 const initialForm = {
     datos_cliente: {
         tipo: 1, nombre: '', apellidoPaterno: '', apellidoMaterno: '',
-        dni: '', fechaNacimiento: '', fechaVencimientoDni: '', sexo: '',
+        dni: '', fechaNacimiento: '', fechaVencimientoDni: '', no_caduca: false, sexo: '',
         ruc: '', razon_social: '', nombre_comercial: '',
         ciiu_id: null, ciiu: null, zona_id: null, zona_nombre: '',
     },

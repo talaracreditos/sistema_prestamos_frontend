@@ -173,7 +173,11 @@ const ViewProspectoModal = ({ isOpen, onClose, data, isLoading, onSeguimientoSuc
                                 {data.tipo === 1 ? (
                                     <>
                                         <DataRow label="DNI"          value={data.dni} />
-                                        <DataRow label="Vencimiento"  value={data.fechaVencimientoDni} />
+                                        <DataRow
+                                            label="Vencimiento"
+                                            value={data.no_caduca ? 'NO CADUCA (Mayor 60 años)' : data.fechaVencimientoDni}
+                                            highlight={data.no_caduca}
+                                        />
                                         <DataRow label="Nacimiento"   value={data.fechaNacimiento} />
                                         <DataRow label="Sexo"         value={data.sexo} />
                                     </>

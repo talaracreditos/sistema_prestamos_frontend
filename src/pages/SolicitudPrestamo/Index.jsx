@@ -9,11 +9,13 @@ import PdfModal from 'components/Shared/Modals/PdfModal';
 import {
     DocumentTextIcon, CheckIcon, XMarkIcon,
     PencilSquareIcon, EyeIcon, DocumentArrowDownIcon, CheckBadgeIcon,
+    IdentificationIcon,
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import ViewSolicitudModal from './ViewSolicitudModal';
 import ApproveSolicitudModal from 'components/Shared/Modals/ApproveSolicitudModal';
 import ContratoSelectorModal from './ContratoSelectorModal';
+import CodigoRecaudoModal from './CodigoRecaudoModal';
 
 const Index = () => {
     const {
@@ -28,6 +30,9 @@ const Index = () => {
         handleMarcarConforme, conformeLoading,
         isContratoSelectorOpen, contratoSelectorData,
         handleCloseContratoSelector, handleSelectContrato,
+        // Código de recaudo
+        isCodigoRecaudoOpen, selectedForCodigo, codigoRecaudoLoading, codigoRecaudoAlert,
+        openCodigoRecaudoModal, handleCloseCodigoRecaudoModal, handleAsignarCodigoRecaudo,
     } = useIndex();
 
     const { can } = useAuth();
@@ -102,6 +107,17 @@ const Index = () => {
                                 </button>
                             )}
 
+                            {/* Botón código de recaudo — digitador */}
+                            {!row.codigo_recaudo && can('solicitudPrestamo.codigoRecaudo') && (
+                                <button
+                                    onClick={() => openCodigoRecaudoModal(row)}
+                                    title="Asignar código de recaudo"
+                                    className="p-1.5 rounded-lg transition-colors text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                                >
+                                    <IdentificationIcon className="w-4 h-4" />
+                                </button>
+                            )}
+
                             {/* Marcar conforme — aplica a AMBOS tipos */}
                             {can('solicitudPrestamo.contratoConforme') && (
                                 <button
@@ -125,8 +141,8 @@ const Index = () => {
                                 <>
                                     <button
                                         onClick={() => openApproveModal(row)}
-                                        disabled={!row.contrato_conforme}
-                                        title={!row.contrato_conforme ? 'Marca el contrato como conforme primero' : 'Aprobar'}
+                                        disabled={!row.codigo_recaudo}
+                                        title={!row.codigo_recaudo ? 'Asigna un código de recaudo primero' : 'Aprobar'}
                                         className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <CheckIcon className="w-4 h-4" />
@@ -143,7 +159,7 @@ const Index = () => {
             )
         },
     ], [handleView, openApproveModal, handleUpdateStatus, handleVerContrato,
-        contratoLoading, handleMarcarConforme, conformeLoading, can]);
+        contratoLoading, handleMarcarConforme, conformeLoading, openCodigoRecaudoModal, can]);
 
     if (loading && solicitudes.length === 0) return <LoadingScreen />;
 
@@ -198,6 +214,17 @@ const Index = () => {
                 onClose={() => setIsPdfOpen(false)}
                 title={contratoPdfTitle}
                 pdfUrl={contratoPdf}
+            />
+
+            {/* 🔥 Modal de código de recaudo */}
+            <CodigoRecaudoModal
+                isOpen={isCodigoRecaudoOpen}
+                onClose={handleCloseCodigoRecaudoModal}
+                solicitud={selectedForCodigo}
+                onConfirm={handleAsignarCodigoRecaudo}
+                loading={codigoRecaudoLoading}
+                alert={codigoRecaudoAlert}
+                onClearAlert={() => {}}
             />
 
             {isApproveOpen && (

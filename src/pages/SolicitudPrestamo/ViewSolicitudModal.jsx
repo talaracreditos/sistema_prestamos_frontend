@@ -116,7 +116,6 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
                             </div>
                         </div>
 
-                        {/* ── Responsables ──────────────────────────────────── */}
                         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                             <h4 className="text-xs font-black text-slate-400 uppercase flex items-center gap-2">
                                 <UserIcon className="w-4 h-4 text-brand-red" /> Responsables
@@ -124,11 +123,25 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
                             <Campo label={data.es_grupal ? 'Nombre del Grupo' : 'Cliente Solicitante'} value={data.cliente_nombre} />
                             <Campo label="Asesor de Negocios" value={data.asesor_nombre} className="normal-case" />
                             <Campo label="Producto Financiero" value={data.producto_nombre} />
+
+                            {/* Código de recaudo */}
+                            <div>
+                                <p className="text-[9px] text-slate-400 font-bold uppercase">Código de Recaudo</p>
+                                <span className={`inline-block mt-0.5 text-[10px] font-black px-2 py-0.5 rounded ${
+                                    data.codigo_recaudo
+                                        ? 'text-blue-600 bg-blue-50 border border-blue-200'
+                                        : 'text-brand-gold-dark bg-brand-gold-light border border-brand-gold/30'
+                                }`}>
+                                    {data.codigo_recaudo || 'PENDIENTE'}
+                                </span>
+                            </div>
+
                             <div className="flex items-center gap-2 text-slate-500 pt-1">
                                 <CalendarDaysIcon className="w-4 h-4" />
                                 <span className="text-[10px] font-bold uppercase">Registrada: {data.fecha_solicitud}</span>
                             </div>
                         </div>
+
                     </div>
 
                     {/* ── Integrantes (solo grupal) ─────────────────────────── */}

@@ -15,7 +15,7 @@ const buildInitialForm = (prospectoId) => ({
     prospecto_id: prospectoId,
     datos_cliente: {
         tipo: 1, nombre: '', apellidoPaterno: '', apellidoMaterno: '',
-        dni: '', fechaNacimiento: '', fechaVencimientoDni: '', sexo: '',
+        dni: '', fechaNacimiento: '', fechaVencimientoDni: '', no_caduca: false, sexo: '',
         ruc: '', razon_social: '', nombre_comercial: '',
         ciiu_id: null, ciiu: null, zona_id: null, zona_nombre: '',
     },
@@ -77,6 +77,7 @@ export const useConvertir = (prospectoId, onSuccess) => {
                         apellidoMaterno:     p.apellidoMaterno     || '',
                         fechaNacimiento:     p.fechaNacimiento     || '',
                         fechaVencimientoDni: p.fechaVencimientoDni || '',
+                        no_caduca:         !!p.no_caduca,
                         sexo:                p.sexo                || '',
                         ruc:                 p.ruc                 || '',
                         razon_social:        p.razon_social        || '',

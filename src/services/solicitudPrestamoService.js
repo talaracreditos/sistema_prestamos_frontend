@@ -47,3 +47,13 @@ export const marcarContratoConforme = async (id) => {
     const response = await fetchWithAuth(`${BASE_URL}/${id}/contrato-conforme`, { method: 'PATCH' });
     return handleResponse(response);
 };
+
+
+export const asignarCodigoRecaudo = async (id, codigo) => {
+    const response = await fetchWithAuth(`${BASE_URL}/${id}/codigo-recaudo`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo_recaudo: codigo }),
+    });
+    return handleResponse(response);
+};

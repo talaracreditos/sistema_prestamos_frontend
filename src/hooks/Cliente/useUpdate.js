@@ -14,7 +14,7 @@ export const useUpdate = () => {
     const [formData, setFormData] = useState({
         datos_cliente: {
             tipo: 1, nombre: '', apellidoPaterno: '', apellidoMaterno: '',
-            dni: '', fechaNacimiento: '', fechaVencimientoDni: '', sexo: '', ruc: '', razon_social: '', nombre_comercial: '', // 🔥 Agregado
+            dni: '', fechaNacimiento: '', fechaVencimientoDni: '', no_caduca: false, sexo: '', ruc: '', razon_social: '', nombre_comercial: '',
             ciiu_id: null,
             ciiu: null,
             zona_id: null,
@@ -45,13 +45,14 @@ export const useUpdate = () => {
                 setFormData({
                     datos_cliente: {
                         tipo: data.tipo || 1, nombre: data.nombre || '', apellidoPaterno: data.apellidoPaterno || '',
-                        apellidoMaterno: data.apellidoMaterno || '', dni: data.dni || '', 
-                        fechaNacimiento: data.fechaNacimiento || '', fechaVencimientoDni: data.fechaVencimientoDni || '', // 🔥 Seteado del backend
+                        apellidoMaterno: data.apellidoMaterno || '', dni: data.dni || '',
+                        fechaNacimiento: data.fechaNacimiento || '', fechaVencimientoDni: data.fechaVencimientoDni || '',
+                        no_caduca: !!data.no_caduca,
                         sexo: data.sexo || '', ruc: data.ruc || '', razon_social: data.razon_social || '', nombre_comercial: data.nombre_comercial || '',
                         ciiu_id: data.ciiu_id || null,
                         ciiu: data.ciiu || null,
                         zona_id: data.zona_id || null,
-                        zona_nombre: data.zona?.nombre || '' 
+                        zona_nombre: data.zona?.nombre || ''
                     },
                     contacto: {
                         telefonoMovil: data.contacto?.telefonoMovil || '', telefonoFijo: data.contacto?.telefonoFijo || '', correo: data.contacto?.correo || ''

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { BuildingLibraryIcon, CheckBadgeIcon, XMarkIcon, IdentificationIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+import { BuildingLibraryIcon, CheckBadgeIcon, XMarkIcon, IdentificationIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 
 const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading, alert, onClearAlert }) => {
-    const [codigoRecaudo, setCodigoRecaudo] = useState('');
-
     if (!isOpen) return null;
 
+    const tieneCodigoRecaudo = !!solicitud?.codigo_recaudo;
+
     const handleConfirm = () => {
-        onConfirm(solicitud.id, 2, 'CUENTA CORRIENTE', codigoRecaudo.trim());
+        onConfirm(solicitud.id, 2, 'CUENTA CORRIENTE');
     };
 
     return (
@@ -36,7 +36,6 @@ const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading,
                     {/* Body */}
                     <div className="p-6 text-center space-y-5">
 
-                        {/* Alert de error dentro del modal */}
                         <AlertMessage
                             type={alert?.type}
                             message={alert?.message}
@@ -56,23 +55,23 @@ const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading,
                             </div>
                         </div>
 
-                        <div className="text-left">
-                            <label className="flex items-center gap-1.5 text-xs font-black text-slate-700 uppercase mb-2">
-                                <IdentificationIcon className="w-4 h-4 text-brand-red" />
-                                Código de Recaudo *
-                            </label>
-                            <input
-                                type="text"
-                                value={codigoRecaudo}
-                                onChange={(e) => setCodigoRecaudo(e.target.value)}
-                                placeholder="Escribe el código de recaudo aquí..."
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl focus:ring-brand-red focus:border-brand-red block p-3 placeholder-slate-400 uppercase outline-none transition-all"
-                                required
-                            />
-                            <p className="text-[10px] text-slate-400 mt-1.5">
-                                Este código debe ser único. Se usará para los pagos del cliente.
-                            </p>
-                        </div>
+                        {/* 🔥 Código de recaudo — ya NO se pide aquí, solo se muestra */}
+                        {tieneCodigoRecaudo ? (
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-3 justify-center">
+                                <IdentificationIcon className="w-6 h-6 text-slate-400" />
+                                <div className="text-left">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Código de Recaudo</p>
+                                    <p className="text-sm font-black text-slate-800">{solicitud.codigo_recaudo}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 justify-center">
+                                <ExclamationTriangleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
+                                <p className="text-xs font-bold text-red-700 text-left">
+                                    Esta solicitud aún no tiene código de recaudo asignado. Ciérrala y asígnalo primero desde el botón correspondiente.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Footer */}
@@ -81,7 +80,7 @@ const ApproveSolicitudModal = ({ isOpen, onClose, onConfirm, solicitud, loading,
                             Cancelar
                         </button>
                         <button
-                            disabled={loading || !codigoRecaudo.trim()}
+                            disabled={loading || !tieneCodigoRecaudo}
                             onClick={handleConfirm}
                             className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs shadow-xl hover:bg-black transition-all disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none active:scale-95 flex justify-center items-center gap-2"
                         >

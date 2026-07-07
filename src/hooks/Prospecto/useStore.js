@@ -6,7 +6,7 @@ import peruData from 'utilities/data/peruData';
 
 const initialForm = {
     tipo: 1,
-    dni: '', nombre: '', apellidoPaterno: '', apellidoMaterno: '', fechaNacimiento: '', fechaVencimientoDni: '', sexo: '',
+    dni: '', nombre: '', apellidoPaterno: '', apellidoMaterno: '', fechaNacimiento: '', fechaVencimientoDni: '', no_caduca: false, sexo: '',
     ruc: '', razon_social: '', nombre_comercial: '',
     ciiu_id: null, zona_id: null,
     telefono: '', telefonoFijo: '', correo: '',

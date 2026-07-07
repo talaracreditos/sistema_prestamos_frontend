@@ -16,14 +16,14 @@ export const useUpdate = () => {
     const [distritos, setDistritos] = useState([]);
 
     const [formData, setFormData] = useState({
-        tipo: 1, dni: '', nombre: '', apellidoPaterno: '', apellidoMaterno: '', fechaNacimiento: '', fechaVencimientoDni: '', sexo: '',
+        tipo: 1, dni: '', nombre: '', apellidoPaterno: '', apellidoMaterno: '', fechaNacimiento: '', fechaVencimientoDni: '', no_caduca: false, sexo: '',
         ruc: '', razon_social: '', nombre_comercial: '',
         ciiu_id: null, ciiu: null, zona_id: null, zona_nombre: '',
         telefono: '', telefonoFijo: '', correo: '',
         direccionFiscal: '', departamento: '', provincia: '', distrito: '', tipoVivienda: '', tiempoResidencia: '',
         ingreso_estimado: '', monto_solicitado: '', proposito: '', observaciones: '',
     });
-
+    
     useEffect(() => {
         const load = async () => {
             try {
@@ -37,6 +37,7 @@ export const useUpdate = () => {
                     apellidoMaterno:     data.apellidoMaterno     || '',
                     fechaNacimiento:     data.fechaNacimiento     || '',
                     fechaVencimientoDni: data.fechaVencimientoDni || '',
+                    no_caduca:          !!data.no_caduca,
                     sexo:                data.sexo                || '',
                     ruc:                 data.ruc                 || '',
                     razon_social:        data.razon_social        || '',

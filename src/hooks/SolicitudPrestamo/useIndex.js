@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { index, changeStatus, show, descargarContrato, marcarContratoConforme } from 'services/solicitudPrestamoService';
+import { index, changeStatus, show, descargarContrato, marcarContratoConforme, asignarCodigoRecaudo } from 'services/solicitudPrestamoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
 export const useIndex = () => {
@@ -28,6 +28,12 @@ export const useIndex = () => {
     // Selector de contrato (grupal / integrantes)
     const [isContratoSelectorOpen, setIsContratoSelectorOpen] = useState(false);
     const [contratoSelectorData, setContratoSelectorData] = useState(null);
+
+    // Código de recaudo
+    const [isCodigoRecaudoOpen, setIsCodigoRecaudoOpen] = useState(false);
+    const [selectedForCodigo, setSelectedForCodigo] = useState(null);
+    const [codigoRecaudoLoading, setCodigoRecaudoLoading] = useState(false);
+    const [codigoRecaudoAlert, setCodigoRecaudoAlert] = useState(null);
 
     const fetchSolicitudes = useCallback(async (page = 1) => {
         setLoading(true);
@@ -63,10 +69,11 @@ export const useIndex = () => {
         setModalAlert(null);
     };
 
-    const handleUpdateStatus = async (id, nuevoEstado, abonadoPor = 'CUENTA CORRIENTE', codigoRecaudo = null) => {
+    // codigoRecaudo ya NO se manda aquí — el backend lo jala de la solicitud
+    const handleUpdateStatus = async (id, nuevoEstado, abonadoPor = 'CUENTA CORRIENTE') => {
         setLoading(true);
         try {
-            await changeStatus(id, nuevoEstado, abonadoPor, codigoRecaudo);
+            await changeStatus(id, nuevoEstado, abonadoPor);
             setIsApproveOpen(false);
             setSelectedSolicitud(null);
             setModalAlert(null);
@@ -122,6 +129,37 @@ export const useIndex = () => {
         } finally { setConformeLoading(null); }
     };
 
+    //  Código de recaudo — abrir modal
+    const openCodigoRecaudoModal = (solicitud) => {
+        setCodigoRecaudoAlert(null);
+        setSelectedForCodigo(solicitud);
+        setIsCodigoRecaudoOpen(true);
+    };
+
+    const handleCloseCodigoRecaudoModal = () => {
+        setIsCodigoRecaudoOpen(false);
+        setSelectedForCodigo(null);
+        setCodigoRecaudoAlert(null);
+    };
+
+    //  Código de recaudo — guardar
+    const handleAsignarCodigoRecaudo = async (solicitudId, codigo) => {
+        setCodigoRecaudoLoading(true);
+        setCodigoRecaudoAlert(null);
+        try {
+            const response = await asignarCodigoRecaudo(solicitudId, codigo);
+            const actualizado = response.data || response;
+            setSolicitudes(prev => prev.map(s => s.id === solicitudId ? { ...s, codigo_recaudo: actualizado.codigo_recaudo } : s));
+            setIsCodigoRecaudoOpen(false);
+            setSelectedForCodigo(null);
+            setAlert({ type: 'success', message: 'Código de recaudo asignado correctamente.' });
+        } catch (err) {
+            setCodigoRecaudoAlert(handleApiError(err)); // error va al modal
+        } finally {
+            setCodigoRecaudoLoading(false);
+        }
+    };
+
     const handleFilterChange = (name, val) => setFilters(prev => ({ ...prev, [name]: val }));
     const handleFilterSubmit = () => { filtersRef.current = filters; fetchSolicitudes(1); };
     const handleFilterClear = () => {
@@ -140,5 +178,8 @@ export const useIndex = () => {
         handleMarcarConforme, conformeLoading,
         isContratoSelectorOpen, contratoSelectorData,
         handleCloseContratoSelector, handleSelectContrato,
+        //  Código de recaudo
+        isCodigoRecaudoOpen, selectedForCodigo, codigoRecaudoLoading, codigoRecaudoAlert,
+        openCodigoRecaudoModal, handleCloseCodigoRecaudoModal, handleAsignarCodigoRecaudo,
     };
 };
