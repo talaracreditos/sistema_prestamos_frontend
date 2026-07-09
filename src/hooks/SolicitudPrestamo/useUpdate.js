@@ -23,6 +23,9 @@ export const useUpdate = () => {
                     asesor_id:          data.asesor_id     || '',
                     asesor_nombre:      data.asesor_nombre  || '',
                     prestamo_origen_id: data.prestamo_origen_id || '',
+                    // ── Fecha de inicio personalizada ──
+                    fecha_inicio_personalizada: data.fecha_inicio_personalizada || '',
+                    usar_fecha_personalizada:   !!data.fecha_inicio_personalizada,
                     integrantes: data.integrantes.map(i => ({
                         id:                  i.id,
                         nombre:              i.nombre_completo,
@@ -141,6 +144,12 @@ export const useUpdate = () => {
             delete payload.dni_status;
 
             payload.seguro = payload.seguro || 0;
+
+            // ── Fecha de inicio personalizada ──
+            if (!payload.usar_fecha_personalizada) {
+                payload.fecha_inicio_personalizada = null;
+            }
+            delete payload.usar_fecha_personalizada;
 
             if (payload.prestamo_origen_id) {
                 payload.modalidad = 'RSS';

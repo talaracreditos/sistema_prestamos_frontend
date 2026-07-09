@@ -140,6 +140,13 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
                                 <CalendarDaysIcon className="w-4 h-4" />
                                 <span className="text-[10px] font-bold uppercase">Registrada: {data.fecha_solicitud}</span>
                             </div>
+
+                            {data.fecha_inicio_personalizada && (
+                                <div className="flex items-center gap-2 text-brand-red pt-1">
+                                    <CalendarDaysIcon className="w-4 h-4" />
+                                    <span className="text-[10px] font-black uppercase">Inicio personalizado: {data.fecha_inicio_personalizada}</span>
+                                </div>
+                            )}
                         </div>
 
                     </div>

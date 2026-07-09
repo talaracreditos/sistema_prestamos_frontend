@@ -36,6 +36,9 @@ export const useStore = () => {
         observaciones:      '',
         aval:               null,
         prestamo_origen_id: '',
+        // ── Fecha de inicio personalizada ──
+        usar_fecha_personalizada:   false,
+        fecha_inicio_personalizada: '',
     });
 
     const esRenovacionActiva = !!formData.prestamo_origen_id;
@@ -239,6 +242,12 @@ export const useStore = () => {
 
             payload.seguro = payload.seguro || 0;
             if (!payload.prestamo_origen_id) delete payload.prestamo_origen_id;
+
+            // ── Fecha de inicio personalizada ──
+            if (!payload.usar_fecha_personalizada) {
+                payload.fecha_inicio_personalizada = null;
+            }
+            delete payload.usar_fecha_personalizada;
 
             if (payload.prestamo_origen_id) {
                 payload.modalidad = 'RSS';
