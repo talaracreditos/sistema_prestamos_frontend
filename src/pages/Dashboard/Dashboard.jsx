@@ -11,6 +11,7 @@ import CuotaDiaCard from './CuotaDiaCard';
 import SBSCard from './SBSCard';
 import DesembolsoCapitalCard from './DesembolsoCapitalCard';
 import MasterCard from './MastedCard';
+import AccesosCard from './Accesoscard';
 
 const Dashboard = () => {
     const { can } = useAuth();
@@ -25,6 +26,7 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
+                {can('dashboard.accesos')        && <AccesosCard />}
                 {can('dashboard.master')         && <MasterCard />}
                 {can('dashboard.pagos')          && <PagoCard />}
                 {can('dashboard.prestamos')      && <PrestamoCard />}

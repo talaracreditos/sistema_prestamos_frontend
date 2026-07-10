@@ -131,3 +131,9 @@ export const exportMasterDashboard = async (filters = {}) => {
     if (!response.ok) throw new Error('Error al exportar reporte master');
     return response.blob();
 };
+
+// ── Accesos de clientes ───────────────────────────────────────────────────────
+export const getAccesosDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/accesos${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
