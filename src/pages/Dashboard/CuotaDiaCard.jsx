@@ -127,12 +127,13 @@ const CuotaDiaCard = () => {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[700px]">
+                                <table className="w-full text-left border-collapse min-w-[760px]">
                                     <thead className="bg-slate-50 text-[9px] font-black text-slate-500 uppercase border-b border-slate-100">
                                         <tr>
                                             <th className="px-4 py-3">Asesor</th>
                                             <th className="px-4 py-3">Nombre / Grupo</th>
                                             <th className="px-4 py-3 text-right">N° Préstamo</th>
+                                            <th className="px-4 py-3 text-right">Cód. Recaudo</th>
                                             <th className="px-4 py-3 text-center">Tipo</th>
                                             <th className="px-4 py-3 text-right">Frecuencia</th>
                                             <th className="px-4 py-3 text-right">N° Cuota</th>
@@ -162,6 +163,9 @@ const CuotaDiaCard = () => {
                                                             ) : null}
                                                             <td className="px-4 py-3 text-xs text-slate-700 font-bold">{f.nombre}</td>
                                                             <td className="px-4 py-3 text-right text-xs text-slate-500 font-bold">{f.numero_prestamo}</td>
+                                                            <td className="px-4 py-3 text-right text-xs text-slate-500 font-bold">
+                                                                {f.codigo_recaudo || <span className="text-slate-300">—</span>}
+                                                            </td>
                                                             <td className="px-4 py-3 text-center">
                                                                 <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase ${
                                                                     f.tipo === 'Grupal'
@@ -186,7 +190,7 @@ const CuotaDiaCard = () => {
 
                                                 {/* Subtotal asesor */}
                                                 <tr className="bg-brand-red-light/30 border-t border-brand-red/20">
-                                                    <td colSpan={6} className="px-4 py-2 text-[10px] font-black text-brand-red uppercase tracking-widest text-right">
+                                                    <td colSpan={7} className="px-4 py-2 text-[10px] font-black text-brand-red uppercase tracking-widest text-right">
                                                         Subtotal {asesor.nombre}
                                                     </td>
                                                     <td className="px-4 py-2 text-right text-sm font-black text-brand-red">
@@ -195,13 +199,13 @@ const CuotaDiaCard = () => {
                                                     <td />
                                                 </tr>
                                                 {/* Separador */}
-                                                <tr><td colSpan={8} className="h-2 bg-white" /></tr>
+                                                <tr><td colSpan={9} className="h-2 bg-white" /></tr>
                                             </React.Fragment>
                                         ))}
                                     </tbody>
                                     <tfoot className="bg-slate-900 text-white">
                                         <tr>
-                                            <td colSpan={6} className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-right">
+                                            <td colSpan={7} className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-right">
                                                 Total General · {totalCuotas} cuotas
                                             </td>
                                             <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
