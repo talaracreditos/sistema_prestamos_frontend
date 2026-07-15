@@ -5,6 +5,7 @@ import ForgotPasswordForm from './components/ForgotPasswordForm';
 import useLogin from 'hooks/Auth/useLogin';
 import background from 'assets/img/background.jpg';
 import logo from 'assets/img/logo.png';
+import escarapela from 'assets/img/escarapela.png';
 
 const Login = () => {
   const {
@@ -27,6 +28,14 @@ const Login = () => {
       </div>
 
       <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(220,_38,_38,_0.15)] p-8 sm:p-10 relative z-10 border border-white/20">
+
+        {/* Escarapela — Fiestas Patrias */}
+        <img
+          src={escarapela}
+          alt="Escarapela Fiestas Patrias"
+          className="absolute -top-4 -left-4 w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-lg select-none pointer-events-none z-20"
+        />
+
         <div className="flex flex-col items-center mb-10">
           <div className="h-20 w-20 bg-white rounded-2xl shadow-lg flex items-center justify-center mb-5 relative overflow-hidden border border-gray-100 p-2 transform rotate-3 hover:rotate-0 transition-transform duration-300">
             <img src={logo} alt="Logo Talara Créditos" className="h-full w-full object-contain" />
