@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { onlyNumbers } from 'utilities/Validations/validations'; 
 
-const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, setShowForgotPassword }) => {
+const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, onCancel }) => {
   const [tipo, setTipo] = useState('DNI');
 
   const handleTipoChange = (nuevoTipo) => {
@@ -22,7 +22,6 @@ const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, setShowForgotPa
 
       <form onSubmit={handleForgotPassword} className="space-y-4">
         
-        {/* Selector de Tipo de Cliente */}
         <div className="flex p-1 bg-slate-100 rounded-xl mb-4">
           <button
             type="button"
@@ -48,17 +47,14 @@ const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, setShowForgotPa
           </button>
         </div>
 
-        {/* Input Dinámico */}
         <div>
           <input
             type="text"
             id="dni"
             value={dni}
-            // Usamos tu utilidad limitando dinámicamente a 8 u 11
             onChange={(e) => setDni(onlyNumbers(e.target.value, tipo === 'DNI' ? 8 : 11))}
             className="block w-full px-5 py-4 bg-slate-50 border border-transparent text-slate-900 rounded-2xl placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 text-lg text-center tracking-[0.25em] font-bold"
             placeholder={tipo === 'DNI' ? "N° DE DNI" : "N° DE RUC"}
-            // Mantenemos minLength y pattern para la validación nativa de HTML5 al dar submit
             minLength={tipo === 'DNI' ? 8 : 11}
             pattern={tipo === 'DNI' ? "\\d{8}" : "\\d{11}"}
             title={tipo === 'DNI' ? "El DNI debe tener exactamente 8 números" : "El RUC debe tener exactamente 11 números"}
@@ -76,10 +72,7 @@ const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, setShowForgotPa
           
           <button
             type="button"
-            onClick={() => {
-              setShowForgotPassword(false);
-              setDni(''); // Limpiar si se arrepiente y vuelve
-            }}
+            onClick={onCancel}
             className="w-full flex justify-center py-4 px-4 rounded-2xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 focus:outline-none transition-colors duration-300 tracking-wide"
           >
             VOLVER AL LOGIN
