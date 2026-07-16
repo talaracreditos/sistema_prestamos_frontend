@@ -38,6 +38,34 @@ const Chevron = ({ collapsed }) => (
     </div>
 );
 
+// ── Préstamos vigentes (celda reutilizable, ahora es una lista) ──────────────
+const PrestamosVigentesCell = ({ prestamos }) => {
+    if (!prestamos || prestamos.length === 0) {
+        return <span className="text-[9px] text-slate-300 font-bold uppercase">Sin préstamos</span>;
+    }
+    return (
+        <div className="flex flex-col gap-1.5">
+            {prestamos.map((p, idx) => (
+                <div key={p.codigo_recaudo ?? idx} className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-slate-700">
+                            S/ {Number(p.monto).toFixed(2)}
+                        </span>
+                        <span className={`px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase ${
+                            p.tipo === 'grupal' ? 'bg-brand-gold/20 text-brand-gold' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                            {p.tipo === 'grupal' ? `Grupal · ${p.grupo ?? 'S/N'}` : 'Individual'}
+                        </span>
+                    </div>
+                    <span className="text-[9px] text-slate-400 font-bold">
+                        {p.asesor ?? 'Sin asesor'} · {p.fecha}
+                    </span>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 // ── Card principal ────────────────────────────────────────────────────────────
 const AccesosCard = () => {
     const {
@@ -155,21 +183,26 @@ const AccesosCard = () => {
                                             <table className="w-full text-left border-collapse mb-4">
                                                 <thead className="bg-slate-50 text-[9px] font-black text-slate-500 uppercase border-b border-slate-100">
                                                     <tr>
-                                                        <th className="px-3 py-2.5">Usuario</th>
+                                                        <th className="px-3 py-2.5">Cliente</th>
+                                                        <th className="px-3 py-2.5">DNI/RUC</th>
                                                         <th className="px-3 py-2.5">Primer acceso</th>
                                                         <th className="px-3 py-2.5">Último acceso</th>
-                                                        <th className="px-3 py-2.5">Registro</th>
+                                                        <th className="px-3 py-2.5">Préstamos vigentes</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-50">
                                                     {recientes.data.map((u, i) => (
                                                         <tr key={u.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}>
                                                             <td className="px-3 py-2.5">
-                                                                <span className="text-[11px] font-black text-slate-700 uppercase">{u.username}</span>
+                                                                <span className="text-[11px] font-black text-slate-700 uppercase">{u.nombre_completo}</span>
+                                                                <span className="block text-[9px] text-slate-400 font-bold">@{u.username}</span>
                                                             </td>
+                                                            <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500">{u.documento ?? '—'}</td>
                                                             <td className="px-3 py-2.5 text-[10px] font-bold text-green-600">{u.primer_acceso}</td>
                                                             <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500">{u.ultimo_acceso}</td>
-                                                            <td className="px-3 py-2.5 text-[10px] font-bold text-slate-400">{u.registered}</td>
+                                                            <td className="px-3 py-2.5">
+                                                                <PrestamosVigentesCell prestamos={u.prestamos_vigentes} />
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
@@ -196,8 +229,10 @@ const AccesosCard = () => {
                                             <table className="w-full text-left border-collapse mb-4">
                                                 <thead className="bg-slate-50 text-[9px] font-black text-slate-500 uppercase border-b border-slate-100">
                                                     <tr>
-                                                        <th className="px-3 py-2.5">Usuario</th>
+                                                        <th className="px-3 py-2.5">Cliente</th>
+                                                        <th className="px-3 py-2.5">DNI/RUC</th>
                                                         <th className="px-3 py-2.5">Fecha registro</th>
+                                                        <th className="px-3 py-2.5">Préstamos vigentes</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-50">
@@ -206,10 +241,17 @@ const AccesosCard = () => {
                                                             <td className="px-3 py-2.5">
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-brand-red flex-shrink-0" />
-                                                                    <span className="text-[11px] font-black text-slate-700 uppercase">{u.username}</span>
+                                                                    <div>
+                                                                        <span className="text-[11px] font-black text-slate-700 uppercase">{u.nombre_completo}</span>
+                                                                        <span className="block text-[9px] text-slate-400 font-bold">@{u.username}</span>
+                                                                    </div>
                                                                 </div>
                                                             </td>
+                                                            <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500">{u.documento ?? '—'}</td>
                                                             <td className="px-3 py-2.5 text-[10px] font-bold text-slate-400">{u.registered}</td>
+                                                            <td className="px-3 py-2.5">
+                                                                <PrestamosVigentesCell prestamos={u.prestamos_vigentes} />
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
