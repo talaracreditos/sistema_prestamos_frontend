@@ -31,7 +31,7 @@ export const useStore = () => {
         cuotas_solicitadas: '',
         frecuencia:         'SEMANAL',
         seguro:             '',
-        seguro_financiado:  false,
+        seguro_financiado:  true, // ← default: financiado en cuotas (lo más usado)
         modalidad:          '',
         observaciones:      '',
         aval:               null,
