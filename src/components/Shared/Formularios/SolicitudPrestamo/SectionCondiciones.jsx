@@ -92,6 +92,7 @@ const SectionCondiciones = ({ data, handleChange, isBlocked }) => {
                         className="w-full p-2.5 bg-brand-gold-light/20 border border-brand-gold/30 rounded-lg text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold disabled:cursor-not-allowed"
                     />
                 </div>
+
                 <div className="col-span-2 md:col-span-1">
                     <label className="block text-[10px] font-bold text-brand-gold-dark uppercase mb-1">Cobro Seguro</label>
                     <select 
@@ -100,8 +101,8 @@ const SectionCondiciones = ({ data, handleChange, isBlocked }) => {
                         onChange={e => handleChange('seguro_financiado', e.target.value === 'true')} 
                         className="w-full p-2.5 bg-brand-gold-light/20 border border-brand-gold/30 rounded-lg text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold disabled:cursor-not-allowed"
                     >
-                        <option value="false">Efectivo (Previo)</option>
                         <option value="true">Financiado (Cuotas)</option>
+                        <option value="false">Efectivo (Previo)</option>
                     </select>
                 </div>
 
