@@ -23,6 +23,7 @@ const DiaOperativo = () => {
     } = useDiaOperativo();
 
     const apertura = diaActual?.fecha_apertura ? formatFecha(diaActual.fecha_apertura) : null;
+    const fechaOperativa = diaActual?.fecha ? formatFecha(diaActual.fecha) : null;
 
     return (
         <div className="container mx-auto p-4 sm:p-6 animate-in fade-in duration-500 max-w-2xl">
@@ -69,11 +70,11 @@ const DiaOperativo = () => {
                         </div>
 
                         {/* Detalle */}
-                        {diaActual && apertura && (
+                        {diaActual && fechaOperativa && (
                             <div className="px-6 py-4 grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <p className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Fecha</p>
-                                    <p className="font-black text-slate-700">{apertura.fecha}</p>
+                                    <p className="font-black text-slate-700">{fechaOperativa.fecha}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">ID</p>
