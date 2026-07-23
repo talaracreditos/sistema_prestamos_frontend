@@ -12,7 +12,7 @@ const ANIOS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 1 +
 
 const Index = () => {
     const {
-        loading, feriados, paginationInfo, filters,
+        loading, feriados, feriadosCalendario, paginationInfo, filters,
         alert, setAlert,
         showDelete, setShowDelete,
         handleAskDelete, handleConfirmDelete, fetchFeriados,
@@ -72,12 +72,11 @@ const Index = () => {
         },
     ];
 
-    const feriadosCalendario = feriados.map(f => ({
-        ...f,
-        fecha: f.fecha?.includes('/')
-            ? f.fecha.split('/').reverse().join('-')
-            : f.fecha,
-    }));
+    // IMPORTANTE: el calendario se pinta con `feriadosCalendario` (listado COMPLETO
+    // sin paginar, viene ya en formato Y-m-d desde el backend), no con `feriados`
+    // (que solo trae los 7 registros de la página actual de la tabla). Antes se
+    // derivaba de `feriados` y por eso faltaban feriados de otras páginas al
+    // cambiar a vista calendario.
 
     return (
         <div className="container mx-auto p-6">
@@ -126,7 +125,7 @@ const Index = () => {
             {vistaCalendario && (
                 <div className="flex flex-col items-center gap-6 mt-2">
                     <Calendario mode="view" feriados={feriadosCalendario} size="large" />
-                    
+
                     <div className="flex items-center gap-6 text-xs font-bold text-slate-400">
                         <span className="flex items-center gap-2">
                             <span className="w-4 h-4 rounded-md bg-brand-red-light border-2 border-brand-red/30 inline-block" />
