@@ -14,6 +14,15 @@ export const index = async (page = 1, filters = {}) => {
     return handleResponse(response);
 };
 
+/**
+ * Trae TODOS los feriados sin paginar. Úsalo solo para marcar días en
+ * <Calendario />. Para la tabla del listado sigue usando `index()`.
+ */
+export const calendario = async () => {
+    const response = await fetchWithAuth(`${BASE_URL}/calendario`, { method: 'GET' });
+    return handleResponse(response);
+};
+
 export const show = async (id) => {
     const response = await fetchWithAuth(`${BASE_URL}/show/${id}`, { method: 'GET' });
     return handleResponse(response);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { show, update } from 'services/feriadoService';
+import { show, update, calendario } from 'services/feriadoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
 export const useUpdate = () => {
@@ -11,6 +11,7 @@ export const useUpdate = () => {
     const [saving,   setSaving]   = useState(false);
     const [alert,    setAlert]    = useState(null);
     const [formData, setFormData] = useState({ fecha: '', descripcion: '' });
+    const [feriados, setFeriados] = useState([]);
 
     useEffect(() => {
         const load = async () => {
@@ -26,6 +27,18 @@ export const useUpdate = () => {
         };
         if (id) load();
     }, [id]);
+
+    // Antes en edición no se pasaban feriados al formulario, así que el
+    // calendario no marcaba ningún día. Se agrega igual que en useStore.
+    useEffect(() => {
+        const loadCalendario = async () => {
+            try {
+                const res = await calendario();
+                setFeriados(res.data || []);
+            } catch (_) {}
+        };
+        loadCalendario();
+    }, []);
 
     const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -43,5 +56,5 @@ export const useUpdate = () => {
         }
     };
 
-    return { formData, loading, saving, alert, setAlert, handleChange, handleSubmit };
+    return { formData, feriados, loading, saving, alert, setAlert, handleChange, handleSubmit };
 };

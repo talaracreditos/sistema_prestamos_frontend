@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { store, index } from 'services/feriadoService';
+import { store, calendario } from 'services/feriadoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
-
-const normalizar = (f) => ({
-    ...f,
-    fecha: f.fecha?.includes('/') ? f.fecha.split('/').reverse().join('-') : f.fecha,
-});
 
 export const useStore = () => {
     const navigate = useNavigate();
@@ -18,8 +13,11 @@ export const useStore = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await index();
-                setFeriados((res.data || []).map(normalizar));
+                // Antes usaba index() (paginado a 7) y por eso el calendario del
+                // formulario solo marcaba los feriados de la primera página.
+                // calendario() trae TODOS sin paginar, ya en formato Y-m-d.
+                const res = await calendario();
+                setFeriados(res.data || []);
             } catch (_) {}
         };
         load();

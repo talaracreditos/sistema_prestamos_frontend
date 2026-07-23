@@ -59,11 +59,11 @@ const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
             {/* Cabecera mes + flechas */}
             <div style={styles.header}>
                 <button onClick={prevMes} style={styles.navBtn}>
-                    <ChevronLeftIcon style={{ width: 16, height: 16 }} />
+                    <ChevronLeftIcon style={{ width: 16, height: 16 }} type='button' />
                 </button>
                 <span style={styles.mesLabel}>{MESES[mesIndex]} {anio}</span>
                 <button onClick={nextMes} style={styles.navBtn}>
-                    <ChevronRightIcon style={{ width: 16, height: 16 }} />
+                    <ChevronRightIcon style={{ width: 16, height: 16 }} type='button' />
                 </button>
             </div>
 

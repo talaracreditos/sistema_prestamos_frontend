@@ -6,7 +6,7 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import FeriadoForm from 'components/Shared/Formularios/Feriado/FeriadoForm';
 
 const Update = () => {
-    const { formData, loading, saving, alert, setAlert, handleChange, handleSubmit } = useUpdate();
+    const { formData, feriados, loading, saving, alert, setAlert, handleChange, handleSubmit } = useUpdate();
 
     if (loading) return <LoadingScreen />;
 
@@ -24,6 +24,7 @@ const Update = () => {
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
                 loading={saving}
+                feriados={feriados}
                 isEdit={true}
             />
         </div>
