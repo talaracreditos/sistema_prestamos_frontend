@@ -13,7 +13,6 @@ import {
 import Pagination from 'components/Shared/Pagination';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 
-// ── Íconos ────────────────────────────────────────────────────────────────────
 const ICONS = {
     'banknotes':    BanknotesIcon,
     'check-circle': CheckCircleIcon,
@@ -26,7 +25,6 @@ const ICONS = {
     'briefcase':    BriefcaseIcon,
 };
 
-// ── Tooltip ───────────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, moneyKey = 'total' }) => {
     if (!active || !payload?.length) return null;
     return (
@@ -43,7 +41,6 @@ const CustomTooltip = ({ active, payload, label, moneyKey = 'total' }) => {
     );
 };
 
-// ── StatRow ───────────────────────────────────────────────────────────────────
 const StatRow = ({ label, valor, tipo, icon, alerta = false }) => {
     const Icon = ICONS[icon] || BanknotesIcon;
     const formatted = tipo === 'monto'
@@ -65,7 +62,6 @@ const StatRow = ({ label, valor, tipo, icon, alerta = false }) => {
     );
 };
 
-// ── TablaLista — lista paginada genérica ──────────────────────────────────────
 const TablaLista = ({ paginationData, renderFila, onPageChange, emptyText = 'Sin datos' }) => {
     const data = paginationData?.data ?? [];
     if (!data.length) return (
@@ -87,7 +83,6 @@ const TablaLista = ({ paginationData, renderFila, onPageChange, emptyText = 'Sin
     );
 };
 
-// ── Gráficas ──────────────────────────────────────────────────────────────────
 const GraficaArea = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A', height = 200 }) => (
     <div>
         {label && <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">{label}</p>}
@@ -125,46 +120,38 @@ const GraficaBarra = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A',
     </div>
 );
 
-// ── DashboardCard ─────────────────────────────────────────────────────────────
-/**
- * Props:
- * - exportService: fn(filters) => Promise<Blob>
- *   Si se pasa, aparece el botón "Excel" en el header.
- *   Los filtros activos (fechaInicio / fechaFin) se pasan automáticamente.
- * - exportFilename: nombre del archivo xlsx sin extensión
- * - exportLabel:    texto del botón (default 'Excel')
- */
 const DashboardCard = ({
-    title,
-    subtitle,
-    icon = 'banknotes',
-    loading = false,
-    cards = [],
-    graficas = [],
-    tabs,
-    tabActivo = 'cards',
+    title, subtitle, icon = 'banknotes', loading = false,
+    cards = [], graficas = [], tabs, tabActivo,
     conFiltros = false,
     fechaInicio = '', setFechaInicio,
     fechaFin    = '', setFechaFin,
     onFiltrar, onLimpiar,
-    tablas = {},
-    extraContent = {},
-    cardsPorTab = {},
-    // ── Export Excel ──────────────────────────────────────────────────────────
-    exportService  = null,   // fn(filters) => Promise<Blob>
-    exportFilename = 'reporte',
-    exportLabel    = 'Excel',
+    tablas = {}, extraContent = {}, cardsPorTab = {},
+    exportService = null, exportFilename = 'reporte', exportLabel = 'Excel',
 }) => {
-    const Icon = ICONS[icon] || BanknotesIcon;
-    const [tab,       setTab]       = useState(tabActivo);
-    const [collapsed, setCollapsed] = useState(false);
-    const tieneRango = fechaInicio || fechaFin;
+    const Icon        = ICONS[icon] || BanknotesIcon;
+    const tabsFinales = tabs ?? [{ id: 'cards', label: 'Resumen' }];
 
-    const tabsFinales    = tabs ?? [{ id: 'cards', label: 'Resumen' }];
+    // ── Tab inicial: usar tabActivo si viene, sino el primer tab ─────────────
+    const primerTab = tabsFinales[0]?.id ?? 'cards';
+    const [tab,       setTab]       = useState(tabActivo ?? primerTab);
+    const [collapsed, setCollapsed] = useState(false);
+
+    const tieneRango     = fechaInicio || fechaFin;
     const graficasDelTab = graficas.filter(g => !g.tab || g.tab === tab);
     const tablaActual    = tablas[tab];
 
-    // Filtros activos para pasar al exportService
+    // ── Cards a mostrar según tab activo ──────────────────────────────────────
+    const getCardsActuales = () => {
+        const tieneCardsPorTab = Object.keys(cardsPorTab).length > 0;
+        // Si se pasó cardsPorTab, usarlo para el tab actual (puede ser array vacío)
+        if (tieneCardsPorTab) return cardsPorTab[tab] ?? [];
+        // Sin cardsPorTab: mostrar todas las cards siempre (comportamiento original)
+        return cards;
+    };
+    const cardsActuales = getCardsActuales();
+
     const exportFilters = {
         ...(fechaInicio ? { fecha_inicio: fechaInicio } : {}),
         ...(fechaFin    ? { fecha_fin:    fechaFin    } : {}),
@@ -175,11 +162,7 @@ const DashboardCard = ({
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
-                {/* Título — clickeable para colapsar */}
-                <div
-                    className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer select-none"
-                    onClick={() => setCollapsed(v => !v)}
-                >
+                <div className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer select-none" onClick={() => setCollapsed(v => !v)}>
                     <div className="p-2 bg-brand-red-light rounded-xl flex-shrink-0">
                         <Icon className="w-5 h-5 text-brand-red" />
                     </div>
@@ -188,8 +171,6 @@ const DashboardCard = ({
                         {subtitle && <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">{subtitle}</p>}
                     </div>
                 </div>
-
-                {/* Acciones header: botón Excel + chevron */}
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {exportService && !collapsed && (
                         <ExcelExportButton
@@ -200,10 +181,8 @@ const DashboardCard = ({
                             disabled={loading}
                         />
                     )}
-                    <div
-                        className={`w-6 h-6 flex items-center justify-center text-slate-400 cursor-pointer transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
-                        onClick={() => setCollapsed(v => !v)}
-                    >
+                    <div className={`w-6 h-6 flex items-center justify-center text-slate-400 cursor-pointer transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+                        onClick={() => setCollapsed(v => !v)}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                         </svg>
@@ -267,16 +246,13 @@ const DashboardCard = ({
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {/* Cards resumen */}
-                            {(() => {
-                                const cardsActuales = cardsPorTab[tab] ?? (tab === 'cards' || tab === 'resumen' || tabsFinales.length === 1 ? cards : []);
-                                if (!cardsActuales.length) return null;
-                                return (
-                                    <div className={`grid gap-3 ${cardsActuales.length > 4 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
-                                        {cardsActuales.map((card, i) => <StatRow key={i} {...card} />)}
-                                    </div>
-                                );
-                            })()}
+
+                            {/* Cards */}
+                            {cardsActuales.length > 0 && (
+                                <div className={`grid gap-3 ${cardsActuales.length > 4 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                                    {cardsActuales.map((card, i) => <StatRow key={i} {...card} />)}
+                                </div>
+                            )}
 
                             {/* Tabla paginada */}
                             {tablaActual && (
@@ -293,12 +269,14 @@ const DashboardCard = ({
                                 <div>{extraContent[tab]}</div>
                             )}
 
-                            {/* Gráficas */}
-                            {graficasDelTab.length === 0 && tab !== 'cards' && tab !== 'resumen' && !tablaActual && !extraContent[tab] && (
+                            {/* Sin datos */}
+                            {graficasDelTab.length === 0 && tab !== primerTab && tab !== 'cards' && tab !== 'resumen' && !tablaActual && !extraContent[tab] && cardsActuales.length === 0 && (
                                 <div className="flex items-center justify-center h-40 text-slate-300 text-xs font-bold uppercase tracking-widest">
                                     Sin datos en este período
                                 </div>
                             )}
+
+                            {/* Gráficas */}
                             {graficasDelTab.map((g, i) => (
                                 g.tipo === 'area'
                                     ? <GraficaArea key={i} data={g.data} xKey={g.xKey} dataKey={g.dataKey} label={g.label} color={g.color} height={g.height} />

@@ -47,12 +47,7 @@ const PagoCard = () => {
             mensual:   cards,
         }
         : {
-            resumen:    [
-                ...byLabel('recaudado'),
-                ...byLabel('excedente gen'),
-                ...byLabel('excedente usado'),
-                ...byLabel('pagos hoy', 'pagos del mes', 'total de pagos'),
-            ],
+            resumen:    cards,
             recaudado:  byLabel('recaudado', 'pagos'),
             capital:    byLabel('capital'),
             interes:    byLabel('interés', 'interes'),
