@@ -161,6 +161,11 @@ const Index = () => {
                             S/ {parseFloat(row.monto).toFixed(2)}
                         </span>
                     )}
+                    {row.comision && (
+                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded border bg-amber-50 text-amber-600 border-amber-200 uppercase tracking-widest w-fit mt-1">
+                            Comisión: S/ {parseFloat(row.comision).toFixed(2)}
+                        </span>
+                    )}
                     <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded w-fit mt-1 border border-slate-200 uppercase tracking-widest">
                         {row.modalidad}
                     </span>

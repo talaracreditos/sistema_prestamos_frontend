@@ -149,6 +149,7 @@ const DashboardCard = ({
     onFiltrar, onLimpiar,
     tablas = {},
     extraContent = {},
+    cardsPorTab = {},
     // ── Export Excel ──────────────────────────────────────────────────────────
     exportService  = null,   // fn(filters) => Promise<Blob>
     exportFilename = 'reporte',
@@ -267,11 +268,15 @@ const DashboardCard = ({
                     ) : (
                         <div className="space-y-6">
                             {/* Cards resumen */}
-                            {(tab === 'cards' || tabsFinales.length === 1) && cards.length > 0 && (
-                                <div className="grid grid-cols-1 gap-3">
-                                    {cards.map((card, i) => <StatRow key={i} {...card} />)}
-                                </div>
-                            )}
+                            {(() => {
+                                const cardsActuales = cardsPorTab[tab] ?? (tab === 'cards' || tab === 'resumen' || tabsFinales.length === 1 ? cards : []);
+                                if (!cardsActuales.length) return null;
+                                return (
+                                    <div className={`grid gap-3 ${cardsActuales.length > 4 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                                        {cardsActuales.map((card, i) => <StatRow key={i} {...card} />)}
+                                    </div>
+                                );
+                            })()}
 
                             {/* Tabla paginada */}
                             {tablaActual && (
@@ -289,7 +294,7 @@ const DashboardCard = ({
                             )}
 
                             {/* Gráficas */}
-                            {graficasDelTab.length === 0 && tab !== 'cards' && !tablaActual && !extraContent[tab] && (
+                            {graficasDelTab.length === 0 && tab !== 'cards' && tab !== 'resumen' && !tablaActual && !extraContent[tab] && (
                                 <div className="flex items-center justify-center h-40 text-slate-300 text-xs font-bold uppercase tracking-widest">
                                     Sin datos en este período
                                 </div>

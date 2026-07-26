@@ -1,27 +1,28 @@
 import { useState, useEffect } from 'react';
 
 export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
-    const [metodo, setMetodo]             = useState('DEPOSITO');
-    const [recibido, setRecibido]         = useState('');
-    const [referencia, setReferencia]     = useState('');
-    const [archivo, setArchivo]           = useState(null);
-    const [preview, setPreview]           = useState(null);
-    const [esParcial, setEsParcial]       = useState(false);
+    const [metodo,       setMetodo]       = useState('DEPOSITO');
+    const [recibido,     setRecibido]     = useState('');
+    const [referencia,   setReferencia]   = useState('');
+    const [archivo,      setArchivo]      = useState(null);
+    const [preview,      setPreview]      = useState(null);
+    const [esParcial,    setEsParcial]    = useState(false);
     const [distribucion, setDistribucion] = useState({});
-    const [alertLocal, setAlertLocal]     = useState(null);
+    const [alertLocal,   setAlertLocal]   = useState(null);
+    // ── Comisión ──────────────────────────────────────────────────────────────
+    const [tieneComision, setTieneComision] = useState(false);
+    const [comision,      setComision]      = useState('');
 
-    const esGrupal = !!(cuota?.es_grupal);
-    const integrantesPendientes = cuota?.integrantes?.filter(i => ![2, 6].includes(i.estado)) ?? [];
-    const soloUnIntegrante      = esGrupal && integrantesPendientes.length === 1;
+    const esGrupal               = !!(cuota?.es_grupal);
+    const integrantesPendientes  = cuota?.integrantes?.filter(i => ![2, 6].includes(i.estado)) ?? [];
+    const soloUnIntegrante       = esGrupal && integrantesPendientes.length === 1;
 
-    // mora_total es el saldo real post-reducción; mora es el cargo_mora sin reducir
     const mora = esGrupal
         ? integrantesPendientes.reduce((acc, int) => acc + parseFloat(int.mora_pendiente ?? 0), 0)
         : parseFloat(cuota?.mora_total ?? cuota?.mora ?? 0);
 
     const excedenteIndividual = !esGrupal ? parseFloat(cuota?.excedente_anterior ?? 0) : 0;
 
-    // Para individual: capital pendiente + mora post-reducción - excedente disponible
     const totalAPagar = esGrupal && integrantesPendientes.length > 0
         ? integrantesPendientes.reduce((acc, int) => {
             const saldoCap = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
@@ -47,10 +48,18 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
 
     const montoNum    = parseFloat(recibido || 0);
     const noCubreMora = !esGrupal && mora > 0 && montoNum > 0 && montoNum < mora;
+
+    const comisionNum    = tieneComision ? parseFloat(comision || 0) : 0;
+    const comisionValida = !tieneComision || (comisionNum > 0);
+
     const validacionMetodo = metodo === 'DEPOSITO'
         ? !!referencia?.trim() && !!archivo
         : true;
-    const puedeSubmit = !noCubreMora && integrantesSinCubrirMora.length === 0 && validacionMetodo;
+
+    const puedeSubmit = !noCubreMora
+        && integrantesSinCubrirMora.length === 0
+        && validacionMetodo
+        && comisionValida;
 
     // ── Efectos ───────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -63,6 +72,8 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             setEsParcial(soloUnIntegrante);
             setDistribucion({});
             setAlertLocal(null);
+            setTieneComision(false);
+            setComision('');
         }
     }, [isOpen, totalAPagar, soloUnIntegrante]);
 
@@ -70,7 +81,6 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         if (integrantesPendientes.length === 0) return parseFloat(totalAPagar);
         const todosEnFull = integrantesPendientes.every(int => !distribucion[int.id] || distribucion[int.id] === '');
         if (todosEnFull) return parseFloat(totalAPagar);
-
         return integrantesPendientes.reduce((acc, int) => {
             const val        = distribucion[int.id];
             const esCompleto = !val || val === '';
@@ -83,7 +93,7 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const totalDistribuido = calcularTotalDistribuido();
 
     useEffect(() => {
-        if (esGrupal && esParcial) setRecibido(totalDistribuido.toFixed(2));
+        if (esGrupal && esParcial)  setRecibido(totalDistribuido.toFixed(2));
     }, [totalDistribuido, esGrupal, esParcial]);
 
     useEffect(() => {
@@ -106,11 +116,16 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData();
-        formData.append('cuota_id',         cuota.id);
-        formData.append('metodo_pago',      metodo);
-        formData.append('monto_recibido',   recibido);
+        formData.append('cuota_id',        cuota.id);
+        formData.append('metodo_pago',     metodo);
+        formData.append('monto_recibido',  recibido);
         formData.append('numero_operacion', referencia);
         if (archivo) formData.append('comprobante', archivo);
+
+        // Comisión — solo si el usuario la marcó y tiene valor
+        if (tieneComision && comisionNum > 0) {
+            formData.append('comision', comisionNum.toFixed(2));
+        }
 
         if (esGrupal && (esParcial || soloUnIntegrante)) {
             formData.append('es_parcial_grupal', '1');
@@ -130,9 +145,21 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     };
 
     return {
-        state:    { metodo, recibido, referencia, archivo, preview, esParcial, distribucion, alertLocal },
-        setters:  { setMetodo, setRecibido, setReferencia, setEsParcial, setAlertLocal, setArchivo, setPreview },
-        computed: { esGrupal, integrantesPendientes, soloUnIntegrante, totalAPagar, mora, excedenteIndividual, integrantesSinCubrirMora, noCubreMora, puedeSubmit, totalDistribuido },
+        state: {
+            metodo, recibido, referencia, archivo, preview,
+            esParcial, distribucion, alertLocal,
+            tieneComision, comision,
+        },
+        setters: {
+            setMetodo, setRecibido, setReferencia, setEsParcial, setAlertLocal,
+            setArchivo, setPreview, setTieneComision, setComision,
+        },
+        computed: {
+            esGrupal, integrantesPendientes, soloUnIntegrante,
+            totalAPagar, mora, excedenteIndividual,
+            integrantesSinCubrirMora, noCubreMora,
+            puedeSubmit, totalDistribuido, comisionNum,
+        },
         handlers: { handleFileChange, handleMontoIntegrante, reset, handleSubmit },
     };
 };

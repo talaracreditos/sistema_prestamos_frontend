@@ -3,18 +3,23 @@ import ViewModal from 'components/Shared/Modals/ViewModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { usePagoCuota } from 'hooks/Operacion/usePagoCuota';
 import { ResumenPago, DistribucionGrupal, AlertasPago } from './Components/PagoCuotaParts';
-import { BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon, UserGroupIcon, DocumentCheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+    BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon,
+    UserGroupIcon, DocumentCheckIcon, XMarkIcon,
+    ReceiptPercentIcon,
+} from '@heroicons/react/24/outline';
 
 const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const { state, setters, computed, handlers } = usePagoCuota({ isOpen, cuota, onClose, onConfirm });
-    const { metodo, referencia, archivo } = state;
+    const { metodo, referencia, archivo, tieneComision, comision } = state;
 
-    // Bloquear cierre mientras se procesa el pago
     const handleClose = () => { if (!loading) handlers.reset(); };
 
     return (
-        <ViewModal isOpen={isOpen} hideFooter={true} onClose={handleClose} title={`Cobrar Cuota N° ${cuota?.nro}`} size="2xl">
-            {/* Overlay bloqueante mientras carga */}
+        <ViewModal isOpen={isOpen} hideFooter={true} onClose={handleClose}
+            title={`Cobrar Cuota N° ${cuota?.nro}`} size="2xl">
+
+            {/* Overlay carga */}
             {loading && (
                 <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-[inherit] gap-3">
                     <div className="w-10 h-10 border-4 border-brand-red/20 border-t-brand-red rounded-full animate-spin" />
@@ -35,13 +40,14 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             integrantesPendientes={computed.integrantesPendientes}
                         />
 
-                        {/* 2. Selector de Método */}
+                        {/* 2. Método */}
                         <div className="grid grid-cols-2 gap-3">
                             {['DEPOSITO', 'EFECTIVO'].map((m) => (
-                                <button key={m} type="button" onClick={() => { setters.setMetodo(m); setters.setReferencia(''); }}
+                                <button key={m} type="button"
+                                    onClick={() => { setters.setMetodo(m); setters.setReferencia(''); }}
                                     disabled={loading}
-                                    className={`p-3 rounded-2xl font-black text-xs flex items-center justify-center gap-2 border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${state.metodo === m ? 'border-brand-red bg-brand-red-light/50 text-brand-red shadow-sm' : 'border-slate-100 text-slate-400 hover:border-slate-200'}`}>
-                                    {m === 'EFECTIVO' ? <BanknotesIcon className="w-4 h-4"/> : <DevicePhoneMobileIcon className="w-4 h-4"/>}
+                                    className={`p-3 rounded-2xl font-black text-xs flex items-center justify-center gap-2 border-2 transition-all disabled:opacity-50 ${state.metodo === m ? 'border-brand-red bg-brand-red-light/50 text-brand-red shadow-sm' : 'border-slate-100 text-slate-400 hover:border-slate-200'}`}>
+                                    {m === 'EFECTIVO' ? <BanknotesIcon className="w-4 h-4" /> : <DevicePhoneMobileIcon className="w-4 h-4" />}
                                     {m}
                                 </button>
                             ))}
@@ -67,20 +73,48 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             )}
                         </div>
 
-                        {/* 4. Voucher Upload */}
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">{state.metodo === 'DEPOSITO' ? 'Comprobante *' : 'Foto del Efectivo (Opcional)'}</label>
-                            <input type="file" accept="image/*" onChange={handlers.handleFileChange} className="hidden" id="pago-cuota-upload" disabled={loading} />
-                            <label htmlFor="pago-cuota-upload" className={`flex items-center justify-center w-full p-5 border-2 border-dashed rounded-2xl transition-all duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${state.archivo ? 'border-brand-red bg-brand-red-light/50 text-brand-red' : 'border-slate-200 hover:border-brand-red/50 hover:bg-slate-50 text-slate-500'}`}>
-                                <div className="flex flex-col items-center gap-1 font-black text-[10px] uppercase">
-                                    <PhotoIcon className="w-6 h-6 mb-1" />
-                                    {state.archivo ? 'Comprobante Cargado ✓' : state.metodo === 'DEPOSITO' ? 'Subir Voucher / Captura' : 'Subir Foto (opcional)'}
+                        {/* ── 5. COMISIÓN ── */}
+                        <div className={`rounded-2xl border-2 transition-all overflow-hidden ${tieneComision ? 'border-amber-300 bg-amber-50' : 'border-slate-100 bg-slate-50'}`}>
+                            {/* Toggle */}
+                            <div
+                                onClick={() => !loading && setters.setTieneComision(!tieneComision)}
+                                className={`flex items-center justify-between p-4 select-none ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                <div className="flex items-center gap-3">
+                                    <ReceiptPercentIcon className={`w-5 h-5 ${tieneComision ? 'text-amber-600' : 'text-slate-400'}`} />
+                                    <div>
+                                        <p className={`text-xs font-black uppercase ${tieneComision ? 'text-amber-700' : 'text-slate-600'}`}>
+                                            Cobro con comisión (Yape / BCP)
+                                        </p>
+                                        <p className="text-[9px] text-slate-400 font-bold">La comisión se registra como referencia interna</p>
+                                    </div>
                                 </div>
-                            </label>
-                            {state.metodo === 'EFECTIVO' && <p className="text-[9px] text-slate-400 font-bold mt-1 ml-1">Puedes adjuntar una foto del efectivo recibido si lo deseas.</p>}
+                                <div className={`w-10 h-5 rounded-full transition-all relative flex-shrink-0 ${tieneComision ? 'bg-amber-500' : 'bg-slate-300'}`}>
+                                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${tieneComision ? 'left-5' : 'left-0.5'}`} />
+                                </div>
+                            </div>
+
+                            {/* Input comisión */}
+                            {tieneComision && (
+                                <div className="px-4 pb-4">
+                                    <label className="block text-[10px] font-black text-amber-600 uppercase mb-1.5">Monto de Comisión (S/) *</label>
+                                    <input
+                                        type="number" step="0.01" min="0.01"
+                                        value={comision}
+                                        disabled={loading}
+                                        onChange={e => setters.setComision(e.target.value)}
+                                        placeholder="Ej: 1.50"
+                                        className="w-full p-3 bg-white border-2 border-amber-200 rounded-xl text-sm font-bold text-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-300 outline-none transition-all disabled:opacity-50"
+                                    />
+                                    {tieneComision && computed.comisionNum > 0 && (
+                                        <p className="text-[9px] font-bold text-amber-600 mt-1">
+                                            Total cobrado al cliente: S/ {(parseFloat(state.recibido || 0) + computed.comisionNum).toFixed(2)} (cuota + comisión)
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
-                        {/* 5. Toggle Parcial Grupal */}
+                        {/* 6. Toggle Parcial Grupal */}
                         {computed.esGrupal && computed.integrantesPendientes.length > 1 && (
                             <div onClick={() => !loading && setters.setEsParcial(!state.esParcial)}
                                 className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all select-none ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${state.esParcial ? 'border-brand-gold bg-brand-gold-light/30' : 'border-slate-200 bg-slate-50 hover:border-slate-300'}`}>
@@ -88,7 +122,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                     <UserGroupIcon className={`w-5 h-5 ${state.esParcial ? 'text-brand-gold-dark' : 'text-slate-400'}`} />
                                     <div>
                                         <p className={`text-xs font-black uppercase ${state.esParcial ? 'text-brand-gold-dark' : 'text-slate-600'}`}>Pago Parcial del Grupo</p>
-                                        <p className="text-[9px] text-slate-400 font-bold">{computed.integrantesPendientes.length} socio{computed.integrantesPendientes.length > 1 ? 's' : ''} habilitado{computed.integrantesPendientes.length > 1 ? 's' : ''}</p>
+                                        <p className="text-[9px] text-slate-400 font-bold">{computed.integrantesPendientes.length} socio(s) habilitado(s)</p>
                                     </div>
                                 </div>
                                 <div className={`w-10 h-5 rounded-full transition-all relative flex-shrink-0 ${state.esParcial ? 'bg-brand-gold-dark' : 'bg-slate-300'}`}>
@@ -97,20 +131,39 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             </div>
                         )}
 
-                        {/* 6. Distribución Grupal */}
+                        {/* 7. Distribución Grupal */}
                         {computed.esGrupal && (state.esParcial || computed.soloUnIntegrante) && computed.integrantesPendientes.length > 0 && (
                             <DistribucionGrupal
                                 distribucion={state.distribucion} handleMontoIntegrante={handlers.handleMontoIntegrante}
                                 integrantesPendientes={computed.integrantesPendientes} soloUnIntegrante={computed.soloUnIntegrante}
-                                totalDistribuido={computed.totalDistribuido} totalAPagar={computed.totalAPagar} recibido={state.recibido}
-                                disabled={loading}
+                                totalDistribuido={computed.totalDistribuido} totalAPagar={computed.totalAPagar}
+                                recibido={state.recibido} disabled={loading}
                             />
                         )}
 
-                        {/* 7. Alertas de mora */}
-                        <AlertasPago noCubreMora={computed.noCubreMora} mora={computed.mora} integrantesSinCubrirMora={computed.integrantesSinCubrirMora} />
+                        {/* 8. Alertas mora */}
+                        <AlertasPago
+                            noCubreMora={computed.noCubreMora} mora={computed.mora}
+                            integrantesSinCubrirMora={computed.integrantesSinCubrirMora}
+                        />
 
-                        {/* 8. Preview móvil */}
+                        {/* 4. Voucher */}
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">
+                                {state.metodo === 'DEPOSITO' ? 'Comprobante *' : 'Foto del Efectivo (Opcional)'}
+                            </label>
+                            <input type="file" accept="image/*" onChange={handlers.handleFileChange}
+                                className="hidden" id="pago-cuota-upload" disabled={loading} />
+                            <label htmlFor="pago-cuota-upload"
+                                className={`flex items-center justify-center w-full p-5 border-2 border-dashed rounded-2xl transition-all duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${state.archivo ? 'border-brand-red bg-brand-red-light/50 text-brand-red' : 'border-slate-200 hover:border-brand-red/50 hover:bg-slate-50 text-slate-500'}`}>
+                                <div className="flex flex-col items-center gap-1 font-black text-[10px] uppercase">
+                                    <PhotoIcon className="w-6 h-6 mb-1" />
+                                    {state.archivo ? 'Comprobante Cargado ✓' : state.metodo === 'DEPOSITO' ? 'Subir Voucher / Captura' : 'Subir Foto (opcional)'}
+                                </div>
+                            </label>
+                        </div>
+
+                        {/* 9. Preview móvil */}
                         {state.preview && (
                             <div className="md:hidden">
                                 <p className="text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">Vista Previa:</p>
@@ -121,7 +174,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                         )}
                     </div>
 
-                    {/* Alert encima del botón */}
+                    {/* Alert */}
                     {state.alertLocal && (
                         <div className="pt-4">
                             <AlertMessage
@@ -133,22 +186,29 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                         </div>
                     )}
 
-                    {/* Botón Guardar */}
+                    {/* Botón */}
                     <div className="pt-4 mt-auto">
                         <button onClick={handlers.handleSubmit} disabled={loading || !computed.puedeSubmit}
                             className="w-full bg-brand-red text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl shadow-brand-red/30 hover:bg-brand-red-dark transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95">
-                            {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <DocumentCheckIcon className="w-5 h-5" />}
+                            {loading
+                                ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                : <DocumentCheckIcon className="w-5 h-5" />
+                            }
                             {loading ? 'Procesando...' : 'Registrar Pago de Cuota'}
                         </button>
                         {metodo === 'DEPOSITO' && (!referencia?.trim() || !archivo) && (
-                        <p className="text-[9px] text-center text-slate-400 font-bold uppercase mt-2">
-                            {!referencia?.trim() && !archivo
-                                ? 'Ingresa el N° de operación y sube el voucher'
-                                : !referencia?.trim()
-                                    ? 'Ingresa el N° de operación'
+                            <p className="text-[9px] text-center text-slate-400 font-bold uppercase mt-2">
+                                {!referencia?.trim() && !archivo
+                                    ? 'Ingresa el N° de operación y sube el voucher'
+                                    : !referencia?.trim() ? 'Ingresa el N° de operación'
                                     : 'Sube el comprobante / voucher'}
-                        </p>
-                    )}
+                            </p>
+                        )}
+                        {tieneComision && !comision && (
+                            <p className="text-[9px] text-center text-amber-500 font-bold uppercase mt-1">
+                                Ingresa el monto de la comisión
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -156,7 +216,8 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                 <div className="hidden md:flex md:w-[45%] bg-slate-50 relative items-center justify-center p-6 rounded-r-[32px]">
                     {state.preview ? (
                         <div className="relative w-full h-full flex items-center justify-center group">
-                            <img src={state.preview} alt="Voucher Preview" className="max-w-full max-h-full object-contain rounded-xl shadow-2xl bg-white border border-slate-200" />
+                            <img src={state.preview} alt="Voucher Preview"
+                                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl bg-white border border-slate-200" />
                             {!loading && (
                                 <button onClick={() => { setters.setArchivo(null); setters.setPreview(null); }}
                                     className="absolute top-4 right-4 bg-white text-brand-red p-2 rounded-full shadow-xl hover:bg-brand-red hover:text-white transition-all opacity-0 group-hover:opacity-100">
