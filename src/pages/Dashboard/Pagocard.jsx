@@ -1,9 +1,10 @@
 import React from 'react';
 import { useDashboardPagos } from 'hooks/Dashboard/useDashboardPagos';
+import { useAuth } from 'context/AuthContext';
 import DashboardCard from 'components/Shared/Cards/DashboardCard';
 import { exportPagosDashboard } from 'services/dashboardService';
 
-const TABS = [
+const TABS_ADMIN = [
     { id: 'resumen',    label: 'Resumen'    },
     { id: 'recaudado',  label: 'Recaudado'  },
     { id: 'capital',    label: 'Capital'    },
@@ -13,7 +14,16 @@ const TABS = [
     { id: 'seguros',    label: 'Seguros'    },
 ];
 
+const TABS_CLIENTE = [
+    { id: 'resumen',   label: 'Resumen'  },
+    { id: 'recaudado', label: '30 días'  },
+    { id: 'mensual',   label: '12 meses' },
+];
+
 const PagoCard = () => {
+    const { role } = useAuth();
+    const esCliente = role === 'cliente';
+
     const {
         loading, data,
         fechaInicio, setFechaInicio,
@@ -21,20 +31,45 @@ const PagoCard = () => {
         handleFiltrar, handleLimpiar,
     } = useDashboardPagos();
 
-    const g    = data?.graficas ?? {};
-    const cards = data?.cards   ?? [];
+    const g     = data?.graficas ?? {};
+    const cards = data?.cards    ?? [];
 
-    const cardsPorTab = {
-        resumen:    cards,
-        recaudado:  cards.filter(c => c.label.toLowerCase().includes('recaudado') || c.label.toLowerCase().includes('pagos')),
-        capital:    cards.filter(c => c.label.toLowerCase().includes('capital')),
-        interes:    cards.filter(c => c.label.toLowerCase().includes('interés') || c.label.toLowerCase().includes('interes')),
-        mora:       cards.filter(c => c.label.toLowerCase().includes('mora')),
-        comisiones: cards.filter(c => c.label.toLowerCase().includes('comision')),
-        seguros:    cards.filter(c => c.label.toLowerCase().includes('seguro')),
-    };
+    const byLabel = (...kws) => cards.filter(c =>
+        kws.some(kw => c.label.toLowerCase().includes(kw.toLowerCase()))
+    );
 
-    const graficas = [
+    // ── Cards por tab ─────────────────────────────────────────────────────────
+    const cardsPorTab = esCliente
+        ? {
+            // Cliente: solo ve sus pagos en resumen, sin desglose
+            resumen:   cards,
+            recaudado: cards,
+            mensual:   cards,
+        }
+        : {
+            resumen:    [
+                ...byLabel('recaudado'),
+                ...byLabel('excedente gen'),
+                ...byLabel('excedente usado'),
+                ...byLabel('pagos hoy', 'pagos del mes', 'total de pagos'),
+            ],
+            recaudado:  byLabel('recaudado', 'pagos'),
+            capital:    byLabel('capital'),
+            interes:    byLabel('interés', 'interes'),
+            mora:       byLabel('mora'),
+            comisiones: byLabel('comision'),
+            seguros:    byLabel('seguro'),
+        };
+
+    // ── Gráficas ──────────────────────────────────────────────────────────────
+    const graficasCliente = [
+        { tab: 'recaudado', tipo: 'area',  data: g.diaria  ?? [], xKey: 'fecha', dataKey: 'total',    label: 'Monto pagado — últimos 30 días (S/)', color: '#8B1A1A', height: 200 },
+        { tab: 'recaudado', tipo: 'barra', data: g.diaria  ?? [], xKey: 'fecha', dataKey: 'cantidad', label: 'Cantidad de pagos — últimos 30 días',  color: '#F5A623', isMoney: false, height: 140 },
+        { tab: 'mensual',   tipo: 'barra', data: g.mensual ?? [], xKey: 'mes',   dataKey: 'total',    label: 'Monto pagado — 12 meses (S/)',          color: '#8B1A1A', height: 200 },
+        { tab: 'mensual',   tipo: 'barra', data: g.mensual ?? [], xKey: 'mes',   dataKey: 'cantidad', label: 'Cantidad de pagos — 12 meses',          color: '#F5A623', isMoney: false, height: 140 },
+    ];
+
+    const graficasAdmin = [
         // ── Recaudado ──────────────────────────────────────────────────────────
         { tab: 'recaudado',  tipo: 'area',  data: g.diaria  ?? [], xKey: 'fecha', dataKey: 'total',    label: 'Monto recaudado — últimos 30 días (S/)', color: '#8B1A1A', height: 200 },
         { tab: 'recaudado',  tipo: 'barra', data: g.diaria  ?? [], xKey: 'fecha', dataKey: 'cantidad', label: 'Cantidad de pagos — últimos 30 días',    color: '#F5A623', isMoney: false, height: 140 },
@@ -65,8 +100,8 @@ const PagoCard = () => {
             loading={loading}
             cards={cards}
             cardsPorTab={cardsPorTab}
-            graficas={graficas}
-            tabs={TABS}
+            graficas={esCliente ? graficasCliente : graficasAdmin}
+            tabs={esCliente ? TABS_CLIENTE : TABS_ADMIN}
             conFiltros={true}
             fechaInicio={fechaInicio} setFechaInicio={setFechaInicio}
             fechaFin={fechaFin}       setFechaFin={setFechaFin}
