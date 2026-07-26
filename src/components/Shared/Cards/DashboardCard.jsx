@@ -147,8 +147,9 @@ const DashboardCard = ({
         const tieneCardsPorTab = Object.keys(cardsPorTab).length > 0;
         // Si se pasó cardsPorTab, usarlo para el tab actual (puede ser array vacío)
         if (tieneCardsPorTab) return cardsPorTab[tab] ?? [];
-        // Sin cardsPorTab: mostrar todas las cards siempre (comportamiento original)
-        return cards;
+        // Sin cardsPorTab: solo mostrar cards en el primer tab
+        if (tab === primerTab) return cards;
+        return [];
     };
     const cardsActuales = getCardsActuales();
 
