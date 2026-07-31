@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useDashboardDesembolsoCapital } from 'hooks/Dashboard/useDashboardDesembolsoCapital';
 import { exportDesembolsoCapitalDashboard } from 'services/dashboardService';
@@ -32,63 +32,117 @@ const Chevron = ({ collapsed }) => (
     </div>
 );
 
-// ── Tooltip portal ────────────────────────────────────────────────────────────
-const DayTooltip = ({ dia, eventos, asesorColorMap, anchorRect }) => {
+// ── Popup del día — con scroll interno y cierre al click fuera ────────────────
+const DayTooltip = ({ dia, eventos, asesorColorMap, anchorRect, onClose }) => {
+    const popupRef     = useRef(null);
     const desembolsos  = eventos?.desembolsos   ?? [];
     const pagos        = eventos?.pagos_capital ?? [];
     const totalDesemb  = desembolsos.reduce((s, d) => s + d.monto,   0);
     const totalCapital = pagos.reduce((s, p) => s + p.capital, 0);
-    const TIP_W = 288;
-    const left  = Math.min(anchorRect.left + anchorRect.width / 2 - TIP_W / 2, window.innerWidth - TIP_W - 8);
-    const top   = anchorRect.top + window.scrollY - 8;
+
+    const TIP_W  = 300;
+    const MAX_H  = 380; // altura máxima del popup — el contenido interno scrollea
+    const left   = Math.min(anchorRect.left + anchorRect.width / 2 - TIP_W / 2, window.innerWidth - TIP_W - 8);
+
+    // Posicionar arriba de la celda; si no cabe, abajo
+    const espacioArriba = anchorRect.top;
+    const abrirAbajo    = espacioArriba < MAX_H + 16;
+    const top = abrirAbajo
+        ? anchorRect.bottom + window.scrollY + 8
+        : anchorRect.top + window.scrollY - 8;
+
     const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
 
+    // ── Cerrar al hacer click fuera ───────────────────────────────────────────
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (popupRef.current && !popupRef.current.contains(e.target)) {
+                onClose();
+            }
+        };
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        // Timeout para que el click que abre el popup no lo cierre inmediatamente
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleEscape);
+        }, 0);
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [onClose]);
+
     return createPortal(
-        <div style={{ position: 'absolute', top, left: Math.max(8, left), width: TIP_W, zIndex: 9999, transform: 'translateY(-100%)' }}
-            className="bg-white border border-slate-200 rounded-xl shadow-2xl p-3 text-left pointer-events-none">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{fmtDate(dia)}</p>
-            {desembolsos.length > 0 && (
-                <div className="mb-2">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Desembolsos — S/ {fmt(totalDesemb)}</p>
-                    {desembolsos.map((d, i) => {
-                        const color = asesorColorMap[d.asesor_id] ?? ASESOR_COLORS[0];
-                        return (
-                            <div key={i} className={`flex items-center justify-between px-2 py-1 rounded-lg mb-0.5 ${color.bg}`}>
-                                <div className="flex flex-col min-w-0">
-                                    <span className={`text-[9px] font-black ${color.text} opacity-60`}>{d.prestamo_label}</span>
-                                    <span className={`text-[10px] font-bold truncate ${color.text}`}>{d.cliente}</span>
+        <div ref={popupRef}
+            style={{
+                position: 'absolute',
+                top,
+                left: Math.max(8, left),
+                width: TIP_W,
+                zIndex: 9999,
+                transform: abrirAbajo ? 'none' : 'translateY(-100%)',
+            }}
+            className="bg-white border border-slate-200 rounded-xl shadow-2xl text-left flex flex-col overflow-hidden"
+        >
+            {/* Header fijo */}
+            <div className="flex items-center justify-between px-3 pt-3 pb-2 border-b border-slate-100 flex-shrink-0">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{fmtDate(dia)}</p>
+                <button onClick={onClose} className="p-0.5 text-slate-300 hover:text-brand-red transition-colors">
+                    <XMarkIcon className="w-3.5 h-3.5" />
+                </button>
+            </div>
+
+            {/* Contenido con scroll */}
+            <div className="overflow-y-auto px-3 pb-3" style={{ maxHeight: MAX_H }}>
+                {desembolsos.length > 0 && (
+                    <div className="mb-2">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest sticky top-0 z-10 bg-white pt-2 pb-1 -mx-3 px-3">
+                            Desembolsos — S/ {fmt(totalDesemb)} ({desembolsos.length})
+                        </p>
+                        {desembolsos.map((d, i) => {
+                            const color = asesorColorMap[d.asesor_id] ?? ASESOR_COLORS[0];
+                            return (
+                                <div key={i} className={`flex items-center justify-between px-2 py-1 rounded-lg mb-0.5 ${color.bg}`}>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className={`text-[9px] font-black ${color.text} opacity-60`}>{d.prestamo_label}</span>
+                                        <span className={`text-[10px] font-bold truncate ${color.text}`}>{d.cliente}</span>
+                                    </div>
+                                    <span className={`text-[10px] font-black ml-2 flex-shrink-0 ${color.text}`}>+S/ {fmt(d.monto)}</span>
                                 </div>
-                                <span className={`text-[10px] font-black ml-2 flex-shrink-0 ${color.text}`}>+S/ {fmt(d.monto)}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-            {pagos.length > 0 && (
-                <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Capital cobrado — S/ {fmt(totalCapital)}</p>
-                    {pagos.map((p, i) => {
-                        const color = asesorColorMap[p.asesor_id] ?? ASESOR_COLORS[0];
-                        return (
-                            <div key={i} className={`flex items-center justify-between px-2 py-1 rounded-lg mb-0.5 ${color.bg}`}>
-                                <div className="flex flex-col min-w-0">
-                                    <span className={`text-[9px] font-black ${color.text} opacity-60`}>{p.prestamo_label} · C{p.numero_cuota}</span>
-                                    <span className={`text-[10px] font-bold truncate ${color.text}`}>{p.cliente}</span>
+                            );
+                        })}
+                    </div>
+                )}
+                {pagos.length > 0 && (
+                    <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest sticky top-0 z-10 bg-white pt-2 pb-1 -mx-3 px-3">
+                            Capital cobrado — S/ {fmt(totalCapital)} ({pagos.length})
+                        </p>
+                        {pagos.map((p, i) => {
+                            const color = asesorColorMap[p.asesor_id] ?? ASESOR_COLORS[0];
+                            return (
+                                <div key={i} className={`flex items-center justify-between px-2 py-1 rounded-lg mb-0.5 ${color.bg}`}>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className={`text-[9px] font-black ${color.text} opacity-60`}>{p.prestamo_label} · C{p.numero_cuota}</span>
+                                        <span className={`text-[10px] font-bold truncate ${color.text}`}>{p.cliente}</span>
+                                    </div>
+                                    <span className={`text-[9px] font-black ml-1 flex-shrink-0 ${color.text}`}>−S/ {fmt(p.capital)}</span>
                                 </div>
-                                <span className={`text-[9px] font-black ml-1 flex-shrink-0 ${color.text}`}>−S/ {fmt(p.capital)}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
         </div>,
         document.body
     );
 };
 
 // ── Celda del día ─────────────────────────────────────────────────────────────
-const DayCell = ({ fecha, eventos, asesorColorMap, esHoy, esMesActual }) => {
-    const [anchorRect, setAnchorRect] = useState(null);
+const DayCell = ({ fecha, eventos, asesorColorMap, esHoy, esMesActual, abierto, onToggle }) => {
     const ref = useRef(null);
     const desembolsos  = eventos?.desembolsos   ?? [];
     const pagos        = eventos?.pagos_capital ?? [];
@@ -96,8 +150,11 @@ const DayCell = ({ fecha, eventos, asesorColorMap, esHoy, esMesActual }) => {
     const totalDesemb  = desembolsos.reduce((s, d) => s + d.monto,   0);
     const totalCapital = pagos.reduce((s, p) => s + p.capital, 0);
     const asesoresPresentes = [...new Set([...desembolsos.map(d => d.asesor_id), ...pagos.map(p => p.asesor_id)])];
-    const handleMouseEnter = useCallback(() => { if (!tieneEventos || !ref.current) return; setAnchorRect(ref.current.getBoundingClientRect()); }, [tieneEventos]);
-    const handleMouseLeave = useCallback(() => setAnchorRect(null), []);
+
+    const handleClick = useCallback(() => {
+        if (!tieneEventos || !ref.current) return;
+        onToggle(fecha, ref.current.getBoundingClientRect());
+    }, [tieneEventos, fecha, onToggle]);
 
     return (
         <div ref={ref}
@@ -105,8 +162,9 @@ const DayCell = ({ fecha, eventos, asesorColorMap, esHoy, esMesActual }) => {
                 ${esMesActual ? 'bg-white border-slate-100' : 'bg-slate-200/90 border-slate-300/60 opacity-40'}
                 ${esHoy ? 'ring-2 ring-brand-red ring-offset-1' : ''}
                 ${tieneEventos ? 'cursor-pointer hover:border-slate-300 transition-colors' : ''}
+                ${abierto ? 'border-brand-red/50 shadow-md' : ''}
             `}
-            onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            onClick={handleClick}>
             <span className={`text-base font-black self-end leading-none mb-1 ${esHoy ? 'text-brand-red' : esMesActual ? 'text-slate-700' : 'text-slate-300'}`}>
                 {new Date(fecha + 'T00:00:00').getDate()}
             </span>
@@ -124,31 +182,35 @@ const DayCell = ({ fecha, eventos, asesorColorMap, esHoy, esMesActual }) => {
                     {totalCapital > 0 && <span className="text-[11px] font-black text-green-600 leading-none truncate">↓ S/{fmt(totalCapital)}</span>}
                 </div>
             )}
-            {anchorRect && tieneEventos && (
-                <DayTooltip dia={fecha} eventos={eventos} asesorColorMap={asesorColorMap} anchorRect={anchorRect} />
-            )}
         </div>
     );
 };
 
-// ── Calendario — navega libremente, notifica al padre al cambiar mes ──────────
+// ── Calendario ────────────────────────────────────────────────────────────────
 const Calendario = ({ eventos, asesorColorMap, mes, anio, onMesChange }) => {
     const hoy = new Date();
+    // Popup abierto: { fecha, rect } o null
+    const [popupAbierto, setPopupAbierto] = useState(null);
+
+    const handleToggleDia = useCallback((fecha, rect) => {
+        setPopupAbierto(prev => prev?.fecha === fecha ? null : { fecha, rect });
+    }, []);
+
+    const cerrarPopup = useCallback(() => setPopupAbierto(null), []);
 
     const prevMes = () => {
-        const nuevo = mes === 1 ? { mes: 12, anio: anio - 1 } : { mes: mes - 1, anio };
-        onMesChange(nuevo);
+        cerrarPopup();
+        onMesChange(mes === 1 ? { mes: 12, anio: anio - 1 } : { mes: mes - 1, anio });
     };
     const nextMes = () => {
-        const nuevo = mes === 12 ? { mes: 1, anio: anio + 1 } : { mes: mes + 1, anio };
-        onMesChange(nuevo);
+        cerrarPopup();
+        onMesChange(mes === 12 ? { mes: 1, anio: anio + 1 } : { mes: mes + 1, anio });
     };
 
     const diasDelMes = useMemo(() => {
         const result  = [];
         const primero = new Date(anio, mes - 1, 1);
         const ultimo  = new Date(anio, mes, 0);
-        
         for (let i = 0; i < primero.getDay(); i++) {
             const d = new Date(anio, mes - 1, -primero.getDay() + i + 1);
             const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -194,9 +256,23 @@ const Calendario = ({ eventos, asesorColorMap, mes, anio, onMesChange }) => {
                         asesorColorMap={asesorColorMap}
                         esHoy={fecha === hoyStr}
                         esMesActual={esMesActual}
+                        abierto={popupAbierto?.fecha === fecha}
+                        onToggle={handleToggleDia}
                     />
                 ))}
             </div>
+
+            {/* Popup — un solo portal a nivel calendario */}
+            {popupAbierto && eventos[popupAbierto.fecha] && (
+                <DayTooltip
+                    dia={popupAbierto.fecha}
+                    eventos={eventos[popupAbierto.fecha]}
+                    asesorColorMap={asesorColorMap}
+                    anchorRect={popupAbierto.rect}
+                    onClose={cerrarPopup}
+                />
+            )}
+
             <div className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-slate-100">
                 <div className="flex items-center gap-1.5">
                     <span className="text-sm font-black text-blue-600">↑</span>
@@ -205,6 +281,9 @@ const Calendario = ({ eventos, asesorColorMap, mes, anio, onMesChange }) => {
                 <div className="flex items-center gap-1.5">
                     <span className="text-sm font-black text-green-600">↓</span>
                     <span className="text-xs font-semibold text-slate-500">Capital cobrado</span>
+                </div>
+                <div className="flex items-center gap-1.5 ml-auto">
+                    <span className="text-[10px] font-bold text-slate-400">Click en un día para ver el detalle</span>
                 </div>
             </div>
         </div>
@@ -225,7 +304,7 @@ const AsesorChip = ({ nombre, color, desembolsos, capital }) => (
     </div>
 );
 
-// ── Card principal ─────────────────────────────────────────────────────────────
+// ── Card principal ────────────────────────────────────────────────────────────
 const DesembolsoCapitalCard = () => {
     const {
         loading, data,
@@ -248,7 +327,6 @@ const DesembolsoCapitalCard = () => {
         return map;
     }, [asesores]);
 
-    // Chips: acumulados del mes visible calculados localmente sobre los eventos ya cargados
     const acumMesPorAsesor = useMemo(() => {
         const map    = {};
         const prefix = `${mesVisible.anio}-${String(mesVisible.mes).padStart(2, '0')}-`;
@@ -272,7 +350,6 @@ const DesembolsoCapitalCard = () => {
         return { desembolsos, capital };
     }, [acumMesPorAsesor]);
 
-    // Export usa el mes visible y los asesores seleccionados
     const exportFilters = {
         mes:  mesVisible.mes,
         anio: mesVisible.anio,
@@ -283,6 +360,7 @@ const DesembolsoCapitalCard = () => {
 
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-visible">
+
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 hover:bg-slate-50/60 transition-colors rounded-t-2xl">
                 <div className="flex items-center gap-2.5 flex-1 cursor-pointer select-none" onClick={() => setCollapsed(v => !v)}>
@@ -316,49 +394,51 @@ const DesembolsoCapitalCard = () => {
 
             {!collapsed && (
                 <>
-                    {/* Filtro asesor únicamente */}
-                    <div className="px-6 py-3 border-b border-slate-50 bg-slate-50/50 flex flex-wrap items-end gap-3">
-                        <div className="flex flex-col gap-1">
-                            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Asesor</label>
-                            <EmpleadoSearchSelect
-                                key={comboKey}
-                                rol="ASESOR"
-                                onSelect={handleAgregarAsesor}
-                                clearOnSelect={true}
-                                placeholder="Agregar asesor..."
-                            />
-                        </div>
-                        <div className="flex items-end gap-2">
-                            <button onClick={handleFiltrarAsesor} disabled={loading}
-                                className="flex items-center gap-1.5 px-4 py-2 bg-brand-red text-white text-[10px] font-black uppercase rounded-lg hover:bg-brand-red-dark transition-all disabled:opacity-50">
-                                <MagnifyingGlassIcon className="w-3.5 h-3.5" /> Filtrar
-                            </button>
-                            <button onClick={onLimpiar}
-                                className="flex items-center gap-1 px-3 py-2 text-slate-400 hover:text-brand-red text-[10px] font-black uppercase rounded-lg border border-slate-200 hover:border-brand-red/30 transition-all">
-                                <XMarkIcon className="w-3.5 h-3.5" /> Limpiar
-                            </button>
-                        </div>
-                    </div>
+                    {/* Filtro asesor */}
+                    <>
+                            <div className="px-6 py-3 border-b border-slate-50 bg-slate-50/50 flex flex-wrap items-end gap-3">
+                                <div className="flex flex-col gap-1">
+                                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Asesor</label>
+                                    <EmpleadoSearchSelect
+                                        key={comboKey}
+                                        rol="ASESOR"
+                                        onSelect={handleAgregarAsesor}
+                                        clearOnSelect={true}
+                                        placeholder="Agregar asesor..."
+                                    />
+                                </div>
+                                <div className="flex items-end gap-2">
+                                    <button onClick={handleFiltrarAsesor} disabled={loading}
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-brand-red text-white text-[10px] font-black uppercase rounded-lg hover:bg-brand-red-dark transition-all disabled:opacity-50">
+                                        <MagnifyingGlassIcon className="w-3.5 h-3.5" /> Filtrar
+                                    </button>
+                                    <button onClick={onLimpiar}
+                                        className="flex items-center gap-1 px-3 py-2 text-slate-400 hover:text-brand-red text-[10px] font-black uppercase rounded-lg border border-slate-200 hover:border-brand-red/30 transition-all">
+                                        <XMarkIcon className="w-3.5 h-3.5" /> Limpiar
+                                    </button>
+                                </div>
+                            </div>
 
-                    {/* Tags asesores */}
-                    {asesoresSeleccionados.length > 0 && (
-                        <div className="px-6 py-2 border-b border-slate-50 bg-white flex flex-wrap gap-2">
-                            {asesoresSeleccionados.map((a, i) => {
-                                const color = ASESOR_COLORS[i % ASESOR_COLORS.length];
-                                return (
-                                    <span key={a.id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${color.bg} ${color.text}`}>
-                                        <div className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
-                                        {a.nombre}
-                                        <button onClick={() => handleQuitarAsesor(a.id)} className="hover:opacity-70">
-                                            <XMarkIcon className="w-3 h-3" />
-                                        </button>
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    )}
+                            {/* Tags asesores seleccionados */}
+                            {asesoresSeleccionados.length > 0 && (
+                                <div className="px-6 py-2 border-b border-slate-50 bg-white flex flex-wrap gap-2">
+                                    {asesoresSeleccionados.map((a, i) => {
+                                        const color = ASESOR_COLORS[i % ASESOR_COLORS.length];
+                                        return (
+                                            <span key={a.id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${color.bg} ${color.text}`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
+                                                {a.nombre}
+                                                <button onClick={() => handleQuitarAsesor(a.id)} className="hover:opacity-70">
+                                                    <XMarkIcon className="w-3 h-3" />
+                                                </button>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                    </>
 
-                    {/* Chips por asesor — totales del mes visible */}
+                    {/* Chips por asesor */}
                     {!loading && asesores.length > 0 && (
                         <div className="px-6 py-3 border-b border-slate-50 bg-white flex flex-wrap gap-2">
                             {asesores.map((a, i) => {
@@ -373,7 +453,6 @@ const DesembolsoCapitalCard = () => {
                                     />
                                 );
                             })}
-                            
                             <div className="flex flex-col gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 min-w-[180px]">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                                     Total {MESES[mesVisible.mes - 1]}
@@ -383,7 +462,6 @@ const DesembolsoCapitalCard = () => {
                                     <span className="text-xs font-black text-slate-300">↓ S/{fmt(totalesMes.capital)}</span>
                                 </div>
                             </div>
-
                         </div>
                     )}
 
