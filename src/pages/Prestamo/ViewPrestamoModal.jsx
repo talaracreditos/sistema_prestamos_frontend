@@ -23,7 +23,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
     const [refreshing, setRefreshing]                       = useState(false);
 
-    /* ── Rol del usuario logueado ── */
     const { user, role } = useAuth();
     const esCliente = role === 'cliente';
 
@@ -54,17 +53,11 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         setRefModalOpen,
     } = useViewPrestamoModal({ data, onClose, onRefresh });
 
-    /* ── Integrante del cliente logueado (grupal) ── */
     const miIntegrante = esCliente && data?.es_grupal
         ? data?.integrantes?.find(int => int.id === userId)
             ?? data?.integrantes_refinanciados?.find(int => int.id === userId)
         : null;
 
-    /* ── Toggle Grupo / Mi saldo (solo cliente en grupal) ──
-     * Vista global por defecto. "Mi saldo" selecciona SU integrante.
-     * "Grupo" vuelve haciendo re-click en el mismo integrante (el hook
-     * hace toggle al seleccionar el mismo id — si tu hook no hace toggle,
-     * agrega ahí: if (integranteSeleccionado === id) → deseleccionar). */
     const handleVerMiSaldo = () => {
         if (!miIntegrante || esVistaIntegrante) return;
         handleSelectIntegrante(miIntegrante.id);
@@ -174,8 +167,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         )}
 
-                        {/* 2. Integrantes — SOLO vista admin/staff (el cliente los ve
-                             como lista informativa dentro de CronogramaCliente) */}
+                        {/* 2. Integrantes */}
                         {!esCliente && data.es_grupal && tieneIntegrantes && (
                             <div className="bg-brand-red-light/40 p-4 rounded-xl border border-brand-red/10">
                                 <h4 className="flex items-center gap-2 text-xs font-black text-brand-red-dark uppercase mb-1">
@@ -244,7 +236,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         )}
 
-                        {/* 3. Banner liquidado — solo staff (el cliente tiene su propio banner 🎉) */}
+                        {/* 3. Banner liquidado — solo staff (el cliente tiene su propio banner ) */}
                         {!esCliente && data.estado === 3 && !loadingIntegrante && (
                             <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl">
                                 <span className="text-[9px] font-black text-green-700 uppercase">
@@ -253,9 +245,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         )}
 
-                        {/* Toggle Grupo / Mi saldo — solo cliente en préstamo grupal */}
+                        {/* Toggle Grupo / Mi saldo  */}
                         {esCliente && data.es_grupal && miIntegrante && (
-                            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+                            <div data-tutorial="toggle-vista" className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
                                 <button
                                     onClick={handleVerGrupo}
                                     disabled={loadingIntegrante}

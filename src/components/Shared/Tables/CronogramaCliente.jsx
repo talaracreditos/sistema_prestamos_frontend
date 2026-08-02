@@ -7,11 +7,13 @@ import {
     CheckCircleIcon,
     SparklesIcon,
     UsersIcon,
+    QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckSolidIcon } from '@heroicons/react/24/solid';
 import { useCuotaData } from './hooks/useCuotaData';
+import TutorialCliente from './TutorialCliente';
 
-const ESTADOS_NO_EXIGIBLES = [0, 2, 6]; // cancelado, pagado, refinanciado
+const ESTADOS_NO_EXIGIBLES = [0, 2, 6];
 
 const fmt = (v) => `S/ ${parseFloat(v ?? 0).toFixed(2)}`;
 
@@ -21,7 +23,7 @@ const fmt = (v) => `S/ ${parseFloat(v ?? 0).toFixed(2)}`;
 const ListaIntegrantes = ({ integrantes, miIntegranteId }) => {
     if (!integrantes?.length) return null;
     return (
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div data-tutorial="integrantes" className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">
                 <UsersIcon className="w-4 h-4 text-brand-red" />
                 Integrantes del grupo ({integrantes.length})
@@ -62,7 +64,7 @@ const ListaIntegrantes = ({ integrantes, miIntegranteId }) => {
 const ProgresoPago = ({ pagadas, total, esVistaPersonal }) => {
     const pct = total > 0 ? Math.round((pagadas / total) * 100) : 0;
     return (
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div data-tutorial="progreso" className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     {esVistaPersonal ? 'Tu avance de pago' : 'Avance del grupo'}
@@ -95,7 +97,7 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
     const conAtraso  = esVencida && d.diasAtraso > 0;
 
     return (
-        <div className={`p-5 rounded-2xl shadow-xl text-white ${
+        <div data-tutorial="proxima" className={`p-5 rounded-2xl shadow-xl text-white ${
             conAtraso
                 ? 'bg-brand-red shadow-brand-red/30'
                 : 'bg-slate-800 shadow-slate-800/20'
@@ -254,7 +256,8 @@ const CronogramaCliente = ({
     miIntegranteId = null,
 }) => {
 
-    const [verPagadas, setVerPagadas] = useState(false);
+    const [verPagadas, setVerPagadas]   = useState(false);
+    const [tutorialKey, setTutorialKey] = useState(0); // >0 = reabrir guía
 
     const esVistaPersonal = !esGrupal || esVistaIntegrante;
 
@@ -273,8 +276,22 @@ const CronogramaCliente = ({
     return (
         <div className="flex flex-col gap-4">
 
+            {/* Tutorial spotlight — resalta las secciones reales de esta vista.
+                Se abre solo la primera vez (localStorage 'tutorial_cliente') */}
+            <TutorialCliente esGrupal={esGrupal} reabrir={tutorialKey} />
+
+            {/* Botón para reabrir la guía (también es el ancla del último paso) */}
+            <button
+                data-tutorial="ayuda"
+                onClick={() => setTutorialKey(k => k + 1)}
+                className="flex items-center gap-1.5 self-end -mb-2 text-[9px] font-black text-slate-400 hover:text-brand-red uppercase tracking-wide transition-colors"
+            >
+                <QuestionMarkCircleIcon className="w-3.5 h-3.5" />
+                ¿Cómo leer mi cronograma?
+            </button>
+
             {eco !== null && !prestamoCancelado && (
-                <div className="grid grid-cols-2 gap-3">
+                <div data-tutorial="resumen" className="grid grid-cols-2 gap-3">
                     <div className="p-4 bg-brand-red rounded-2xl shadow-lg shadow-brand-red/20">
                         <p className="text-[9px] font-black uppercase text-white/70 mb-1">
                             {prestamoTerminado
@@ -339,7 +356,7 @@ const CronogramaCliente = ({
 
             {/* Resto de cuotas pendientes */}
             {pendientes.length > 1 && !prestamoCancelado && (
-                <div className="flex flex-col gap-2">
+                <div data-tutorial="pendientes" className="flex flex-col gap-2">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
                         Cuotas siguientes ({pendientes.length - 1})
                     </p>
@@ -356,7 +373,7 @@ const CronogramaCliente = ({
 
             {/* Cuotas pagadas — colapsadas */}
             {pagadas.length > 0 && (
-                <div className="flex flex-col gap-2">
+                <div data-tutorial="pagadas" className="flex flex-col gap-2">
                     <button
                         onClick={() => setVerPagadas(v => !v)}
                         className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 transition-all"
