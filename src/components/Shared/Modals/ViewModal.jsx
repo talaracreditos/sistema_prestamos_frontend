@@ -58,7 +58,7 @@ const ViewModal = ({ isOpen, onClose, title, children, isLoading = false, size =
                         <div className="flex flex-col items-center justify-center py-20">
                             <div className="relative w-12 h-12">
                                 <div className="absolute inset-0 border-4 border-slate-100 rounded-full" />
-                                <div className="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin" />
+                                <div className="absolute inset-0 border-4 border-t-red-800 rounded-full animate-spin" />
                             </div>
                             <p className="mt-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Cargando información...</p>
                         </div>

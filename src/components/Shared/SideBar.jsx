@@ -107,7 +107,6 @@ export const MENU_GROUPS = [
                 section: 'Préstamos', icon: BanknotesIcon,
                 subs: [
                     { name: 'Listar Préstamos', link: '/prestamo/listar',          requiredPermission: 'prestamo.index' },
-                    { name: 'Nuevo Préstamo',   link: '/prestamo/agregar',         requiredPermission: 'prestamo.store' },
                     { name: 'Nueva Solicitud',  link: '/solicitudPrestamo/agregar', requiredPermission: 'solicitudPrestamo.store' },
                     { name: 'Solicitudes',      link: '/solicitudPrestamo/listar',  requiredPermission: 'solicitudPrestamo.index' },
                 ],
@@ -138,18 +137,6 @@ export const MENU_GROUPS = [
                     { name: 'Sesiones (Apertura/Cierre)', link: '/caja/sesiones', requiredPermission: 'cajaSesion.index' },
                     { name: 'Gestión de Cajas',           link: '/caja/listar',   requiredPermission: 'caja.index' },
                     { name: 'Nueva Caja',                 link: '/caja/agregar',  requiredPermission: 'caja.store' },
-                ],
-            }
-        ]
-    },
-    {
-        groupName: 'Reportes',
-        items: [
-            {
-                section: 'Informes', icon: DocumentChartBarIcon,
-                subs: [
-                    { name: 'Clientes Morosos', link: '/reporte/morosos',    requiredPermission: 'reporte.morosidad' },
-                    { name: 'Flujo de Caja',    link: '/reporte/flujo-caja', requiredPermission: 'reporte.flujo' },
                 ],
             }
         ]
