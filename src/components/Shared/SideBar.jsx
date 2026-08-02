@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
     HomeIcon, ChartPieIcon, UsersIcon, BanknotesIcon, 
     CurrencyDollarIcon, BuildingLibraryIcon, UserGroupIcon, 
-    WalletIcon, DocumentChartBarIcon, Bars3Icon,
+    WalletIcon, Bars3Icon,
     ArrowRightOnRectangleIcon, CubeIcon,
     ClipboardDocumentListIcon,
     ArrowsRightLeftIcon
