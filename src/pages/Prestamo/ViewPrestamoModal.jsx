@@ -6,6 +6,7 @@ import RefinanciamientoModal from './RefinanciamientoModal';
 import ReducirMoraModal from './ReducirMoraModal';
 import CambiarPresidenteModal from './CambiarPresidenteModal';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
+import CronogramaCliente from 'components/Shared/Tables/CronogramaCliente';
 import {
     CalendarIcon, UserIcon, UserGroupIcon,
     InformationCircleIcon, UsersIcon,
@@ -13,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowPathRoundedSquareIcon, StarIcon } from '@heroicons/react/24/outline';
 import { useViewPrestamoModal } from 'hooks/Prestamo/useViewPrestamoModal';
+import { useAuth } from 'context/AuthContext';
 
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
@@ -20,6 +22,12 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const [cuotaParaReducir, setCuotaParaReducir]           = useState(null);
     const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
     const [refreshing, setRefreshing]                       = useState(false);
+
+    /* ── Rol del usuario logueado ── */
+    const { user, role } = useAuth();
+    const esCliente = role === 'cliente';
+
+    const userId = user?.id ?? null;
 
     const {
         canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente,
@@ -45,6 +53,27 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         setHistorialModal,
         setRefModalOpen,
     } = useViewPrestamoModal({ data, onClose, onRefresh });
+
+    /* ── Integrante del cliente logueado (grupal) ── */
+    const miIntegrante = esCliente && data?.es_grupal
+        ? data?.integrantes?.find(int => int.id === userId)
+            ?? data?.integrantes_refinanciados?.find(int => int.id === userId)
+        : null;
+
+    /* ── Toggle Grupo / Mi saldo (solo cliente en grupal) ──
+     * Vista global por defecto. "Mi saldo" selecciona SU integrante.
+     * "Grupo" vuelve haciendo re-click en el mismo integrante (el hook
+     * hace toggle al seleccionar el mismo id — si tu hook no hace toggle,
+     * agrega ahí: if (integranteSeleccionado === id) → deseleccionar). */
+    const handleVerMiSaldo = () => {
+        if (!miIntegrante || esVistaIntegrante) return;
+        handleSelectIntegrante(miIntegrante.id);
+    };
+
+    const handleVerGrupo = () => {
+        if (!esVistaIntegrante || !integranteSeleccionado) return;
+        handleSelectIntegrante(integranteSeleccionado);
+    };
 
     const integranteTienePendientes = esVistaIntegrante
         ? (cronogramaActivo ?? []).some(c => ![2, 6, 0].includes(c.estado))
@@ -72,7 +101,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
             <ViewModal
                 isOpen={isOpen}
                 onClose={handleClose}
-                title={`Detalle de Préstamo #${data?.id?.toString().padStart(5, '0')}`}
+                title={esCliente
+                    ? `Mi Préstamo #${data?.id?.toString().padStart(5, '0')}`
+                    : `Detalle de Préstamo #${data?.id?.toString().padStart(5, '0')}`}
                 isLoading={isLoading}
                 size="xl"
                 hideFooter = {true}
@@ -91,8 +122,10 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                         {data.es_grupal ? 'Grupo Solidario' : 'Cliente Titular'}
                                     </p>
                                     <p className="text-sm font-black uppercase text-slate-800">{data.cliente?.nombre}</p>
-                                    <p className="text-[10px] font-bold text-brand-red">Documento: {data.cliente?.documento}</p>
-                                    {!data.es_grupal && (
+                                    {!esCliente && (
+                                        <p className="text-[10px] font-bold text-brand-red">Documento: {data.cliente?.documento}</p>
+                                    )}
+                                    {!data.es_grupal && !esCliente && (
                                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                                             <span className={`text-[9px] font-black uppercase ${
                                                 data.integrantes?.[0]?.situacion === 'CASTIGADO' ? 'text-red-600' :
@@ -134,13 +167,16 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         {prestamoCancelado && (
                             <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl">
                                 <span className="text-[9px] font-black text-slate-500 uppercase">
-                                    🚫 Préstamo Cancelado — Las cuotas ya no son exigibles
+                                    {esCliente
+                                        ? '🚫 Este préstamo fue cancelado — Ya no hay cuotas por pagar'
+                                        : '🚫 Préstamo Cancelado — Las cuotas ya no son exigibles'}
                                 </span>
                             </div>
                         )}
 
-                        {/* 2. Integrantes */}
-                        {data.es_grupal && tieneIntegrantes && (
+                        {/* 2. Integrantes — SOLO vista admin/staff (el cliente los ve
+                             como lista informativa dentro de CronogramaCliente) */}
+                        {!esCliente && data.es_grupal && tieneIntegrantes && (
                             <div className="bg-brand-red-light/40 p-4 rounded-xl border border-brand-red/10">
                                 <h4 className="flex items-center gap-2 text-xs font-black text-brand-red-dark uppercase mb-1">
                                     <UsersIcon className="w-4 h-4" /> Desglose de Integrantes
@@ -208,8 +244,8 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         )}
 
-                        {/* 3. Banner liquidado */}
-                        {data.estado === 3 && !loadingIntegrante && (
+                        {/* 3. Banner liquidado — solo staff (el cliente tiene su propio banner 🎉) */}
+                        {!esCliente && data.estado === 3 && !loadingIntegrante && (
                             <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl">
                                 <span className="text-[9px] font-black text-green-700 uppercase">
                                     ✓ Préstamo Liquidado
@@ -217,15 +253,47 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         )}
 
+                        {/* Toggle Grupo / Mi saldo — solo cliente en préstamo grupal */}
+                        {esCliente && data.es_grupal && miIntegrante && (
+                            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+                                <button
+                                    onClick={handleVerGrupo}
+                                    disabled={loadingIntegrante}
+                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
+                                        !esVistaIntegrante
+                                            ? 'bg-brand-red text-white shadow-md shadow-brand-red/20'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                                >
+                                    <UsersIcon className="w-3.5 h-3.5" />
+                                    Grupo
+                                </button>
+                                <button
+                                    onClick={handleVerMiSaldo}
+                                    disabled={loadingIntegrante}
+                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50 ${
+                                        esVistaIntegrante
+                                            ? 'bg-brand-red text-white shadow-md shadow-brand-red/20'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                                >
+                                    <UserIcon className="w-3.5 h-3.5" />
+                                    Mi Saldo
+                                </button>
+                            </div>
+                        )}
+
                         {/* 4. Header cronograma */}
                         <div className="flex items-center justify-between flex-wrap gap-2">
                             <h4 className="flex items-center gap-2 text-[11px] font-black text-slate-700 uppercase tracking-widest px-1">
                                 <CalendarIcon className="w-4 h-4 text-brand-red" />
-                                {esVistaIntegrante ? `Cronograma — ${integranteNombre}` : 'Cronograma de Pagos y Saldos'}
+                                {esCliente
+                                    ? (esVistaIntegrante ? 'Mis Cuotas' : (data.es_grupal ? 'Cuotas del Grupo' : 'Mis Cuotas'))
+                                    : esVistaIntegrante ? `Cronograma — ${integranteNombre}` : 'Cronograma de Pagos y Saldos'}
                             </h4>
                             <div className="flex items-center gap-2 flex-wrap">
 
-                                {canRefinanciar && data.estado === 1 && !prestamoCancelado && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (!esVistaIntegrante || integranteTienePendientes) && data.datos_economicos?.desembolsado && (
+                                {!esCliente && canRefinanciar && data.estado === 1 && !prestamoCancelado && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (!esVistaIntegrante || integranteTienePendientes) && data.datos_economicos?.desembolsado && (
                                     <button
                                         onClick={() => handleAbrirRefinanciamiento(cronogramaActivo, esVistaIntegrante, integranteNombre)}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold hover:bg-brand-gold-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-gold/20"
@@ -235,7 +303,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </button>
                                 )}
 
-                                {canCambiarPresidente && data.es_grupal && !esVistaIntegrante && data.estado === 1 && !prestamoCancelado && data.integrantes?.length > 1 && (
+                                {!esCliente && canCambiarPresidente && data.es_grupal && !esVistaIntegrante && data.estado === 1 && !prestamoCancelado && data.integrantes?.length > 1 && (
                                     <button
                                         onClick={() => setCambiarPresidenteOpen(true)}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md"
@@ -245,7 +313,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </button>
                                 )}
 
-                                {integranteYaRefinanciado && (
+                                {!esCliente && integranteYaRefinanciado && (
                                     <span className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-500 text-[10px] font-black uppercase rounded-lg border border-blue-200">
                                         <ArrowPathRoundedSquareIcon className="w-3.5 h-3.5" />
                                         Préstamo #{integranteRefinanciado.refinanciado_prestamo_id?.toString().padStart(5, '0')}
@@ -268,18 +336,30 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                             ? <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
                                             : <ArrowDownTrayIcon className="w-3.5 h-3.5" />
                                         }
-                                        {esVistaIntegrante ? 'PDF Individual' : (data.es_grupal ? 'PDF Grupal' : 'Descargar PDF')}
+                                        {esCliente
+                                            ? (esVistaIntegrante ? 'PDF de mis cuotas' : 'Descargar PDF')
+                                            : esVistaIntegrante ? 'PDF Individual' : (data.es_grupal ? 'PDF Grupal' : 'Descargar PDF')}
                                     </button>
                                 )}
                             </div>
                         </div>
 
-                        {/* 5. Cronograma + Cards económicas integradas */}
+                        {/* 5. Cronograma */}
                         {loadingIntegrante ? (
                             <div className="flex items-center justify-center py-12">
                                 <ArrowPathIcon className="w-6 h-6 animate-spin text-brand-red" />
                                 <span className="ml-2 text-xs text-slate-400 font-bold uppercase">Cargando cronograma...</span>
                             </div>
+                        ) : esCliente ? (
+                            <CronogramaCliente
+                                cronograma={cronogramaActivo}
+                                eco={eco}
+                                estadoPrestamo={data.estado}
+                                prestamoCancelado={prestamoCancelado}
+                                esVistaIntegrante={esVistaIntegrante}
+                                integrantes={data.es_grupal ? data.integrantes : []}
+                                miIntegranteId={miIntegrante?.id ?? null}
+                            />
                         ) : (
                             <CronogramaTable
                                 cronograma={cronogramaActivo}
@@ -302,25 +382,29 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
             <HistorialMoraModal isOpen={!!historialModal} onClose={() => setHistorialModal(null)} data={historialModal} />
             <PdfModal isOpen={pdfOpen} onClose={handleCerrarPdf} title={pdfTitle} base64={pdfBase64} />
-            <RefinanciamientoModal
-                isOpen={refModalOpen}
-                onClose={() => setRefModalOpen(false)}
-                data={refData}
-                integrantesGrupo={data?.integrantes}
-                onSuccess={handleSuccessRefinanciamiento}
-            />
-            <ReducirMoraModal
-                isOpen={reducirMoraOpen}
-                onClose={() => { setReducirMoraOpen(false); setCuotaParaReducir(null); }}
-                cuota={cuotaParaReducir}
-                onSuccess={handleSuccessReducirMora}
-            />
-            <CambiarPresidenteModal
-                isOpen={cambiarPresidenteOpen}
-                onClose={() => setCambiarPresidenteOpen(false)}
-                prestamo={data}
-                onSuccess={() => { setCambiarPresidenteOpen(false); if (onRefresh) onRefresh(); }}
-            />
+            {!esCliente && (
+                <>
+                    <RefinanciamientoModal
+                        isOpen={refModalOpen}
+                        onClose={() => setRefModalOpen(false)}
+                        data={refData}
+                        integrantesGrupo={data?.integrantes}
+                        onSuccess={handleSuccessRefinanciamiento}
+                    />
+                    <ReducirMoraModal
+                        isOpen={reducirMoraOpen}
+                        onClose={() => { setReducirMoraOpen(false); setCuotaParaReducir(null); }}
+                        cuota={cuotaParaReducir}
+                        onSuccess={handleSuccessReducirMora}
+                    />
+                    <CambiarPresidenteModal
+                        isOpen={cambiarPresidenteOpen}
+                        onClose={() => setCambiarPresidenteOpen(false)}
+                        prestamo={data}
+                        onSuccess={() => { setCambiarPresidenteOpen(false); if (onRefresh) onRefresh(); }}
+                    />
+                </>
+            )}
         </>
     );
 };
