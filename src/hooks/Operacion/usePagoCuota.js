@@ -17,24 +17,21 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const integrantesPendientes  = cuota?.integrantes?.filter(i => ![2, 6].includes(i.estado)) ?? [];
     const soloUnIntegrante       = esGrupal && integrantesPendientes.length === 1;
 
+    /* Mora PENDIENTE */
     const mora = esGrupal
         ? integrantesPendientes.reduce((acc, int) => acc + parseFloat(int.mora_pendiente ?? 0), 0)
-        : parseFloat(cuota?.mora_total ?? cuota?.mora ?? 0);
+        : parseFloat(cuota?.mora ?? 0);
 
     const excedenteIndividual = !esGrupal ? parseFloat(cuota?.excedente_anterior ?? 0) : 0;
 
+    /* Total a pagar */
     const totalAPagar = esGrupal && integrantesPendientes.length > 0
         ? integrantesPendientes.reduce((acc, int) => {
             const saldoCap = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
             const moraPend = parseFloat(int.mora_pendiente ?? 0);
             return acc + saldoCap + moraPend;
         }, 0).toFixed(2)
-        : Math.max(0,
-            parseFloat(cuota?.capital_pendiente ?? 0) +
-            parseFloat(cuota?.interes_pendiente  ?? 0) +
-            parseFloat(cuota?.seguro_pendiente   ?? 0) +
-            mora - excedenteIndividual
-        ).toFixed(2);
+        : parseFloat(cuota?.saldo_pendiente ?? 0).toFixed(2);
 
     // ── Validaciones ──────────────────────────────────────────────────────────
     const integrantesSinCubrirMora = (esGrupal && esParcial)
