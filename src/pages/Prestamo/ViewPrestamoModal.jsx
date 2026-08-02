@@ -356,6 +356,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                 eco={eco}
                                 estadoPrestamo={data.estado}
                                 prestamoCancelado={prestamoCancelado}
+                                esGrupal={!!data.es_grupal}
                                 esVistaIntegrante={esVistaIntegrante}
                                 integrantes={data.es_grupal ? data.integrantes : []}
                                 miIntegranteId={miIntegrante?.id ?? null}
