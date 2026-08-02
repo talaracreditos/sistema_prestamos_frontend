@@ -75,88 +75,99 @@ const Index = () => {
         },
         {
             header: 'Acciones',
-            render: (row) => (
-                <div className="flex gap-1 justify-end items-center flex-wrap">
+            render: (row) => {
+                const puedeAprobar = !!row.codigo_recaudo && !!row.contrato_conforme;
+                const motivoBloqueo = !row.codigo_recaudo && !row.contrato_conforme
+                    ? 'Asigna el código de recaudo y marca el contrato conforme primero'
+                    : !row.codigo_recaudo
+                        ? 'Asigna un código de recaudo primero'
+                        : !row.contrato_conforme
+                            ? 'Marca el contrato como conforme primero'
+                            : 'Aprobar';
 
-                    <button onClick={() => handleView(row.id)}
-                        className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-colors">
-                        <EyeIcon className="w-4 h-4" />
-                    </button>
+                return (
+                    <div className="flex gap-1 justify-end items-center flex-wrap">
 
-                    {row.estado === 1 && (
-                        <>
-                            {can('solicitudPrestamo.update') && (
-                                <Link to={`/solicitudPrestamo/editar/${row.id}`}
-                                    className="p-1.5 text-slate-400 hover:text-brand-gold-dark hover:bg-brand-gold-light rounded-lg transition-colors">
-                                    <PencilSquareIcon className="w-4 h-4" />
-                                </Link>
-                            )}
+                        <button onClick={() => handleView(row.id)}
+                            className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-colors">
+                            <EyeIcon className="w-4 h-4" />
+                        </button>
 
-                            {/* Botón contrato — aplica a AMBOS tipos */}
-                            {can('solicitudPrestamo.generatePDF') && (
-                                <button
-                                    onClick={() => handleVerContrato(row)}
-                                    disabled={contratoLoading === row.id}
-                                    title={row.es_grupal ? 'Ver contrato grupal' : 'Ver contrato individual'}
-                                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                >
-                                    {contratoLoading === row.id
-                                        ? <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
-                                        : <DocumentArrowDownIcon className="w-4 h-4" />
-                                    }
-                                </button>
-                            )}
+                        {row.estado === 1 && (
+                            <>
+                                {can('solicitudPrestamo.update') && (
+                                    <Link to={`/solicitudPrestamo/editar/${row.id}`}
+                                        className="p-1.5 text-slate-400 hover:text-brand-gold-dark hover:bg-brand-gold-light rounded-lg transition-colors">
+                                        <PencilSquareIcon className="w-4 h-4" />
+                                    </Link>
+                                )}
 
-                            {/* Botón código de recaudo — digitador */}
-                            {!row.codigo_recaudo && can('solicitudPrestamo.codigoRecaudo') && (
-                                <button
-                                    onClick={() => openCodigoRecaudoModal(row)}
-                                    title="Asignar código de recaudo"
-                                    className="p-1.5 rounded-lg transition-colors text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                                >
-                                    <IdentificationIcon className="w-4 h-4" />
-                                </button>
-                            )}
-
-                            {/* Marcar conforme — aplica a AMBOS tipos */}
-                            {can('solicitudPrestamo.contratoConforme') && (
-                                <button
-                                    onClick={() => !row.contrato_conforme && handleMarcarConforme(row.id)}
-                                    disabled={row.contrato_conforme || conformeLoading === row.id}
-                                    title={row.contrato_conforme ? 'Contrato conforme' : 'Marcar conforme'}
-                                    className={`p-1.5 rounded-lg transition-colors ${
-                                        row.contrato_conforme
-                                            ? 'text-green-600 bg-green-50 cursor-default'
-                                            : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
-                                    }`}
-                                >
-                                    {conformeLoading === row.id
-                                        ? <div className="w-4 h-4 border-2 border-slate-300 border-t-green-500 rounded-full animate-spin" />
-                                        : <CheckBadgeIcon className="w-4 h-4" />
-                                    }
-                                </button>
-                            )}
-
-                            {can('solicitudPrestamo.status') && (
-                                <>
+                                {/* Botón contrato — aplica a AMBOS tipos */}
+                                {can('solicitudPrestamo.generatePDF') && (
                                     <button
-                                        onClick={() => openApproveModal(row)}
-                                        disabled={!row.codigo_recaudo}
-                                        title={!row.codigo_recaudo ? 'Asigna un código de recaudo primero' : 'Aprobar'}
-                                        className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        onClick={() => handleVerContrato(row)}
+                                        disabled={contratoLoading === row.id}
+                                        title={row.es_grupal ? 'Ver contrato grupal' : 'Ver contrato individual'}
+                                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                     >
-                                        <CheckIcon className="w-4 h-4" />
+                                        {contratoLoading === row.id
+                                            ? <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+                                            : <DocumentArrowDownIcon className="w-4 h-4" />
+                                        }
                                     </button>
-                                    <button onClick={() => handleUpdateStatus(row.id, 3)}
-                                        className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-colors">
-                                        <XMarkIcon className="w-4 h-4" />
+                                )}
+
+                                {/* Botón código de recaudo — digitador */}
+                                {!row.codigo_recaudo && can('solicitudPrestamo.codigoRecaudo') && (
+                                    <button
+                                        onClick={() => openCodigoRecaudoModal(row)}
+                                        title="Asignar código de recaudo"
+                                        className="p-1.5 rounded-lg transition-colors text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                                    >
+                                        <IdentificationIcon className="w-4 h-4" />
                                     </button>
-                                </>
-                            )}
-                        </>
-                    )}
-                </div>
-            )
+                                )}
+
+                                {/* Marcar conforme — aplica a AMBOS tipos */}
+                                {can('solicitudPrestamo.contratoConforme') && (
+                                    <button
+                                        onClick={() => !row.contrato_conforme && handleMarcarConforme(row.id)}
+                                        disabled={row.contrato_conforme || conformeLoading === row.id}
+                                        title={row.contrato_conforme ? 'Contrato conforme' : 'Marcar conforme'}
+                                        className={`p-1.5 rounded-lg transition-colors ${
+                                            row.contrato_conforme
+                                                ? 'text-green-600 bg-green-50 cursor-default'
+                                                : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                        }`}
+                                    >
+                                        {conformeLoading === row.id
+                                            ? <div className="w-4 h-4 border-2 border-slate-300 border-t-green-500 rounded-full animate-spin" />
+                                            : <CheckBadgeIcon className="w-4 h-4" />
+                                        }
+                                    </button>
+                                )}
+
+                                {can('solicitudPrestamo.status') && (
+                                    <>
+                                        <button
+                                            onClick={() => openApproveModal(row)}
+                                            disabled={!puedeAprobar}
+                                            title={motivoBloqueo}
+                                            className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <CheckIcon className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => handleUpdateStatus(row.id, 3)}
+                                            className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-colors">
+                                            <XMarkIcon className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
+                            </>
+                        )}
+                    </div>
+                );
+            }
         },
     ], [handleView, openApproveModal, handleUpdateStatus, handleVerContrato,
         contratoLoading, handleMarcarConforme, conformeLoading, openCodigoRecaudoModal, can]);
@@ -216,7 +227,7 @@ const Index = () => {
                 pdfUrl={contratoPdf}
             />
 
-            {/* 🔥 Modal de código de recaudo */}
+            {/* Modal de código de recaudo */}
             <CodigoRecaudoModal
                 isOpen={isCodigoRecaudoOpen}
                 onClose={handleCloseCodigoRecaudoModal}

@@ -275,7 +275,7 @@ const Store = () => {
                                     <h2 className="text-6xl md:text-7xl font-black text-brand-red italic tracking-tighter">S/ {prestamoSeleccionado.monto}</h2>
                                     {prestamoSeleccionado.monto_original &&
                                         parseFloat(prestamoSeleccionado.monto_original) !== parseFloat(prestamoSeleccionado.monto) && (
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mt-2">
+                                        <span className="text-[14px] font-bold text-slate-400 uppercase tracking-widest block mt-2">
                                             Monto original: S/ {parseFloat(prestamoSeleccionado.monto_original).toFixed(2)}
                                         </span>
                                     )}
