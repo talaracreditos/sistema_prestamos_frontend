@@ -206,6 +206,8 @@ const CuotaPagadaItem = ({ cuota, i, esVistaIntegrante }) => {
 
     const d = useCuotaData(cuota, i, esVistaIntegrante);
 
+    const tuvoMora = d.moraPagada > 0;
+
     return (
         <div className="flex items-center justify-between bg-green-50/50 p-3 rounded-xl border border-green-100">
             <div className="flex items-center gap-3">
@@ -214,10 +216,26 @@ const CuotaPagadaItem = ({ cuota, i, esVistaIntegrante }) => {
                     <p className="text-xs font-bold text-slate-600">
                         Cuota #{d.nro.toString().padStart(2, '0')} · {cuota.vencimiento}
                     </p>
-                    <p className="text-[9px] font-black text-green-600 uppercase">✓ Pagada</p>
+                    <p className="text-[9px] font-black text-green-600 uppercase">
+                        ✓ Pagada
+                        {tuvoMora && (
+                            <span className="text-brand-gold-dark ml-1.5">
+                                · Mora pagada: {fmt(d.moraPagada)}
+                            </span>
+                        )}
+                    </p>
                 </div>
             </div>
-            <p className="text-sm font-black text-green-700">{fmt(d.monto)}</p>
+            <div className="text-right">
+                <p className="text-sm font-black text-green-700">
+                    {tuvoMora ? fmt(d.monto + d.moraPagada) : fmt(d.monto)}
+                </p>
+                {tuvoMora && (
+                    <p className="text-[9px] font-bold text-slate-400 whitespace-nowrap">
+                        Cuota {fmt(d.monto)} + Mora {fmt(d.moraPagada)}
+                    </p>
+                )}
+            </div>
         </div>
     );
 };
@@ -230,10 +248,10 @@ const CronogramaCliente = ({
     eco = null,
     estadoPrestamo = 1,
     prestamoCancelado = false,
-    esGrupal = false,            
-    esVistaIntegrante = false,   
-    integrantes = [],            
-    miIntegranteId = null,    
+    esGrupal = false,
+    esVistaIntegrante = false,
+    integrantes = [],
+    miIntegranteId = null,
 }) => {
 
     const [verPagadas, setVerPagadas] = useState(false);
@@ -266,7 +284,7 @@ const CronogramaCliente = ({
                         <p className="text-lg font-black text-white">
                             {fmt(eco?.total_prestamo)}
                         </p>
-                        <p className="text-[9px] font-bold text-white/60 mt-0.5">
+                        <p className="text-[11px] font-bold text-white/60 mt-0.5">
                             de {fmt(eco?.total_original)}
                         </p>
                     </div>
