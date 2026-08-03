@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useDashboardAccesos } from 'hooks/Dashboard/useDashboardAccesos';
+import { exportAccesosDashboard } from 'services/dashboardService';
+import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 import Pagination from 'components/Shared/Pagination';
 import {
     UsersIcon, CheckCircleIcon, XCircleIcon,
@@ -95,10 +97,19 @@ const AccesosCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <button onClick={refresh} disabled={loading}
-                            className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl border border-slate-200 hover:border-brand-red/30 transition-all disabled:opacity-40">
-                            <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        </button>
+                        <>
+                            <ExcelExportButton
+                                exportService={exportAccesosDashboard}
+                                filters={{}}
+                                filename="reporte_accesos"
+                                label="Excel"
+                                disabled={loading}
+                            />
+                            <button onClick={refresh} disabled={loading}
+                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl border border-slate-200 hover:border-brand-red/30 transition-all disabled:opacity-40">
+                                <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                            </button>
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />
@@ -133,7 +144,7 @@ const AccesosCard = () => {
                                     label="Nunca ingresaron"
                                     value={resumen.sin_acceso ?? 0}
                                     icon={XCircleIcon}
-                                    sub={`${resumen.total ? (100 - resumen.porcentaje) : 0}% del total`}
+                                    sub={`${resumen.porcentaje_sin_acceso ?? 0}% del total`}
                                     color={{ bg: 'bg-red-50', border: 'border-red-100', icon: 'bg-red-100 text-brand-red', text: 'text-brand-red' }}
                                 />
                             </div>

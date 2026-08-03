@@ -82,9 +82,12 @@ const PagoCard = () => {
         // ── Comisiones ─────────────────────────────────────────────────────────
         { tab: 'comisiones', tipo: 'area',  data: g.comision_diaria  ?? [], xKey: 'fecha', dataKey: 'total', label: 'Comisiones — últimos 30 días (S/)', color: '#F5A623', height: 200 },
         { tab: 'comisiones', tipo: 'barra', data: g.comision_mensual ?? [], xKey: 'mes',   dataKey: 'total', label: 'Comisiones — 12 meses (S/)',         color: '#F5A623', height: 200 },
-        // ── Seguros ────────────────────────────────────────────────────────────
-        { tab: 'seguros',    tipo: 'area',  data: g.seguro_diaria  ?? [], xKey: 'fecha', dataKey: 'total', label: 'Seguros cobrados — últimos 30 días (S/)', color: '#5B1A8B', height: 200 },
-        { tab: 'seguros',    tipo: 'barra', data: g.seguro_mensual ?? [], xKey: 'mes',   dataKey: 'total', label: 'Seguros cobrados — 12 meses (S/)',         color: '#5B1A8B', height: 200 },
+        // ── Seguro (Ingreso x Seguro cobrado) ─────────────────────────────────
+        { tab: 'seguros',    tipo: 'area',  data: g.seguro_diaria  ?? [], xKey: 'fecha', dataKey: 'total', label: 'Ingreso x Seguro — últimos 30 días (S/)', color: '#5B1A8B', height: 200 },
+        { tab: 'seguros',    tipo: 'barra', data: g.seguro_mensual ?? [], xKey: 'mes',   dataKey: 'total', label: 'Ingreso x Seguro — 12 meses (S/)',         color: '#5B1A8B', height: 200 },
+        // ── Seguro Percibido (préstamos desembolsados) ────────────────────────
+        { tab: 'seguros',    tipo: 'area',  data: g.seguro_percibido_diaria  ?? [], xKey: 'fecha', dataKey: 'total', label: 'Seguro Percibido — últimos 30 días (S/)', color: '#7C3AED', height: 200 },
+        { tab: 'seguros',    tipo: 'barra', data: g.seguro_percibido_mensual ?? [], xKey: 'mes',   dataKey: 'total', label: 'Seguro Percibido — 12 meses (S/)',         color: '#7C3AED', height: 200 },
     ];
 
     return (

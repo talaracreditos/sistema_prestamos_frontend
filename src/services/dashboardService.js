@@ -137,3 +137,9 @@ export const getAccesosDashboard = async (filters = {}) => {
     const response = await fetchWithAuth(`${BASE_URL}/accesos${buildQs(filters)}`, { method: 'GET' });
     return handleResponse(response);
 };
+
+export const exportAccesosDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/accesos/export${buildQs(filters)}`, { method: 'GET' });
+    if (!response.ok) throw new Error('Error al exportar accesos');
+    return response.blob();
+};
