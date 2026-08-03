@@ -72,20 +72,11 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
     const [abierto, setAbierto]           = useState(false);
     const [pasosActivos, setPasosActivos] = useState([]);
     const [idx, setIdx]                   = useState(0);
-    const [rect, setRect]                 = useState(null);  
-    const [esMovil, setEsMovil]           = useState(false);
+    const [rect, setRect]                 = useState(null);
 
     const paso      = pasosActivos[idx] ?? null;
     const esUltimo  = idx === pasosActivos.length - 1;
     const esPrimero = idx === 0;
-
-    /* ── Detectar móvil ── */
-    useEffect(() => {
-        const medir = () => setEsMovil(window.innerWidth < 640);
-        medir();
-        window.addEventListener('resize', medir);
-        return () => window.removeEventListener('resize', medir);
-    }, []);
 
     /* ── Abrir el tour ── */
     const abrirTour = useCallback(() => {
@@ -116,9 +107,7 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
         if (reabrir > 0) abrirTour();
     }, [reabrir, abrirTour]);
 
-    /* ── Al cambiar de paso: scroll hasta el elemento y medirlo.
-     * Re-mide en scroll (capture, para el scroll interno del modal)
-     * y en resize, así el spotlight sigue pegado al elemento. ── */
+
     useEffect(() => {
         if (!abierto || !paso) return;
 
@@ -153,7 +142,7 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
 
     const siguiente = () => {
         if (esUltimo) { cerrar(); return; }
-        setRect(null); // evita que el marco viejo parpadee en la posición anterior
+        setRect(null);
         setIdx(i => i + 1);
     };
 
@@ -165,29 +154,26 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
 
     if (!abierto || !paso) return null;
 
-    /* ── Posición del tooltip en PC: debajo del elemento si cabe, si no encima.
-     * En móvil siempre es bottom-sheet. ── */
-    const TOOLTIP_W = 340;
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 375;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const TOOLTIP_W = Math.min(340, vw - 24);
+
     let tooltipStyle = {};
-    if (!esMovil) {
-        if (rect) {
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-            const left = Math.min(
-                Math.max(rect.left + rect.width / 2 - TOOLTIP_W / 2, 12),
-                vw - TOOLTIP_W - 12
-            );
-            const cabeAbajo = rect.bottom + 240 < vh;
-            tooltipStyle = cabeAbajo
-                ? { top: rect.bottom + 14, left, width: TOOLTIP_W }
-                : { bottom: vh - rect.top + 14, left, width: TOOLTIP_W };
-        } else {
-            tooltipStyle = {
-                top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: TOOLTIP_W,
-            };
-        }
+    if (rect) {
+        const left = Math.min(
+            Math.max(rect.left + rect.width / 2 - TOOLTIP_W / 2, 12),
+            vw - TOOLTIP_W - 12
+        );
+        const cabeAbajo = rect.bottom + 240 < vh;
+        tooltipStyle = cabeAbajo
+            ? { top: rect.bottom + 14, left, width: TOOLTIP_W }
+            : { bottom: vh - rect.top + 14, left, width: TOOLTIP_W };
+    } else {
+        tooltipStyle = {
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: TOOLTIP_W,
+        };
     }
 
     return (
@@ -211,14 +197,10 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
                 <div className="fixed inset-0 z-[9998] bg-slate-900/68 backdrop-blur-[2px] pointer-events-none" />
             )}
 
-            {/* ── Tooltip explicativo ── */}
+            {/* ── Tooltip explicativo — flotante pegado al elemento en cualquier pantalla ── */}
             <div
-                className={`fixed z-[9999] bg-white shadow-2xl overflow-hidden ${
-                    esMovil
-                        ? 'bottom-0 left-0 right-0 rounded-t-3xl animate-in slide-in-from-bottom duration-300'
-                        : 'rounded-2xl animate-in fade-in zoom-in-95 duration-200'
-                }`}
-                style={esMovil ? {} : tooltipStyle}
+                className="fixed z-[9999] bg-white shadow-2xl rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
+                style={tooltipStyle}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 pt-4 pb-1">
