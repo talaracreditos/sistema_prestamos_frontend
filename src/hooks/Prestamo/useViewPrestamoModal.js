@@ -12,6 +12,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     const canReducirMora       = can('prestamo.reducirMora');
     const canCambiarPresidente = can('prestamo.cambiarPresidente');
     const canCastigar          = can('prestamoDetalle.status');
+    const canReprogramar       = can('prestamo.reprogramar');
 
     const [integranteSeleccionado, setIntegranteSeleccionado] = useState(null);
     const [integranteData, setIntegranteData]                 = useState(null);
@@ -149,7 +150,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
 
     return {
         // permisos
-        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canCastigar,
+        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canCastigar, canReprogramar,
         // estado
         integranteSeleccionado, integranteData, loadingIntegrante, loadingCastigo,
         pdfOpen, pdfBase64, pdfTitle, loadingPdf,

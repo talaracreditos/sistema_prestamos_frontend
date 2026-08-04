@@ -68,6 +68,21 @@ export const cambiarPresidente = async (data) => {
     return handleResponse(response);
 };
 
+// ── Reprogramación (solo individuales) ─────────────────────────────────────────
+// data = { frecuencia, fecha_primera_cuota, motivo }
+export const reprogramar = async (prestamoId, data) => {
+    const response = await fetchWithAuth(`${BASE_URL}/${prestamoId}/reprogramar`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+};
+
+export const historialReprogramaciones = async (prestamoId) => {
+    const response = await fetchWithAuth(`${BASE_URL}/${prestamoId}/reprogramaciones`, { method: 'GET' });
+    return handleResponse(response);
+};
+
 export const deletePrestamo = async (id) => {
     const response = await fetchWithAuth(`${BASE_URL}/delete/${id}`, { method: 'DELETE' });
     return handleResponse(response);

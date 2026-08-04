@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
-import HistorialMoraModal from 'components/Shared/Modals/HistorialMoraModal';
+import HistorialMoraModal from './HistorialMoraModal';
+import HistorialReprogramacionesModal from './HistorialReprogramacionesModal';
 import RefinanciamientoModal from './RefinanciamientoModal';
 import ReducirMoraModal from './ReducirMoraModal';
 import CambiarPresidenteModal from './CambiarPresidenteModal';
+import ReprogramacionModal from './ReprogramacionModal';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
 import CronogramaCliente from 'components/Shared/Tables/CronogramaCliente';
 import {
     CalendarIcon, UserIcon, UserGroupIcon,
     InformationCircleIcon, UsersIcon,
-    ArrowPathIcon, ArrowDownTrayIcon,
+    ArrowPathIcon, ArrowDownTrayIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowPathRoundedSquareIcon, StarIcon } from '@heroicons/react/24/outline';
 import { useViewPrestamoModal } from 'hooks/Prestamo/useViewPrestamoModal';
@@ -18,10 +20,12 @@ import { useAuth } from 'context/AuthContext';
 
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
-    const [reducirMoraOpen, setReducirMoraOpen]             = useState(false);
-    const [cuotaParaReducir, setCuotaParaReducir]           = useState(null);
-    const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
-    const [refreshing, setRefreshing]                       = useState(false);
+    const [reducirMoraOpen, setReducirMoraOpen]                 = useState(false);
+    const [cuotaParaReducir, setCuotaParaReducir]               = useState(null);
+    const [cambiarPresidenteOpen, setCambiarPresidenteOpen]     = useState(false);
+    const [reprogramarOpen, setReprogramarOpen]                 = useState(false);
+    const [historialReprogOpen, setHistorialReprogOpen]         = useState(false);
+    const [refreshing, setRefreshing]                           = useState(false);
 
     const { user, role } = useAuth();
     const esCliente = role === 'cliente';
@@ -29,7 +33,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const userId = user?.id ?? null;
 
     const {
-        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente,
+        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canReprogramar,
         canCastigar, loadingCastigo, handleCastigar, integranteSeleccionado,
         loadingIntegrante,
         pdfOpen, pdfBase64, pdfTitle, loadingPdf,
@@ -89,6 +93,21 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         if (onRefresh) onRefresh();
     };
 
+    const handleSuccessReprogramacion = () => {
+        setReprogramarOpen(false);
+        if (onRefresh) onRefresh();
+    };
+
+    // Reprogramar: solo individuales, vigentes, desembolsados, no cancelados.
+    // canReprogramar viene del hook (mismo lugar que los demás permisos).
+    const puedeVerReprogramar = !esCliente && canReprogramar && !data?.es_grupal
+        && data?.estado === 1 && !prestamoCancelado && data?.datos_economicos?.desembolsado;
+
+    const cuotasPendientesCount = (cronogramaActivo ?? [])
+        .filter(c => ![0, 2, 6].includes(c.estado)).length;
+
+    const handleAbrirReprogramar = () => setReprogramarOpen(true);
+
     return (
         <>
             <ViewModal
@@ -138,6 +157,16 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                     }`}
                                                 >
                                                     {loadingCastigo ? '...' : data.castigado ? '✓ Quitar Castigo' : '✕ Marcar Castigado'}
+                                                </button>
+                                            )}
+                                            {data.total_reprogramaciones > 0 && (
+                                                <button
+                                                    onClick={() => setHistorialReprogOpen(true)}
+                                                    title="Ver historial de reprogramaciones"
+                                                    className="flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 transition-colors"
+                                                >
+                                                    <ClockIcon className="w-3 h-3" />
+                                                    Reprogramado {data.total_reprogramaciones}x
                                                 </button>
                                             )}
                                         </div>
@@ -285,6 +314,16 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </h4>
                             <div className="flex items-center gap-2 flex-wrap">
 
+                                {puedeVerReprogramar && (
+                                    <button
+                                        onClick={handleAbrirReprogramar}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-teal-600/20"
+                                    >
+                                        <ClockIcon className="w-3.5 h-3.5" />
+                                        Reprogramar
+                                    </button>
+                                )}
+
                                 {!esCliente && canRefinanciar && data.estado === 1 && !prestamoCancelado && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (!esVistaIntegrante || integranteTienePendientes) && data.datos_economicos?.desembolsado && (
                                     <button
                                         onClick={() => handleAbrirRefinanciamiento(cronogramaActivo, esVistaIntegrante, integranteNombre)}
@@ -395,6 +434,22 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         onClose={() => setCambiarPresidenteOpen(false)}
                         prestamo={data}
                         onSuccess={() => { setCambiarPresidenteOpen(false); if (onRefresh) onRefresh(); }}
+                    />
+                    <ReprogramacionModal
+                        isOpen={reprogramarOpen}
+                        onClose={() => setReprogramarOpen(false)}
+                        data={reprogramarOpen ? {
+                            prestamoId:            data?.id,
+                            frecuenciaActual:       data?.datos_economicos?.frecuencia,
+                            cuotasPendientes:       cuotasPendientesCount,
+                            totalReprogramaciones:  data?.total_reprogramaciones ?? 0,
+                        } : null}
+                        onSuccess={handleSuccessReprogramacion}
+                    />
+                    <HistorialReprogramacionesModal
+                        isOpen={historialReprogOpen}
+                        onClose={() => setHistorialReprogOpen(false)}
+                        prestamoId={data?.id}
                     />
                 </>
             )}

@@ -8,7 +8,7 @@ import DesembolsoModal from './DesembolsoModal';
 import AbrirSesionModal from 'components/Shared/Modals/AbrirSesionModal';
 import CerrarSesionModal from 'components/Shared/Modals/CerrarSesionModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
-import HistorialMoraModal from 'components/Shared/Modals/HistorialMoraModal';
+import HistorialMoraModal from 'pages/Prestamo/HistorialMoraModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import {
