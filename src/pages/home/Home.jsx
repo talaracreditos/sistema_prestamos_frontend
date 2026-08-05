@@ -107,7 +107,7 @@ const Home = () => {
                 <div className="space-y-3 relative z-10">
                   <div className="flex items-center gap-3">
                     <MapPin size={15} className="text-yellow-300 shrink-0"/>
-                    <p className="text-white text-sm font-medium">Av. Principal 123, Talara, Piura</p>
+                    <p className="text-white text-sm font-medium">Av. D Nro. 14 C.H. Talara (Frente a la Curacao)</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone size={15} className="text-yellow-300 shrink-0"/>
