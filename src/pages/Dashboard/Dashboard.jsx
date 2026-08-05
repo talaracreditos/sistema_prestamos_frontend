@@ -12,6 +12,7 @@ import SBSCard from './SBSCard';
 import DesembolsoCapitalCard from './DesembolsoCapitalCard';
 import MasterCard from './MastedCard';
 import AccesosCard from './Accesoscard';
+import ClientesMoraMayor8Card from './ClientesMoraMayor8Card';
 
 const Dashboard = () => {
     const { can } = useAuth();
@@ -33,6 +34,7 @@ const Dashboard = () => {
                 {can('dashboard.cuotaDia')       && <CuotaDiaCard />}
                 {can('dashboard.asesores')       && <AsesorCard />}
                 {can('dashboard.mora')           && <MoraCard />}
+                {can('dashboard.clientesMoraMayor8') && <ClientesMoraMayor8Card />}
                 {can('dashboard.clientesMora')   && <ClientesMoraCard />}
                 {can('dashboard.sbs')            && <SBSCard />}
                 {can('dashboard.gruposAsesor')   && <GruposAsesorCard />}

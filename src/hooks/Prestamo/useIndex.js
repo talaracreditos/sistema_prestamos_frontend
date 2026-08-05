@@ -7,7 +7,11 @@ export const useIndex = () => {
     const [prestamos, setPrestamos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
 
-    const [filters, setFilters] = useState({ search: '', cliente: '', estado: '1', asesor_id: '', fecha_inicio: '', fecha_fin: '' });
+    const [filters, setFilters] = useState({
+        search: '', cliente: '', estado: '1', asesor_id: '',
+        fecha_inicio: '', fecha_fin: '',
+        fecha_desembolso_inicio: '', fecha_desembolso_fin: ''
+    });
     const filtersRef = useRef(filters);
     const [alert, setAlert] = useState(null);
 
@@ -98,7 +102,11 @@ export const useIndex = () => {
     const handleFilterChange = (name, val) => setFilters(prev => ({ ...prev, [name]: val }));
     const handleFilterSubmit = () => { filtersRef.current = filters; fetchPrestamos(1); };
     const handleFilterClear = () => {
-        const res = { search: '', cliente: '', estado: '1', asesor_id: '', fecha_inicio: '', fecha_fin: '' };
+        const res = {
+            search: '', cliente: '', estado: '1', asesor_id: '',
+            fecha_inicio: '', fecha_fin: '',
+            fecha_desembolso_inicio: '', fecha_desembolso_fin: ''
+        };
         setFilters(res);
         filtersRef.current = res;
         fetchPrestamos(1);

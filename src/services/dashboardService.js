@@ -143,3 +143,14 @@ export const exportAccesosDashboard = async (filters = {}) => {
     if (!response.ok) throw new Error('Error al exportar accesos');
     return response.blob();
 };
+
+// ── Clientes mora mayor a 8 días ──────────────────────────────────────────────
+export const getClientesMoraMayor8Dashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/clientes-mora-mayor8${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
+export const exportClientesMoraMayor8Dashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/clientes-mora-mayor8/export${buildQs(filters)}`, { method: 'GET' });
+    if (!response.ok) throw new Error('Error al exportar clientes mora mayor a 8 días');
+    return response.blob();
+};

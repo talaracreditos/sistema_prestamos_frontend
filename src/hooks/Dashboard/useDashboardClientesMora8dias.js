@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getClientesMoraDashboard, getClientesMoraMayor8Dashboard } from 'services/dashboardService';
+import { getClientesMoraDashboard } from 'services/dashboardService';
 
-const useDashboardClientesMoraBase = (fetchFn) => {
+export const useDashboardClientesMora = () => {
     const [loading,     setLoading]     = useState(true);
     const [data,        setData]        = useState(null);
     const [busqueda,    setBusqueda]    = useState('');
@@ -11,17 +11,17 @@ const useDashboardClientesMoraBase = (fetchFn) => {
     const fetchData = useCallback(async (p = 1, b = '', fi = '', ff = '') => {
         setLoading(true);
         try {
-            const json = await fetchFn({
+            const json = await getClientesMoraDashboard({
                 page: p, per_page: 10,
                 busqueda: b, fecha_inicio: fi, fecha_fin: ff,
             });
-            setData(json?.data?.data !== undefined ? json.data : json);
+            setData(json.data || json);
         } catch (e) {
             console.error('Error dashboard clientes mora:', e);
         } finally {
             setLoading(false);
         }
-    }, [fetchFn]);
+    }, []);
 
     useEffect(() => { fetchData(1); }, [fetchData]);
 
@@ -37,6 +37,3 @@ const useDashboardClientesMoraBase = (fetchFn) => {
         handleFiltrar, handleLimpiar, handlePageChange,
     };
 };
-
-export const useDashboardClientesMora       = () => useDashboardClientesMoraBase(getClientesMoraDashboard);
-export const useDashboardClientesMoraMayor8 = () => useDashboardClientesMoraBase(getClientesMoraMayor8Dashboard);

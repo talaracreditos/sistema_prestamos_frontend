@@ -60,6 +60,16 @@ const Index = () => {
                 colSpan: 'col-span-12 md:col-span-3',
             });
             config.push({
+                name: 'fecha_desembolso_inicio', type: 'date',
+                label: 'Fecha Desembolso (desde)',
+                colSpan: 'col-span-12 md:col-span-3',
+            });
+            config.push({
+                name: 'fecha_desembolso_fin', type: 'date',
+                label: 'Fecha Desembolso (hasta)',
+                colSpan: 'col-span-12 md:col-span-3',
+            });
+            config.push({
                 name: 'asesor_id', type: 'custom',
                 label: 'Filtrar por Asesor',
                 colSpan: 'col-span-12 md:col-span-4',
