@@ -13,12 +13,15 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         frecuencia:          'SEMANAL',
         codigo_recaudo:      '',
         incluir_mora:        true,
+        mora_incluida:       '',
         observaciones:       '',
         tiene_seguro:        false,
         seguro:              '',
         seguro_financiado:   true,
         nuevo_presidente_id: '',
     });
+
+    const moraDisponible = data?.mora || 0;
 
     const esPresidenteRefinanciado = useMemo(() => {
         if (!integrantesGrupo || !data?.cliente_id) return false;
@@ -44,7 +47,9 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
                 frecuencia:          'SEMANAL',
                 codigo_recaudo:      '',
                 incluir_mora:        true,
-                incluir_excedente:   true,
+                // Por defecto, si hay mora, se precarga completa — el usuario
+                // puede reducirla (o subirla, se recorta al real en backend).
+                mora_incluida:       (data.mora || 0) > 0 ? data.mora.toFixed(2) : '',
                 observaciones:       '',
                 tiene_seguro:        false,
                 seguro:              '',
@@ -58,6 +63,28 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        if (name === 'incluir_mora') {
+            setFormData(prev => ({
+                ...prev,
+                incluir_mora: checked,
+                // Al desmarcar, limpiamos el monto; al marcar, precargamos la mora completa.
+                mora_incluida: checked ? (moraDisponible > 0 ? moraDisponible.toFixed(2) : '') : '',
+            }));
+            return;
+        }
+
+        if (name === 'mora_incluida') {
+            // Sanitiza numérico y limita al tope real de mora disponible.
+            let sanitized = value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+            const num = parseFloat(sanitized);
+            if (!isNaN(num) && num > moraDisponible) {
+                sanitized = moraDisponible.toFixed(2);
+            }
+            setFormData(prev => ({ ...prev, mora_incluida: sanitized }));
+            return;
+        }
+
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
@@ -68,10 +95,11 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         try {
             await refinanciar({
                 ...formData,
-                seguro:                   formData.tiene_seguro ? parseFloat(formData.seguro || 0) : 0,
-                seguro_financiado:        formData.tiene_seguro ? formData.seguro_financiado : false,
-                prestamo_refinanciado_id: data.prestamo_id,
-                cliente_refinanciado_id:  data.cliente_id,
+                mora_incluida:             formData.incluir_mora ? parseFloat(formData.mora_incluida || 0) : 0,
+                seguro:                    formData.tiene_seguro ? parseFloat(formData.seguro || 0) : 0,
+                seguro_financiado:         formData.tiene_seguro ? formData.seguro_financiado : false,
+                prestamo_refinanciado_id:  data.prestamo_id,
+                cliente_refinanciado_id:   data.cliente_id,
             });
             onSuccess();
         } catch (err) {
@@ -81,11 +109,11 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         }
     };
 
-    // Cálculos financieros — excedente siempre se aplica si existe
-    const montoBase   = formData.incluir_mora
-        ? ((data?.deuda || 0) + (data?.mora || 0))
-        : (data?.deuda || 0);
+    // ── Cálculos financieros ────────────────────────────────────────────────
+    const moraIncluidaNum = formData.incluir_mora ? Math.min(parseFloat(formData.mora_incluida || 0), moraDisponible) : 0;
+    const moraCondonada   = Math.max(0, moraDisponible - moraIncluidaNum);
 
+    const montoBase   = (data?.deuda || 0) + moraIncluidaNum;
     const excedente   = data?.excedente || 0;
     const seguroValor = formData.tiene_seguro ? parseFloat(formData.seguro || 0) : 0;
     const montoCalc   = (formData.tiene_seguro && formData.seguro_financiado)
@@ -97,7 +125,8 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         || !formData.cuotas_solicitadas
         || !formData.tasa_interes
         || !formData.codigo_recaudo?.trim()
-        || (formData.tiene_seguro && (!formData.seguro || parseFloat(formData.seguro) <= 0));
+        || (formData.tiene_seguro && (!formData.seguro || parseFloat(formData.seguro) <= 0))
+        || (formData.incluir_mora && (!formData.mora_incluida || parseFloat(formData.mora_incluida) <= 0));
 
     return {
         formData, setFormData,
@@ -105,6 +134,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         integrantesRestantes, esPresidenteRefinanciado,
         handleChange, handleSubmit,
         montoBase, montoCalc,
+        moraDisponible, moraIncluidaNum, moraCondonada,
         submitDisabled,
     };
 };

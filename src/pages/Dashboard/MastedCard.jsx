@@ -288,7 +288,7 @@ const MasterCard = () => {
                                                 <th className="px-3 py-3">Celular</th>
                                                 <th className="px-3 py-3">Zona</th>
                                                 <th className="px-3 py-3">Asesor</th>
-                                                <th className="px-3 py-3 text-right">Monto Ind.</th>
+                                                <th className="px-3 py-3 text-right">Monto Desemb.</th>
                                                 <th className="px-3 py-3 text-right">Cuota Ind.</th>
                                                 <th className="px-3 py-3 text-right">Seguro</th>
                                                 <th className="px-3 py-3 text-right">Tasa %</th>

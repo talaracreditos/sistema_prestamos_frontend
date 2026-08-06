@@ -5,7 +5,7 @@ import {
     BanknotesIcon,
     UserGroupIcon,
     ChartPieIcon,
-    LockClosedIcon,
+    ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Fila de integrante ────────────────────────────────────────────────────────
@@ -52,83 +52,80 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
             if (!esPagable) return null;
 
             // ── Individual ────────────────────────────────────────────────────
+            // Ya no se bloquea el botón: si hay una cuota anterior pendiente,
+            // el modal abre directo con el campo de PIN visible (requierePinAnticipado),
+            // sin necesidad de fallar un submit primero. El backend sigue siendo
+            // quien valida en última instancia (ValidacionCobrarService).
             if (!esGrupal) {
                 const hayAnteriorPendiente = allRows
                     .filter(r => r.nro < row.nro)
                     .some(r => r.estado !== 2);
-                
-                // Inyectamos el flag es_grupal: false
-                const rowIndividual = { ...row, es_grupal: false };
+
+                const rowIndividual = { ...row, es_grupal: false, requierePinAnticipado: hayAnteriorPendiente };
 
                 return (
-                    <button
-                        onClick={() => !hayAnteriorPendiente && openPagoModal(rowIndividual)}
-                        disabled={hayAnteriorPendiente}
-                        className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-[10px] uppercase transition-all ${
-                            hayAnteriorPendiente
-                                ? 'bg-slate-50 text-slate-300 cursor-not-allowed border border-slate-100'
-                                : 'bg-brand-red text-white hover:bg-brand-red-dark shadow-lg shadow-brand-red/30 active:scale-95'
-                        }`}
-                    >
-                        {hayAnteriorPendiente
-                            ? <><LockClosedIcon className="w-3.5 h-3.5" /> Bloqueada</>
-                            : <><BanknotesIcon  className="w-3.5 h-3.5" /> Cobrar</>}
-                    </button>
+                    <div className="flex flex-col gap-1 items-end">
+                        <button
+                            onClick={() => openPagoModal(rowIndividual)}
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 ${
+                                hayAnteriorPendiente
+                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/30'
+                                    : 'bg-brand-red text-white hover:bg-brand-red-dark shadow-lg shadow-brand-red/30'
+                            }`}
+                        >
+                            {hayAnteriorPendiente
+                                ? <><ShieldExclamationIcon className="w-3.5 h-3.5" /> Requiere PIN</>
+                                : <><BanknotesIcon className="w-3.5 h-3.5" /> Cobrar</>}
+                        </button>
+                        {hayAnteriorPendiente && (
+                            <span className="text-[8px] font-bold text-amber-600 uppercase">
+                                Cuota anterior pendiente
+                            </span>
+                        )}
+                    </div>
                 );
             }
 
             // ── Grupal ────────────────────────────────────────────────────────
             const cuotaAnterior = allRows.find(r => r.nro === row.nro - 1);
 
-            const integrantesPueden = (row.integrantes ?? []).filter(int => {
-                if (integrantePagoSuParte(int)) return false;
-                if (!cuotaAnterior) return true;
-                const detAnt = (cuotaAnterior.integrantes ?? []).find(d => d.id === int.id);
-                if (!detAnt) return true;
-                return integrantePagoSuParte(detAnt);
-            });
+            const todosPendientes = (row.integrantes ?? []).filter(int => !integrantePagoSuParte(int));
 
-            const integrantesBloqueados = (row.integrantes ?? []).filter(int => {
-                if (integrantePagoSuParte(int)) return false;
+            const integrantesBloqueados = todosPendientes.filter(int => {
                 if (!cuotaAnterior) return false;
                 const detAnt = (cuotaAnterior.integrantes ?? []).find(d => d.id === int.id);
                 if (!detAnt) return false;
                 return !integrantePagoSuParte(detAnt);
             });
 
-            if (integrantesPueden.length === 0) {
-                return (
-                    <div className="flex flex-col gap-0.5">
-                        <span className="inline-flex items-center gap-1 text-[9px] font-black text-slate-300 uppercase">
-                            <LockClosedIcon className="w-3 h-3" /> Todos bloqueados
-                        </span>
-                        <span className="text-[8px] text-slate-400 font-bold">
-                            Deben pagar cuota anterior
-                        </span>
-                    </div>
-                );
-            }
+            if (todosPendientes.length === 0) return null;
 
-            // Inyectamos el flag es_grupal: true para que el hook lo detecte
-            const rowFiltrado = { 
-                ...row, 
-                integrantes: integrantesPueden,
-                es_grupal: true 
+            const hayBloqueados = integrantesBloqueados.length > 0;
+
+            const rowFiltrado = {
+                ...row,
+                integrantes: todosPendientes,
+                es_grupal: true,
+                requierePinAnticipado: hayBloqueados,
             };
 
             return (
                 <div className="flex flex-col gap-1">
                     <button
                         onClick={() => openPagoModal(rowFiltrado)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-[10px] uppercase bg-brand-red text-white hover:bg-brand-red-dark shadow-lg shadow-brand-red/30 active:scale-95 transition-all"
+                        className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 ${
+                            hayBloqueados
+                                ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/30'
+                                : 'bg-brand-red text-white hover:bg-brand-red-dark shadow-lg shadow-brand-red/30'
+                        }`}
                     >
-                        <BanknotesIcon className="w-3.5 h-3.5" />
-                        Cobrar ({integrantesPueden.length})
+                        {hayBloqueados
+                            ? <><ShieldExclamationIcon className="w-3.5 h-3.5" /> Cobrar ({todosPendientes.length})</>
+                            : <><BanknotesIcon className="w-3.5 h-3.5" /> Cobrar ({todosPendientes.length})</>}
                     </button>
-                    {integrantesBloqueados.length > 0 && (
-                        <span className="text-[8px] font-bold text-slate-400 flex items-center gap-0.5">
-                            <LockClosedIcon className="w-2.5 h-2.5" />
-                            {integrantesBloqueados.length} bloqueado{integrantesBloqueados.length > 1 ? 's' : ''}
+                    {hayBloqueados && (
+                        <span className="text-[8px] font-bold text-amber-600 uppercase">
+                            {integrantesBloqueados.length} requiere{integrantesBloqueados.length > 1 ? 'n' : ''} PIN
                         </span>
                     )}
                 </div>

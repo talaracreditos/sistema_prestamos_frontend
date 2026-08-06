@@ -108,6 +108,44 @@ const PagoCard = () => {
             exportService={exportPagosDashboard}
             exportFilename="reporte_pagos"
             exportLabel="Excel"
+            cardGroups={esCliente ? [] : [
+                // Modo CON rango filtrado — parent: "Total Recaudado"
+                {
+                    parent: ['total recaudado'],
+                    children: [
+                        { keywords: ['capital cobrado'],                    signo: '+' },
+                        { keywords: ['interés cobrado', 'interes cobrado'], signo: '+' },
+                        { keywords: ['ingreso x seguro'],                   signo: '+' },
+                        { keywords: ['mora cobrada'],                       signo: '+' },
+                        { keywords: ['excedente generado'],                 signo: '+' },
+                        { keywords: ['excedente usado'],                    signo: '-' },
+                    ],
+                },
+                // Modo SIN rango — parent: "Recaudado Hoy"
+                {
+                    parent: ['recaudado hoy'],
+                    children: [
+                        { keywords: ['capital cobrado hoy'],                signo: '+' },
+                        { keywords: ['interés hoy', 'interes hoy'],         signo: '+' },
+                        { keywords: ['ingreso x seguro hoy'],               signo: '+' },
+                        { keywords: ['mora hoy'],                           signo: '+' },
+                        { keywords: ['excedente gen. hoy', 'excedente gen hoy'], signo: '+' },
+                        { keywords: ['excedente usado hoy'],                signo: '-' },
+                    ],
+                },
+                // Modo SIN rango — parent: "Recaudado al Mes"
+                {
+                    parent: ['recaudado al mes'],
+                    children: [
+                        { keywords: ['capital cobrado al mes'],             signo: '+' },
+                        { keywords: ['interés al mes', 'interes al mes'],   signo: '+' },
+                        { keywords: ['ingreso x seguro al mes'],            signo: '+' },
+                        { keywords: ['mora al mes'],                        signo: '+' },
+                        { keywords: ['excedente gen. mes', 'excedente gen mes'], signo: '+' },
+                        { keywords: ['excedente usado mes'],                signo: '-' },
+                    ],
+                },
+            ]}
         />
     );
 };

@@ -6,14 +6,18 @@ import { ResumenPago, DistribucionGrupal, AlertasPago } from './Components/PagoC
 import {
     BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon,
     UserGroupIcon, DocumentCheckIcon, XMarkIcon,
-    ReceiptPercentIcon,
+    ReceiptPercentIcon, ShieldExclamationIcon, KeyIcon,
 } from '@heroicons/react/24/outline';
 
 const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const { state, setters, computed, handlers } = usePagoCuota({ isOpen, cuota, onClose, onConfirm });
-    const { metodo, referencia, archivo, tieneComision, comision } = state;
+    const { metodo, referencia, archivo, tieneComision, comision, pinRequerido, pinContexto, pin, pinError } = state;
 
     const handleClose = () => { if (!loading) handlers.reset(); };
+
+    const descripcionPin = pinContexto?.cuota_anterior
+        ? `La cuota #${pinContexto.cuota_anterior} está pendiente. Ingresa el PIN de un administrador para autorizar el cobro de la cuota #${pinContexto.cuota_actual} de todas formas.`
+        : 'Esta cuota requiere autorización de un administrador. Ingresa el PIN para continuar.';
 
     return (
         <ViewModal isOpen={isOpen} hideFooter={true} onClose={handleClose}
@@ -39,6 +43,43 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             excedenteIndividual={computed.excedenteIndividual} esGrupal={computed.esGrupal}
                             integrantesPendientes={computed.integrantesPendientes}
                         />
+
+                        {/* ── PIN de autorización (inline, siempre visible si hace falta) ── */}
+                        {pinRequerido && (
+                            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 space-y-3 animate-in fade-in duration-300">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-amber-100 rounded-xl flex-shrink-0">
+                                        <ShieldExclamationIcon className="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black text-amber-700 uppercase">Autorización Requerida</p>
+                                        <p className="text-[10px] text-amber-600/80 font-medium leading-snug">{descripcionPin}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-amber-600 uppercase mb-1.5 flex items-center gap-1">
+                                        <KeyIcon className="w-3.5 h-3.5" /> PIN de Autorización (6 dígitos) *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={6}
+                                        value={pin}
+                                        disabled={loading}
+                                        onChange={e => handlers.handlePinChange(e.target.value)}
+                                        placeholder="••••••"
+                                        className={`w-full p-3 border-2 rounded-xl text-lg font-black tracking-[0.3em] text-center outline-none transition-all disabled:opacity-50 ${
+                                            pinError
+                                                ? 'border-red-400 bg-red-50 text-red-600'
+                                                : 'border-amber-300 bg-white text-amber-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-400'
+                                        }`}
+                                    />
+                                    {pinError && (
+                                        <p className="text-[10px] text-red-600 font-bold mt-1.5">⚠ {pinError}</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* 2. Método */}
                         <div className="grid grid-cols-2 gap-3">
@@ -207,6 +248,11 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                         {tieneComision && !comision && (
                             <p className="text-[9px] text-center text-amber-500 font-bold uppercase mt-1">
                                 Ingresa el monto de la comisión
+                            </p>
+                        )}
+                        {pinRequerido && !state.pinCompleto && (
+                            <p className="text-[9px] text-center text-amber-500 font-bold uppercase mt-1">
+                                Ingresa el PIN de autorización (6 dígitos)
                             </p>
                         )}
                     </div>

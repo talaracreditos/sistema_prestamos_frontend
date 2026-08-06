@@ -13,9 +13,20 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const [tieneComision, setTieneComision] = useState(false);
     const [comision,      setComision]      = useState('');
 
+    // ── PIN de autorización (cuota anterior pendiente) ──────────────────────────
+    // pinRequerido: si true, se muestra el campo PIN inline en el MISMO form
+    // (no una pantalla aparte). Arranca en true si el front ya sabía de
+    // antemano (cuota.requierePinAnticipado, seteado en OperacionForm) y
+    // también se activa si el backend lo exige de sorpresa al hacer submit.
+    const [pinRequerido, setPinRequerido] = useState(false);
+    const [pinContexto,  setPinContexto]  = useState(null);
+    const [pin,          setPin]          = useState('');
+    const [pinError,     setPinError]     = useState(null);
+
     const esGrupal               = !!(cuota?.es_grupal);
     const integrantesPendientes  = cuota?.integrantes?.filter(i => ![2, 6].includes(i.estado)) ?? [];
     const soloUnIntegrante       = esGrupal && integrantesPendientes.length === 1;
+    const pinAnticipado          = !!cuota?.requierePinAnticipado;
 
     /* Mora PENDIENTE */
     const mora = esGrupal
@@ -53,10 +64,14 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         ? !!referencia?.trim() && !!archivo
         : true;
 
+    const pinCompleto = pin.length === 6;
+    const pinValido    = !pinRequerido || pinCompleto;
+
     const puedeSubmit = !noCubreMora
         && integrantesSinCubrirMora.length === 0
         && validacionMetodo
-        && comisionValida;
+        && comisionValida
+        && pinValido;
 
     // ── Efectos ───────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -71,8 +86,13 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             setAlertLocal(null);
             setTieneComision(false);
             setComision('');
+            // PIN: arranca visible si el front ya sabía que hacía falta
+            setPinRequerido(pinAnticipado);
+            setPinContexto(null);
+            setPin('');
+            setPinError(null);
         }
-    }, [isOpen, totalAPagar, soloUnIntegrante]);
+    }, [isOpen, totalAPagar, soloUnIntegrante, pinAnticipado]);
 
     const calcularTotalDistribuido = () => {
         if (integrantesPendientes.length === 0) return parseFloat(totalAPagar);
@@ -97,7 +117,7 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         if (esGrupal && !esParcial) setRecibido(totalAPagar);
     }, [esParcial, esGrupal, totalAPagar]);
 
-    // ── Handlers ──────────────────────────────────────────────────────────────
+    // ── Handlers generales ────────────────────────────────────────────────────
     const handleFileChange = (e) => {
         const f = e.target.files[0];
         if (f) { setArchivo(f); setPreview(URL.createObjectURL(f)); }
@@ -108,10 +128,34 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         setDistribucion(prev => ({ ...prev, [id]: sanitized }));
     };
 
-    const reset = () => { setArchivo(null); setPreview(null); onClose(); };
+    const reset = () => {
+        setArchivo(null);
+        setPreview(null);
+        setPinRequerido(false);
+        setPinContexto(null);
+        setPin('');
+        setPinError(null);
+        onClose();
+    };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handlePinChange = (valor) => {
+        setPin(valor.replace(/\D/g, '').slice(0, 6));
+        if (pinError) setPinError(null);
+    };
+
+    // ── Callback que onConfirm invoca si el backend exige PIN (o el PIN
+    // enviado era inválido) ──────────────────────────────────────────────────
+    const handleRequierePin = (contexto, mensaje) => {
+        setPinContexto(contexto);
+        setPinRequerido(true);
+        // Si ya había un pin escrito (submit con pin incorrecto), mostramos
+        // el motivo devuelto por el backend; si no había pin, es la primera
+        // vez que se detecta el bloqueo.
+        setPinError(pin ? (mensaje || 'PIN incorrecto o inválido.') : null);
+        setAlertLocal(null);
+    };
+
+    const buildFormData = () => {
         const formData = new FormData();
         formData.append('cuota_id',        cuota.id);
         formData.append('metodo_pago',     metodo);
@@ -119,9 +163,12 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         formData.append('numero_operacion', referencia);
         if (archivo) formData.append('comprobante', archivo);
 
-        // Comisión — solo si el usuario la marcó y tiene valor
         if (tieneComision && comisionNum > 0) {
             formData.append('comision', comisionNum.toFixed(2));
+        }
+
+        if (pinRequerido && pinCompleto) {
+            formData.append('pin', pin);
         }
 
         if (esGrupal && (esParcial || soloUnIntegrante)) {
@@ -137,8 +184,15 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             ));
         }
 
+        return formData;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const formData = buildFormData();
+
         setAlertLocal(null);
-        onConfirm(formData, setAlertLocal);
+        onConfirm(formData, { setAlertLocal, onRequierePin: handleRequierePin });
     };
 
     return {
@@ -146,6 +200,7 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             metodo, recibido, referencia, archivo, preview,
             esParcial, distribucion, alertLocal,
             tieneComision, comision,
+            pinRequerido, pinContexto, pin, pinError, pinCompleto,
         },
         setters: {
             setMetodo, setRecibido, setReferencia, setEsParcial, setAlertLocal,
@@ -157,6 +212,8 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             integrantesSinCubrirMora, noCubreMora,
             puedeSubmit, totalDistribuido, comisionNum,
         },
-        handlers: { handleFileChange, handleMontoIntegrante, reset, handleSubmit },
+        handlers: {
+            handleFileChange, handleMontoIntegrante, reset, handleSubmit, handlePinChange,
+        },
     };
 };

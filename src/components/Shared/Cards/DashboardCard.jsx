@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     BanknotesIcon, CheckCircleIcon, CalendarDaysIcon,
     DocumentTextIcon, ChartBarIcon, ClockIcon,
@@ -41,14 +41,74 @@ const CustomTooltip = ({ active, payload, label, moneyKey = 'total' }) => {
     );
 };
 
-const StatRow = ({ label, valor, tipo, icon, alerta = false }) => {
+const fmtMoney = v => `S/ ${parseFloat(v || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+
+/**
+ * Popup de desglose que aparece al hacer hover (desktop) o click/tap
+ * (móvil) sobre una card "padre". `breakdown` = [{ label, valor, signo:
+ * '+' | '-' }], en el orden que se quiere mostrar la fórmula. El total
+ * (valor de la propia card) se muestra al final como resultado.
+ */
+const BreakdownPopup = ({ breakdown, total }) => (
+    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-30 w-64 bg-slate-900 text-white rounded-xl shadow-2xl px-4 py-3 text-xs animate-in fade-in zoom-in-95 duration-150">
+        <p className="font-black text-slate-300 uppercase tracking-wider mb-2 text-[10px]">Cómo se compone</p>
+        <div className="space-y-1">
+            {breakdown.map((b, i) => (
+                <div key={i} className="flex items-center justify-between">
+                    <span className="text-slate-300 font-bold">{b.signo === '-' ? '−' : '+'} {b.label}</span>
+                    <span className="font-black">{fmtMoney(b.valor)}</span>
+                </div>
+            ))}
+        </div>
+        <div className="border-t border-white/10 mt-2 pt-2 flex items-center justify-between">
+            <span className="font-black uppercase text-[10px] tracking-wider text-brand-gold">Total</span>
+            <span className="font-black text-brand-gold">{fmtMoney(total)}</span>
+        </div>
+        {/* Flechita apuntando hacia abajo */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-full w-3 h-3 bg-slate-900 rotate-45 -mt-1.5" />
+    </div>
+);
+
+// ── StatRow: hover (desktop) + click/tap (móvil) para mostrar el popup ─────
+const StatRow = ({ label, valor, tipo, icon, alerta = false, breakdown = null }) => {
+    const [showPopup, setShowPopup] = useState(false);
+    const containerRef = useRef(null);
     const Icon = ICONS[icon] || BanknotesIcon;
     const formatted = tipo === 'monto'
-        ? `S/ ${parseFloat(valor || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`
+        ? fmtMoney(valor)
         : tipo === 'fecha' ? (valor ?? 'N/A') : (valor?.toLocaleString() ?? '0');
+
+    // Cierra el popup al tocar fuera de la card (necesario para el modo click/tap)
+    useEffect(() => {
+        if (!showPopup) return;
+        const handleOutside = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setShowPopup(false);
+            }
+        };
+        document.addEventListener('touchstart', handleOutside);
+        document.addEventListener('mousedown', handleOutside);
+        return () => {
+            document.removeEventListener('touchstart', handleOutside);
+            document.removeEventListener('mousedown', handleOutside);
+        };
+    }, [showPopup]);
+
+    const handleClick = () => {
+        if (!breakdown) return;
+        setShowPopup(v => !v);
+    };
+
     return (
-        <div className={`relative flex items-center gap-4 bg-white rounded-2xl border px-5 py-4 shadow-sm transition-all hover:shadow-md
-            ${alerta ? 'border-brand-red/30 bg-brand-red-light/20' : 'border-slate-100'}`}>
+        <div
+            ref={containerRef}
+            onMouseEnter={() => breakdown && setShowPopup(true)}
+            onMouseLeave={() => breakdown && setShowPopup(false)}
+            onClick={handleClick}
+            className={`relative flex items-center gap-4 bg-white rounded-2xl border px-5 py-4 shadow-sm transition-all
+                ${alerta ? 'border-brand-red/30 bg-brand-red-light/20' : 'border-slate-100'}
+                ${breakdown ? 'cursor-help hover:shadow-md hover:border-brand-red/20 active:scale-[0.98]' : 'hover:shadow-md'}`}
+        >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
                 ${alerta ? 'bg-brand-red text-white' : 'bg-brand-red-light text-brand-red'}`}>
                 <Icon className="w-5 h-5" />
@@ -58,6 +118,13 @@ const StatRow = ({ label, valor, tipo, icon, alerta = false }) => {
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{label}</p>
             </div>
             {alerta && <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-brand-red animate-pulse" />}
+            {breakdown && (
+                <span className="absolute top-3 right-3 text-slate-300 text-[10px] font-black select-none">ⓘ</span>
+            )}
+
+            {breakdown && showPopup && (
+                <BreakdownPopup breakdown={breakdown} total={valor} />
+            )}
         </div>
     );
 };
@@ -120,6 +187,37 @@ const GraficaBarra = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A',
     </div>
 );
 
+/**
+ * Enriquece las cards con `breakdown` cuando corresponda a un grupo
+ * configurado en `groups`. groups = [{ parent: [keywords], children:
+ * [{ keywords: [...], signo: '+'|'-' }] }]. Matching por substring
+ * case-insensitive contra card.label. Cada card busca el primer grupo
+ * cuyo `parent` matchee — asegúrate de que las keywords de distintos
+ * grupos no se solapen (ej. usa 'capital cobrado hoy' en vez de 'capital
+ * cobrado' si existe también 'Capital Cobrado al Mes').
+ */
+const enrichCardsWithBreakdown = (cards, groups) => {
+    if (!groups?.length) return cards;
+
+    return cards.map(card => {
+        const grupo = groups.find(g =>
+            g.parent.some(kw => card.label?.toLowerCase().includes(kw.toLowerCase()))
+        );
+        if (!grupo) return card;
+
+        const breakdown = grupo.children
+            .map(child => {
+                const found = cards.find(c =>
+                    c !== card && child.keywords.some(kw => c.label?.toLowerCase().includes(kw.toLowerCase()))
+                );
+                return found ? { label: found.label, valor: found.valor, signo: child.signo ?? '+' } : null;
+            })
+            .filter(Boolean);
+
+        return breakdown.length > 0 ? { ...card, breakdown } : card;
+    });
+};
+
 const DashboardCard = ({
     title, subtitle, icon = 'banknotes', loading = false,
     cards = [], graficas = [], tabs, tabActivo,
@@ -129,11 +227,11 @@ const DashboardCard = ({
     onFiltrar, onLimpiar,
     tablas = {}, extraContent = {}, cardsPorTab = {},
     exportService = null, exportFilename = 'reporte', exportLabel = 'Excel',
+    cardGroups = [],
 }) => {
     const Icon        = ICONS[icon] || BanknotesIcon;
     const tabsFinales = tabs ?? [{ id: 'cards', label: 'Resumen' }];
 
-    // ── Tab inicial: usar tabActivo si viene, sino el primer tab ─────────────
     const primerTab = tabsFinales[0]?.id ?? 'cards';
     const [tab,       setTab]       = useState(tabActivo ?? primerTab);
     const [collapsed, setCollapsed] = useState(false);
@@ -142,16 +240,20 @@ const DashboardCard = ({
     const graficasDelTab = graficas.filter(g => !g.tab || g.tab === tab);
     const tablaActual    = tablas[tab];
 
-    // ── Cards a mostrar según tab activo ──────────────────────────────────────
     const getCardsActuales = () => {
         const tieneCardsPorTab = Object.keys(cardsPorTab).length > 0;
-        // Si se pasó cardsPorTab, usarlo para el tab actual (puede ser array vacío)
         if (tieneCardsPorTab) return cardsPorTab[tab] ?? [];
-        // Sin cardsPorTab: solo mostrar cards en el primer tab
         if (tab === primerTab) return cards;
         return [];
     };
     const cardsActuales = getCardsActuales();
+
+    // Breakdown SOLO se aplica en el tab Resumen (primerTab)
+    const esTabResumen = tab === primerTab;
+    const cardsConBreakdown = useMemo(
+        () => esTabResumen ? enrichCardsWithBreakdown(cardsActuales, cardGroups) : cardsActuales,
+        [cardsActuales, cardGroups, esTabResumen]
+    );
 
     const exportFilters = {
         ...(fechaInicio ? { fecha_inicio: fechaInicio } : {}),
@@ -249,9 +351,9 @@ const DashboardCard = ({
                         <div className="space-y-6">
 
                             {/* Cards */}
-                            {cardsActuales.length > 0 && (
-                                <div className={`grid gap-3 ${cardsActuales.length > 4 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
-                                    {cardsActuales.map((card, i) => <StatRow key={i} {...card} />)}
+                            {cardsConBreakdown.length > 0 && (
+                                <div className={`grid gap-3 ${cardsConBreakdown.length > 4 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                                    {cardsConBreakdown.map((card, i) => <StatRow key={i} {...card} />)}
                                 </div>
                             )}
 
@@ -271,7 +373,7 @@ const DashboardCard = ({
                             )}
 
                             {/* Sin datos */}
-                            {graficasDelTab.length === 0 && tab !== primerTab && tab !== 'cards' && tab !== 'resumen' && !tablaActual && !extraContent[tab] && cardsActuales.length === 0 && (
+                            {graficasDelTab.length === 0 && tab !== primerTab && tab !== 'cards' && tab !== 'resumen' && !tablaActual && !extraContent[tab] && cardsConBreakdown.length === 0 && (
                                 <div className="flex items-center justify-center h-40 text-slate-300 text-xs font-bold uppercase tracking-widest">
                                     Sin datos en este período
                                 </div>

@@ -154,9 +154,6 @@ const CuotaDiaCard = () => {
                                                             {j === 0 ? (
                                                                 <td className="px-4 py-3 align-top" rowSpan={asesor.filas.length}>
                                                                     <div className="flex items-center gap-2">
-                                                                        <div className="w-7 h-7 rounded-lg bg-brand-red-light flex items-center justify-center flex-shrink-0">
-                                                                            <span className="text-[9px] font-black text-brand-red">{asesor.abrev}</span>
-                                                                        </div>
                                                                         <span className="text-xs font-black text-slate-800 uppercase">{asesor.nombre}</span>
                                                                     </div>
                                                                 </td>
@@ -167,7 +164,7 @@ const CuotaDiaCard = () => {
                                                                 {f.codigo_recaudo || <span className="text-slate-300">—</span>}
                                                             </td>
                                                             <td className="px-4 py-3 text-center">
-                                                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase ${
+                                                                <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase ${
                                                                     f.tipo === 'Grupal'
                                                                         ? 'bg-brand-red-light text-brand-red border-brand-red/20'
                                                                         : 'bg-slate-100 text-slate-500 border-slate-200'
@@ -175,7 +172,7 @@ const CuotaDiaCard = () => {
                                                             </td>
                                                             <td className="px-4 py-3 text-right text-xs text-slate-500 capitalize">{f.frecuencia}</td>
                                                             <td className="px-4 py-3 text-right text-xs text-slate-600 font-bold">{f.numero_cuota}</td>
-                                                            <td className="px-4 py-3 text-right text-sm font-black text-slate-900">
+                                                            <td className="px-4 py-3 text-right text-xs font-black text-slate-900">
                                                                 S/ {fmt(f.cuota_monto)}
                                                             </td>
                                                             <td className="px-4 py-3 text-right text-xs font-bold">
@@ -193,7 +190,7 @@ const CuotaDiaCard = () => {
                                                     <td colSpan={7} className="px-4 py-2 text-[10px] font-black text-brand-red uppercase tracking-widest text-right">
                                                         Subtotal {asesor.nombre}
                                                     </td>
-                                                    <td className="px-4 py-2 text-right text-sm font-black text-brand-red">
+                                                    <td className="px-4 py-2 text-right text-xs font-black text-brand-red">
                                                         S/ {fmt(asesor.total_cuota)}
                                                     </td>
                                                     <td />

@@ -11,6 +11,7 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
         formData, setFormData, loading, alert, setAlert,
         integrantesRestantes, esPresidenteRefinanciado,
         handleChange, handleSubmit, montoCalc,
+        moraDisponible, moraIncluidaNum, moraCondonada,
         submitDisabled,
     } = useRefinanciamientoModal({ isOpen, data, integrantesGrupo, onSuccess });
 
@@ -33,7 +34,7 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
                     <div>
                         <h4 className="text-[11px] font-black text-amber-800 uppercase">Cliente: {data.cliente_nombre}</h4>
                         <p className="text-[10px] text-amber-700 font-bold mt-1">
-                            Deuda Base: S/ {data.deuda.toFixed(2)} | Mora: S/ {data.mora.toFixed(2)}
+                            Deuda Base: S/ {data.deuda.toFixed(2)} | Mora Total: S/ {moraDisponible.toFixed(2)}
                         </p>
                         {data.excedente > 0 && (
                             <p className="text-[10px] text-purple-700 font-bold mt-0.5">
@@ -102,13 +103,42 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
                                 <option value="MENSUAL">MENSUAL</option>
                             </select>
                         </div>
-                        <div className="flex items-center mt-6">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="incluir_mora" checked={formData.incluir_mora} onChange={handleChange} disabled={loading}
-                                    className="w-4 h-4 text-brand-red border-slate-300 rounded focus:ring-brand-red disabled:opacity-50" />
-                                <span className="text-[11px] font-black text-slate-700 uppercase">Incluir Mora al Capital</span>
-                            </label>
-                        </div>
+                    </div>
+
+                    {/* ── Mora: check + monto editable ── */}
+                    <div className={`border rounded-xl p-4 space-y-3 transition-all ${formData.incluir_mora ? 'border-brand-red/30 bg-brand-red-light/20' : 'border-slate-200 bg-slate-50'}`}>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="incluir_mora" checked={formData.incluir_mora} onChange={handleChange} disabled={loading || moraDisponible <= 0}
+                                className="w-4 h-4 text-brand-red border-slate-300 rounded focus:ring-brand-red disabled:opacity-50" />
+                            <span className="text-[11px] font-black text-slate-700 uppercase">Incluir Mora al Capital</span>
+                        </label>
+
+                        {moraDisponible <= 0 && (
+                            <p className="text-[10px] text-slate-400 font-bold">Este cliente no tiene mora pendiente.</p>
+                        )}
+
+                        {formData.incluir_mora && moraDisponible > 0 && (
+                            <div className="pt-1">
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                    Monto de Mora a Incluir (S/) — Máx. S/ {moraDisponible.toFixed(2)} *
+                                </label>
+                                <input
+                                    type="text" inputMode="decimal" name="mora_incluida" required disabled={loading}
+                                    value={formData.mora_incluida} onChange={handleChange} placeholder="0.00"
+                                    className="w-full border border-brand-red/30 rounded-xl px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-brand-red outline-none disabled:opacity-50"
+                                />
+                                {moraCondonada > 0 && (
+                                    <p className="text-[10px] text-amber-600 font-bold mt-1.5">
+                                        ⚠ Los S/ {moraCondonada.toFixed(2)} restantes de mora quedarán condonados (no se cobrarán).
+                                    </p>
+                                )}
+                                {moraIncluidaNum === moraDisponible && (
+                                    <p className="text-[10px] text-green-600 font-bold mt-1.5">
+                                        ✓ Se incluirá la mora completa.
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50">

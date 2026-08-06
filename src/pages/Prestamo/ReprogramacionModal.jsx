@@ -85,7 +85,7 @@ const ReprogramacionModal = ({ isOpen, onClose, data, onSuccess }) => {
                                 {previewFechas.map((fecha, i) => (
                                     <div key={i} className="flex items-center justify-between px-3 py-1.5">
                                         <span className="text-[10px] font-bold text-slate-400">
-                                            {i === 0 ? 'Próxima cuota' : `Cuota siguiente #${i + 1}`}
+                                            {i === 0 ? 'Próxima cuota' : `Cuota Reprogramada #${i + 1}`}
                                         </span>
                                         <span className="text-[11px] font-black text-slate-700">{fecha}</span>
                                     </div>
