@@ -31,17 +31,19 @@ const SBSCard = () => {
         busqueda,     setBusqueda,
         calificacion, setCalificacion,
         nroCredito,   setNroCredito,
+        mes,            setMes,
         handleFiltrar, handleLimpiar, handlePageChange,
     } = useDashboardSBS();
 
     const resumen    = data?.por_calificacion ?? {};
     const filas      = data?.filas ?? [];
-    const tieneFiltro = busqueda || calificacion !== '' || nroCredito;
+    const tieneFiltro = busqueda || calificacion !== '' || nroCredito || mes;
 
     const exportFilters = {
-        ...(busqueda     ? { busqueda }                : {}),
-        ...(calificacion !== '' ? { calificacion }     : {}),
-        ...(nroCredito   ? { nro_credito: nroCredito } : {}),
+        ...(busqueda          ? { busqueda }                : {}),
+        ...(calificacion !== '' ? { calificacion }          : {}),
+        ...(nroCredito        ? { nro_credito: nroCredito } : {}),
+        ...(mes               ? { mes }                     : {}), // AGREGAMOS A EXCEL
     };
 
     return (
@@ -101,6 +103,18 @@ const SBSCard = () => {
                                 onKeyDown={e => e.key === 'Enter' && handleFiltrar()}
                                 placeholder="Ej: García, 12345678..."
                                 className="w-full p-2 text-xs text-slate-700 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                            />
+                        </div>
+                        {/* NUEVO: Selector de Mes */}
+                        <div>
+                            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                Mes
+                            </label>
+                            <input
+                                type="month"
+                                value={mes}
+                                onChange={e => setMes(e.target.value)}
+                                className="w-32 p-2 text-xs text-slate-700 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
                             />
                         </div>
                         <div>
