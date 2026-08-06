@@ -121,7 +121,9 @@ export const useStore = () => {
         setIsPagoModalOpen(true);
     };
 
-    const handleConfirmarPago = async (formData, setAlertLocal) => {
+    const handleConfirmarPago = async (formData, options = {}) => {
+        const { setAlertLocal } = options;
+
         setLoading(true);
         try {
             const response = await cobrarCuota(formData);
@@ -138,6 +140,7 @@ export const useStore = () => {
             }
         } catch (err) {
             const error = handleApiError(err);
+            
             if (setAlertLocal) {
                 setAlertLocal(error);
             } else {
