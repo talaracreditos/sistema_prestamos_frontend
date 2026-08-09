@@ -12,6 +12,7 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
         integrantesRestantes, esPresidenteRefinanciado,
         handleChange, handleSubmit, montoCalc,
         moraDisponible, moraIncluidaNum, moraCondonada,
+        interesDisponible, interesIncluidoNum, interesCondonado,
         submitDisabled,
     } = useRefinanciamientoModal({ isOpen, data, integrantesGrupo, onSuccess });
 
@@ -34,7 +35,7 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
                     <div>
                         <h4 className="text-[11px] font-black text-amber-800 uppercase">Cliente: {data.cliente_nombre}</h4>
                         <p className="text-[10px] text-amber-700 font-bold mt-1">
-                            Deuda Base: S/ {data.deuda.toFixed(2)} | Mora Total: S/ {moraDisponible.toFixed(2)}
+                            Deuda Base: S/ {data.deuda.toFixed(2)} | Interés: S/ {interesDisponible.toFixed(2)} | Mora Total: S/ {moraDisponible.toFixed(2)}
                         </p>
                         {data.excedente > 0 && (
                             <p className="text-[10px] text-purple-700 font-bold mt-0.5">
@@ -103,6 +104,36 @@ const RefinanciamientoModal = ({ isOpen, onClose, data, integrantesGrupo, onSucc
                                 <option value="MENSUAL">MENSUAL</option>
                             </select>
                         </div>
+                    </div>
+
+                    {/* ── Interés del préstamo BASE: monto editable, capado al real ── */}
+                    <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50/30">
+                        <label className="text-[11px] font-black text-slate-700 uppercase">Interés del Préstamo Base</label>
+
+                        {interesDisponible <= 0 ? (
+                            <p className="text-[10px] text-slate-400 font-bold">Este préstamo no tiene interés pendiente.</p>
+                        ) : (
+                            <div className="pt-1">
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                    Interés a Incluir (S/) — Máx. S/ {interesDisponible.toFixed(2)} *
+                                </label>
+                                <input
+                                    type="text" inputMode="decimal" name="interes_incluido" required disabled={loading}
+                                    value={formData.interes_incluido} onChange={handleChange} placeholder="0.00"
+                                    className="w-full border border-blue-300 rounded-xl px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-blue-400 outline-none disabled:opacity-50"
+                                />
+                                {interesCondonado > 0 && (
+                                    <p className="text-[10px] text-amber-600 font-bold mt-1.5">
+                                        ⚠ Los S/ {interesCondonado.toFixed(2)} restantes de interés quedarán condonados (no se cobrarán).
+                                    </p>
+                                )}
+                                {interesIncluidoNum === interesDisponible && (
+                                    <p className="text-[10px] text-green-600 font-bold mt-1.5">
+                                        ✓ Se incluirá el interés completo.
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* ── Mora: check + monto editable ── */}

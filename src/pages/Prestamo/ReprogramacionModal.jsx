@@ -43,8 +43,7 @@ const ReprogramacionModal = ({ isOpen, onClose, data, onSuccess }) => {
                 <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4">
                     <InformationCircleIcon className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                     <p className="text-[10px] text-blue-700 font-bold leading-relaxed">
-                        Solo se mueven las fechas de las cuotas pendientes. Los montos y la mora ya generada
-                        no cambian. Este préstamo ya fue reprogramado{' '}
+                        Solo se mueven las fechas de las cuotas pendientes. Los montos no cambian. Este préstamo ya fue reprogramado{' '}
                         <span className="font-black">{data.totalReprogramaciones ?? 0}</span>{' '}
                         {data.totalReprogramaciones === 1 ? 'vez' : 'veces'} antes.
                     </p>

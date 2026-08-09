@@ -71,8 +71,14 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     };
 
     // ── Refinanciamiento ──────────────────────────────────────────────────────
+    // Estimado local para mostrar en el modal antes de enviar — el backend
+    // (SaldoRefinanciamientoService) recalcula el saldo real y autoritativo
+    // al momento de guardar, esto solo es para que el usuario vea cifras
+    // aproximadas mientras decide cuánto interés/mora incluir.
     const handleAbrirRefinanciamiento = (cronogramaActivo, esVistaIntegrante, integranteNombre) => {
-        let deudaPendiente     = 0;
+        let capitalPendiente   = 0;
+        let interesPendiente   = 0;
+        let seguroPendiente    = 0;
         let moraPendiente      = 0;
         let excedentePendiente = 0;
         let excDeducido        = false;
@@ -81,10 +87,14 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
             cronogramaActivo.forEach(cuota => {
                 if ([0, 2, 6].includes(cuota.estado)) return;
 
-                const deudaBase  = parseFloat(cuota.total_cuota ?? cuota.monto ?? 0);
-                const abonado    = parseFloat(cuota.pago_acumulado ?? 0);
-                const moraTotal  = parseFloat(cuota.mora_total ?? cuota.mora ?? 0);
-                const moraPagada = parseFloat(cuota.mora_pagada ?? 0);
+                const capital       = parseFloat(cuota.capital ?? 0);
+                const capitalPagado = parseFloat(cuota.capital_pagado ?? 0);
+                const interes       = parseFloat(cuota.interes ?? 0);
+                const interesPagado = parseFloat(cuota.interes_pagado ?? 0);
+                const seguro        = parseFloat(cuota.seguro ?? 0);
+                const seguroPagado  = parseFloat(cuota.seguro_pagado ?? 0);
+                const moraTotal     = parseFloat(cuota.mora_total ?? cuota.mora ?? 0);
+                const moraPagada    = parseFloat(cuota.mora_pagada ?? 0);
 
                 const excedente = !excDeducido
                     ? parseFloat(cuota.excedente_anterior ?? 0)
@@ -95,10 +105,14 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
                     excDeducido        = true;
                 }
 
-                deudaPendiente += Math.max(0, deudaBase - abonado);
-                moraPendiente  += Math.max(0, moraTotal - moraPagada);
+                capitalPendiente += Math.max(0, capital - capitalPagado);
+                interesPendiente += Math.max(0, interes - interesPagado);
+                seguroPendiente  += Math.max(0, seguro  - seguroPagado);
+                moraPendiente    += Math.max(0, moraTotal - moraPagada);
             });
         }
+
+        const deudaPendiente = capitalPendiente + interesPendiente + seguroPendiente;
 
         if (deudaPendiente <= 0) {
             alert('No hay saldo pendiente para refinanciar.');
@@ -106,12 +120,15 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         }
 
         setRefData({
-            prestamo_id:    data.id,
-            cliente_id:     esVistaIntegrante ? integranteSeleccionado : null,
-            cliente_nombre: esVistaIntegrante ? integranteNombre : data.cliente?.nombre,
-            deuda:          deudaPendiente,
-            mora:           moraPendiente,
-            excedente:      excedentePendiente,
+            prestamo_id:      data.id,
+            cliente_id:       esVistaIntegrante ? integranteSeleccionado : null,
+            cliente_nombre:   esVistaIntegrante ? integranteNombre : data.cliente?.nombre,
+            deuda:            deudaPendiente,
+            capital:          capitalPendiente,
+            interes:          interesPendiente,
+            seguro_pendiente: seguroPendiente,
+            mora:             moraPendiente,
+            excedente:        excedentePendiente,
         });
         setRefModalOpen(true);
     };

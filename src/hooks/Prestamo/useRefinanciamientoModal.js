@@ -14,6 +14,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         codigo_recaudo:      '',
         incluir_mora:        true,
         mora_incluida:       '',
+        interes_incluido:    '',
         observaciones:       '',
         tiene_seguro:        false,
         seguro:              '',
@@ -21,7 +22,8 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         nuevo_presidente_id: '',
     });
 
-    const moraDisponible = data?.mora || 0;
+    const moraDisponible    = data?.mora    || 0;
+    const interesDisponible = data?.interes || 0;
 
     const esPresidenteRefinanciado = useMemo(() => {
         if (!integrantesGrupo || !data?.cliente_id) return false;
@@ -50,6 +52,10 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
                 // Por defecto, si hay mora, se precarga completa — el usuario
                 // puede reducirla (o subirla, se recorta al real en backend).
                 mora_incluida:       (data.mora || 0) > 0 ? data.mora.toFixed(2) : '',
+                // Igual que la mora: se precarga el interés pendiente completo
+                // del préstamo BASE — el usuario puede reducirlo (condonar
+                // parte) o subirlo, se recorta al real pendiente en backend.
+                interes_incluido:    (data.interes || 0) > 0 ? data.interes.toFixed(2) : '0.00',
                 observaciones:       '',
                 tiene_seguro:        false,
                 seguro:              '',
@@ -85,6 +91,18 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
             return;
         }
 
+        if (name === 'interes_incluido') {
+            // Sanitiza numérico y limita al tope real de interés pendiente
+            // del préstamo base — el resto queda condonado.
+            let sanitized = value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+            const num = parseFloat(sanitized);
+            if (!isNaN(num) && num > interesDisponible) {
+                sanitized = interesDisponible.toFixed(2);
+            }
+            setFormData(prev => ({ ...prev, interes_incluido: sanitized }));
+            return;
+        }
+
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
@@ -96,6 +114,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
             await refinanciar({
                 ...formData,
                 mora_incluida:             formData.incluir_mora ? parseFloat(formData.mora_incluida || 0) : 0,
+                interes_incluido:          parseFloat(formData.interes_incluido || 0),
                 seguro:                    formData.tiene_seguro ? parseFloat(formData.seguro || 0) : 0,
                 seguro_financiado:         formData.tiene_seguro ? formData.seguro_financiado : false,
                 prestamo_refinanciado_id:  data.prestamo_id,
@@ -113,7 +132,13 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
     const moraIncluidaNum = formData.incluir_mora ? Math.min(parseFloat(formData.mora_incluida || 0), moraDisponible) : 0;
     const moraCondonada   = Math.max(0, moraDisponible - moraIncluidaNum);
 
-    const montoBase   = (data?.deuda || 0) + moraIncluidaNum;
+    const interesIncluidoNum = Math.min(parseFloat(formData.interes_incluido || 0) || 0, interesDisponible);
+    const interesCondonado   = Math.max(0, interesDisponible - interesIncluidoNum);
+
+    // data.deuda = capital + interés real + seguro pendientes del préstamo
+    // base. Se le resta el interés real completo y se suma solo el interés
+    // que el usuario decidió incluir (el resto queda condonado).
+    const montoBase   = (data?.deuda || 0) - interesDisponible + interesIncluidoNum + moraIncluidaNum;
     const excedente   = data?.excedente || 0;
     const seguroValor = formData.tiene_seguro ? parseFloat(formData.seguro || 0) : 0;
     const montoCalc   = (formData.tiene_seguro && formData.seguro_financiado)
@@ -125,6 +150,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         || !formData.cuotas_solicitadas
         || !formData.tasa_interes
         || !formData.codigo_recaudo?.trim()
+        || formData.interes_incluido === ''
         || (formData.tiene_seguro && (!formData.seguro || parseFloat(formData.seguro) <= 0))
         || (formData.incluir_mora && (!formData.mora_incluida || parseFloat(formData.mora_incluida) <= 0));
 
@@ -135,6 +161,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         handleChange, handleSubmit,
         montoBase, montoCalc,
         moraDisponible, moraIncluidaNum, moraCondonada,
+        interesDisponible, interesIncluidoNum, interesCondonado,
         submitDisabled,
     };
 };
