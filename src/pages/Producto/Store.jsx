@@ -23,15 +23,14 @@ const Store = () => {
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-3xl">
+        <div className="container mx-auto p-6 max-w-3xl transition-colors">
             <PageHeader title="Registrar Producto" buttonText="Volver" buttonLink="/producto/listar" />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
             <form onSubmit={handleSubmit} className="mt-6">
                 <ProductoForm data={formData} handleChange={(f, v) => setFormData({...formData, [f]: v})} />
                 
                 <div className="mt-8 flex justify-end">
-                    {/* 🔥 Botón Sólido Corporativo */}
-                    <button type="submit" disabled={loading} className="w-full sm:w-auto bg-brand-red text-white px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 hover:bg-brand-red-dark transition-all disabled:opacity-50 tracking-wide">
+                    <button type="submit" disabled={loading} className="w-full sm:w-auto bg-brand-red dark:bg-brand-red-glow text-white dark:text-black px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 dark:shadow-black/30 hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50 tracking-wide">
                         {loading ? 'Guardando...' : 'Guardar Producto'}
                     </button>
                 </div>

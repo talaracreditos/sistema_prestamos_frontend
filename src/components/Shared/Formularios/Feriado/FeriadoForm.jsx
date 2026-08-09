@@ -18,11 +18,11 @@ const FeriadoForm = ({
     return (
         <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6 bg-white p-10 rounded-[40px] border border-slate-100 shadow-sm"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6 bg-white dark:bg-dark-surface p-10 rounded-[40px] border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors"
         >
             {/* Columna izquierda — Calendario */}
             <div className="flex flex-col items-center">
-                <label className="block text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest">
+                <label className="block text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase mb-6 tracking-widest transition-colors">
                     {isEdit ? 'Modificar Fecha' : '1. Selecciona la Fecha del Calendario'}
                 </label>
                 <Calendario
@@ -32,8 +32,8 @@ const FeriadoForm = ({
                     feriados={feriadosCalendario}
                 />
                 {!isEdit && feriadosCalendario.length > 0 && (
-                    <p className="text-[9px] text-slate-400 uppercase tracking-widest mt-4">
-                        Días <span className="font-bold text-brand-red">marcados</span> = feriados registrados
+                    <p className="text-[9px] text-slate-400 dark:text-dark-text-muted uppercase tracking-widest mt-4 transition-colors">
+                        Días <span className="font-bold text-brand-red dark:text-brand-gold">marcados</span> = feriados registrados
                     </p>
                 )}
             </div>
@@ -41,19 +41,19 @@ const FeriadoForm = ({
             {/* Columna derecha — Campos */}
             <div className="flex flex-col justify-center space-y-6">
                 <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">
+                    <label className="block text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase mb-2 ml-1 tracking-widest transition-colors">
                         {isEdit ? 'Nueva Fecha' : 'Fecha Seleccionada'}
                     </label>
                     <input
                         type="text"
                         readOnly
                         value={formData.fecha || 'NADA SELECCIONADO'}
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-brand-red text-center outline-none"
+                        className="w-full p-4 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-2xl font-black text-brand-red dark:text-brand-gold text-center outline-none transition-colors"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">
+                    <label className="block text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase mb-2 ml-1 tracking-widest transition-colors">
                         Descripción {isEdit ? '' : 'del Feriado'}
                     </label>
                     <input
@@ -61,7 +61,7 @@ const FeriadoForm = ({
                         value={formData.descripcion || ''}
                         onChange={(e) => handleChange('descripcion', toUpper(e.target.value))}
                         placeholder="EJ: COMBATE DE ANGAMOS"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-red focus:border-brand-red transition-all"
+                        className="w-full p-4 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-2xl font-bold text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold placeholder-slate-400 dark:placeholder-dark-text-muted/60 transition-all"
                         required
                     />
                 </div>
@@ -70,7 +70,7 @@ const FeriadoForm = ({
                     <button
                         type="submit"
                         disabled={loading || !formData.fecha}
-                        className="w-full py-4 bg-brand-red text-white font-black uppercase rounded-2xl hover:bg-brand-red-dark transition-all shadow-xl shadow-brand-red/30 disabled:opacity-50 tracking-widest active:scale-95"
+                        className="w-full py-4 bg-brand-red dark:bg-brand-red-glow text-white dark:text-black font-black uppercase rounded-2xl hover:bg-brand-red-dark dark:hover:brightness-110 transition-all shadow-xl shadow-brand-red/30 dark:shadow-black/30 disabled:opacity-50 tracking-widest active:scale-95"
                     >
                         {loading
                             ? (isEdit ? 'Guardando...' : 'Procesando...')

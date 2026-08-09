@@ -28,19 +28,19 @@ const Index = () => {
                 header: 'Entidad Bancaria',
                 render: (row) => (
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-brand-red-light/50 border border-brand-red/20">
-                            <BuildingLibraryIcon className="w-5 h-5 text-brand-red" />
+                        <div className="p-2.5 rounded-xl bg-brand-red-light/50 dark:bg-dark-surface-alt border border-brand-red/20 dark:border-brand-gold/20 transition-colors">
+                            <BuildingLibraryIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                         </div>
-                        <span className="font-black text-slate-800 text-sm uppercase">{row.nombre}</span>
+                        <span className="font-black text-slate-800 dark:text-dark-text text-sm uppercase transition-colors">{row.nombre}</span>
                     </div>
                 )
             },
             {
                 header: 'Validaciones',
                 render: (row) => (
-                    <div className="text-xs text-slate-600 font-medium">
-                        <p>Cta: <b className="text-black">{row.longitud_cuenta} díg.</b></p>
-                        <p>CCI: <b className="text-black">{row.longitud_cci} díg.</b></p>
+                    <div className="text-xs text-slate-600 dark:text-dark-text-muted font-medium transition-colors">
+                        <p>Cta: <b className="text-black dark:text-dark-text">{row.longitud_cuenta} díg.</b></p>
+                        <p>CCI: <b className="text-black dark:text-dark-text">{row.longitud_cci} díg.</b></p>
                     </div>
                 )
             },
@@ -53,7 +53,7 @@ const Index = () => {
                     <button
                         onClick={() => handleAskToggle(row.id)}
                         className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase transition-transform hover:scale-105 shadow-sm border
-                            ${row.estado ? 'bg-green-50 text-green-700 border-green-200' : 'bg-brand-red-light text-brand-red border-brand-red/30'}`}
+                            ${row.estado ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' : 'bg-brand-red-light dark:bg-red-500/20 text-brand-red dark:text-red-400 border-brand-red/30 dark:border-red-500/20'}`}
                     >
                         {row.estado ? 'Activo' : 'Inactivo'}
                     </button>
@@ -70,7 +70,7 @@ const Index = () => {
                             <Link 
                                 to={`/entidadBancaria/editar/${row.id}`}
                                 title="Editar"
-                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-brand-gold/20 shadow-sm"
                             >
                                 <PencilSquareIcon className="w-4 h-4" />
                             </Link>
@@ -79,7 +79,7 @@ const Index = () => {
                             <button 
                                 onClick={() => handleAskDelete(row.id)}
                                 title="Eliminar"
-                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20 shadow-sm"
                             >
                                 <TrashIcon className="w-4 h-4" />
                             </button>
@@ -93,7 +93,7 @@ const Index = () => {
     }, [handleAskToggle, handleAskDelete, canStatus, canUpdate, canDelete]);
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader 
                 title="Entidades Bancarias" 
                 icon={BuildingLibraryIcon} 

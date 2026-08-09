@@ -10,14 +10,14 @@ import {
 
 // ── Fila de integrante ────────────────────────────────────────────────────────
 const IntegranteRow = ({ integrante }) => (
-    <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-        <span className="text-sm text-slate-800 font-semibold">
+    <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-dark-border last:border-0 transition-colors">
+        <span className="text-sm text-slate-800 dark:text-dark-text font-semibold transition-colors">
             {integrante.nombre}
-            <span className="ml-2 text-[10px] font-bold text-brand-gold-dark uppercase">
+            <span className="ml-2 text-[10px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase transition-colors">
                 ({integrante.cargo})
             </span>
         </span>
-        <span className="text-sm font-black text-brand-red shrink-0">
+        <span className="text-sm font-black text-brand-red dark:text-brand-gold shrink-0 transition-colors">
             S/ {parseFloat(integrante.monto).toFixed(2)}
         </span>
     </div>
@@ -47,15 +47,11 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
             const saldoGlobal = parseFloat(row.saldo_pendiente ?? row.saldo_real ?? 0);
 
             if (row.estado === 2 || saldoGlobal <= 0)
-                return <span className="text-[10px] font-black text-green-600 uppercase italic">✓ Cobrado</span>;
+                return <span className="text-[10px] font-black text-green-600 dark:text-green-400 uppercase italic">✓ Cobrado</span>;
 
             if (!esPagable) return null;
 
             // ── Individual ────────────────────────────────────────────────────
-            // Ya no se bloquea el botón: si hay una cuota anterior pendiente,
-            // el modal abre directo con el campo de PIN visible (requierePinAnticipado),
-            // sin necesidad de fallar un submit primero. El backend sigue siendo
-            // quien valida en última instancia (ValidacionCobrarService).
             if (!esGrupal) {
                 const hayAnteriorPendiente = allRows
                     .filter(r => r.nro < row.nro)
@@ -70,7 +66,7 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 ${
                                 hayAnteriorPendiente
                                     ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/30'
-                                    : 'bg-brand-red text-white hover:bg-brand-red-dark shadow-lg shadow-brand-red/30'
+                                    : 'bg-brand-red dark:bg-brand-red-glow text-white dark:text-black hover:bg-brand-red-dark dark:hover:brightness-110 shadow-lg shadow-brand-red/30 dark:shadow-black/30'
                             }`}
                         >
                             {hayAnteriorPendiente
@@ -78,7 +74,7 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                                 : <><BanknotesIcon className="w-3.5 h-3.5" /> Cobrar</>}
                         </button>
                         {hayAnteriorPendiente && (
-                            <span className="text-[8px] font-bold text-amber-600 uppercase">
+                            <span className="text-[8px] font-bold text-amber-600 dark:text-amber-400 uppercase">
                                 Cuota anterior pendiente
                             </span>
                         )}
@@ -116,7 +112,7 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                         className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 ${
                             hayBloqueados
                                 ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/30'
-                                : 'bg-brand-red text-white hover:bg-brand-red-dark shadow-lg shadow-brand-red/30'
+                                : 'bg-brand-red dark:bg-brand-red-glow text-white dark:text-black hover:bg-brand-red-dark dark:hover:brightness-110 shadow-lg shadow-brand-red/30 dark:shadow-black/30'
                         }`}
                     >
                         {hayBloqueados
@@ -124,7 +120,7 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                             : <><BanknotesIcon className="w-3.5 h-3.5" /> Cobrar ({todosPendientes.length})</>}
                     </button>
                     {hayBloqueados && (
-                        <span className="text-[8px] font-bold text-amber-600 uppercase">
+                        <span className="text-[8px] font-bold text-amber-600 dark:text-amber-400 uppercase">
                             {integrantesBloqueados.length} requiere{integrantesBloqueados.length > 1 ? 'n' : ''} PIN
                         </span>
                     )}
@@ -134,26 +130,26 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
     }];
 
     return (
-        <div className="mt-10 animate-in slide-in-from-bottom-6 duration-500 space-y-6">
+        <div className="mt-10 animate-in slide-in-from-bottom-6 duration-500 space-y-6 transition-colors">
 
             {/* Desglose integrantes */}
             {tieneInteg && (
-                <div className="bg-white rounded-[28px] border border-slate-100 shadow-sm overflow-hidden">
-                    <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                        <div className="p-2 bg-slate-900 rounded-xl"><UserGroupIcon className="w-4 h-4 text-white" /></div>
-                        <h4 className="font-black text-slate-800 uppercase text-xs tracking-[0.15em]">Desglose de Integrantes</h4>
+                <div className="bg-white dark:bg-dark-surface rounded-[28px] border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 overflow-hidden transition-colors">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-dark-border flex items-center gap-3 transition-colors">
+                        <div className="p-2 bg-slate-900 dark:bg-black rounded-xl transition-colors"><UserGroupIcon className="w-4 h-4 text-white dark:text-dark-text" /></div>
+                        <h4 className="font-black text-slate-800 dark:text-dark-text uppercase text-xs tracking-[0.15em] transition-colors">Desglose de Integrantes</h4>
                     </div>
-                    <div className="p-5 divide-y divide-slate-100">
+                    <div className="p-5 divide-y divide-slate-100 dark:divide-dark-border transition-colors">
                         {integrantes.map(int => <IntegranteRow key={int.id} integrante={int} />)}
                     </div>
                 </div>
             )}
 
             {/* Resumen Económico — DatosEconomicosCards */}
-            <div className="bg-white rounded-[28px] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <div className="p-2 bg-slate-900 rounded-xl"><ChartPieIcon className="w-4 h-4 text-white" /></div>
-                    <h4 className="font-black text-slate-800 uppercase text-xs tracking-[0.15em]">Resumen Económico</h4>
+            <div className="bg-white dark:bg-dark-surface rounded-[28px] border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 overflow-hidden transition-colors">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-dark-border flex items-center gap-3 transition-colors">
+                    <div className="p-2 bg-slate-900 dark:bg-black rounded-xl transition-colors"><ChartPieIcon className="w-4 h-4 text-white dark:text-dark-text" /></div>
+                    <h4 className="font-black text-slate-800 dark:text-dark-text uppercase text-xs tracking-[0.15em] transition-colors">Resumen Económico</h4>
                 </div>
                 <div className="p-5">
                     <DatosEconomicosCards
@@ -165,10 +161,10 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
             </div>
 
             {/* Cronograma */}
-            <div className="bg-white rounded-[28px] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <div className="p-2 bg-slate-900 rounded-xl"><BanknotesIcon className="w-4 h-4 text-white" /></div>
-                    <h4 className="font-black text-slate-800 uppercase text-xs tracking-[0.15em]">Cronograma de Pagos y Saldos</h4>
+            <div className="bg-white dark:bg-dark-surface rounded-[28px] border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 overflow-hidden transition-colors">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-dark-border flex items-center gap-3 transition-colors">
+                    <div className="p-2 bg-slate-900 dark:bg-black rounded-xl transition-colors"><BanknotesIcon className="w-4 h-4 text-white dark:text-dark-text" /></div>
+                    <h4 className="font-black text-slate-800 dark:text-dark-text uppercase text-xs tracking-[0.15em] transition-colors">Cronograma de Pagos y Saldos</h4>
                 </div>
                 <div className="p-2">
                     <CronogramaTable

@@ -21,7 +21,7 @@ const CronogramaTable = ({
     };
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 transition-colors">
             {/* Cards económicas — solo si se pasan */}
             {eco !== null && (
                 loadingEco

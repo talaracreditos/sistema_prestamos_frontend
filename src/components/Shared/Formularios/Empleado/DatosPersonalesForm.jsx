@@ -7,20 +7,20 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
     const onChange = (field, value) => handleNestedChange('datos_empleado', field, value);
 
-    const inputClass = "w-full p-3.5 text-sm font-bold text-slate-800 border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition-all";
+    const inputClass = "w-full p-3.5 text-sm font-bold text-slate-800 dark:text-dark-text border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-surface-alt rounded-xl focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold outline-none placeholder-slate-400 dark:placeholder-dark-text-muted/60 transition-all";
 
     return (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100">
-            <h3 className="text-base font-black text-slate-800 flex items-center gap-2 mb-6 uppercase tracking-wide border-b border-slate-100 pb-3">
-                <IdentificationIcon className="w-6 h-6 text-brand-red" /> Información Personal
+        <div className="bg-white dark:bg-dark-surface p-6 sm:p-8 rounded-2xl shadow-sm dark:shadow-black/25 border border-slate-100 dark:border-dark-border transition-colors">
+            <h3 className="text-base font-black text-slate-800 dark:text-dark-text flex items-center gap-2 mb-6 uppercase tracking-wide border-b border-slate-100 dark:border-dark-border pb-3 transition-colors">
+                <IdentificationIcon className="w-6 h-6 text-brand-red dark:text-brand-gold" /> Información Personal
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                 
                 {/* DNI: Solo 8 números */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        DNI <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        DNI <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <input
                         type="text"
@@ -33,8 +33,8 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Fecha Nacimiento */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Fecha Nacimiento <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Fecha Nacimiento <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <input
                         type="date"
@@ -46,8 +46,8 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Sexo */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Sexo <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Sexo <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <select
                         value={valores.sexo || ''}
@@ -62,8 +62,8 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Nombres: Solo letras */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Nombres <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Nombres <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <input
                         type="text"
@@ -76,8 +76,8 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Apellido Paterno: Solo letras */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Apellido Paterno <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Apellido Paterno <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <input
                         type="text"
@@ -90,8 +90,8 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Apellido Materno: Solo letras */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Apellido Materno <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Apellido Materno <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <input
                         type="text"
@@ -104,11 +104,11 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Teléfono: Solo 9 números */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Teléfono <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Teléfono <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <div className="relative">
-                        <PhoneIcon className="w-5 h-5 absolute left-3 top-3.5 text-slate-400"/>
+                        <PhoneIcon className="w-5 h-5 absolute left-3 top-3.5 text-slate-400 dark:text-dark-text-muted transition-colors"/>
                         <input
                             type="text"
                             value={valores.telefono || ''}
@@ -121,8 +121,8 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Estado Civil */}
                 <div className="md:col-span-4">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Estado Civil <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Estado Civil <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <select
                         value={valores.estadoCivil || ''}
@@ -140,11 +140,11 @@ const DatosPersonalesForm = ({ data, handleNestedChange }) => {
 
                 {/* Dirección */}
                 <div className="md:col-span-12">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-                        Dirección <span className="text-brand-red">*</span>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-2 transition-colors">
+                        Dirección <span className="text-brand-red dark:text-brand-gold">*</span>
                     </label>
                     <div className="relative">
-                        <MapPinIcon className="w-5 h-5 absolute left-3 top-3.5 text-slate-400"/>
+                        <MapPinIcon className="w-5 h-5 absolute left-3 top-3.5 text-slate-400 dark:text-dark-text-muted transition-colors"/>
                         <input
                             type="text"
                             value={valores.direccion || ''}

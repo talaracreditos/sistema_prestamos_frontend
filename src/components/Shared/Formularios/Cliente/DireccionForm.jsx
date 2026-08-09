@@ -33,18 +33,17 @@ const DireccionForm = ({ data, handleNestedChange }) => {
         return [...peruData[d.departamento][d.provincia]].sort();
     }, [d.departamento, d.provincia]);
 
-    // 🔥 InputClass unificado, con text-slate-800 y focus:ring-brand-red
-    const inputClass = "w-full p-3 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-red outline-none";
+    const inputClass = "w-full p-3 text-sm text-slate-800 dark:text-dark-text bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold outline-none placeholder-slate-400 dark:placeholder-dark-text-muted/60 transition-colors";
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
-            <h3 className="text-base font-black text-slate-800 flex items-center gap-2 mb-5 uppercase tracking-wide border-b border-slate-100 pb-3">
-                <MapPinIcon className="w-5 h-5 text-brand-red" /> Dirección y Zona
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm dark:shadow-black/25 border border-slate-100 dark:border-dark-border flex flex-col h-full transition-colors">
+            <h3 className="text-base font-black text-slate-800 dark:text-dark-text flex items-center gap-2 mb-5 uppercase tracking-wide border-b border-slate-100 dark:border-dark-border pb-3 transition-colors">
+                <MapPinIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" /> Dirección y Zona
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Dirección Fiscal / Domicilio *</label>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">Dirección Fiscal / Domicilio *</label>
                     <input
                         type="text"
                         value={d.direccionFiscal || ''}
@@ -56,7 +55,7 @@ const DireccionForm = ({ data, handleNestedChange }) => {
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Departamento *</label>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">Departamento *</label>
                     <select
                         value={d.departamento || ''}
                         onChange={handleDepartamentoChange}
@@ -71,12 +70,12 @@ const DireccionForm = ({ data, handleNestedChange }) => {
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Provincia *</label>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">Provincia *</label>
                     <select
                         value={d.provincia || ''}
                         onChange={handleProvinciaChange}
                         disabled={!d.departamento}
-                        className={`${inputClass} disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer`}
+                        className={`${inputClass} disabled:bg-slate-100 dark:disabled:bg-dark-surface-alt disabled:text-slate-400 dark:disabled:text-dark-text-muted/60 disabled:cursor-not-allowed cursor-pointer`}
                         required
                     >
                         <option value="">-- Seleccione --</option>
@@ -87,12 +86,12 @@ const DireccionForm = ({ data, handleNestedChange }) => {
                 </div>
 
                 <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Distrito *</label>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">Distrito *</label>
                     <select
                         value={d.distrito || ''}
                         onChange={(e) => onD('distrito', e.target.value)}
                         disabled={!d.provincia}
-                        className={`${inputClass} disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer`}
+                        className={`${inputClass} disabled:bg-slate-100 dark:disabled:bg-dark-surface-alt disabled:text-slate-400 dark:disabled:text-dark-text-muted/60 disabled:cursor-not-allowed cursor-pointer`}
                         required
                     >
                         <option value="">-- Seleccione --</option>
@@ -103,7 +102,7 @@ const DireccionForm = ({ data, handleNestedChange }) => {
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">T. Residencia *</label>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">T. Residencia *</label>
                     <input
                         type="text"
                         value={d.tiempoResidencia || ''}
@@ -115,7 +114,7 @@ const DireccionForm = ({ data, handleNestedChange }) => {
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tipo de Vivienda *</label>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">Tipo de Vivienda *</label>
                     <select
                         value={d.tipoVivienda || ''}
                         onChange={(e) => onD('tipoVivienda', e.target.value)}
@@ -130,8 +129,8 @@ const DireccionForm = ({ data, handleNestedChange }) => {
                     </select>
                 </div>
 
-                <div className="sm:col-span-2 pt-2 border-t border-slate-100 mt-2">
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Zona Operativa Comercial *</label>
+                <div className="sm:col-span-2 pt-2 border-t border-slate-100 dark:border-dark-border mt-2 transition-colors">
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-dark-text-muted uppercase mb-1 transition-colors">Zona Operativa Comercial *</label>
                     <ZonaSearchSelect
                         initialName={dc.zona_nombre || ''}
                         onSelect={(zona) => handleNestedChange('datos_cliente', 'zona_id', zona ? zona.id : null)}

@@ -24,7 +24,7 @@ const Update = () => {
     if (loading) return <LoadingScreen />;
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader
                 title="Editar Empleado"
                 subtitle={`Editando a: ${formData.datos_empleado.nombre} ${formData.datos_empleado.apellidoPaterno}`}
@@ -57,14 +57,14 @@ const Update = () => {
                     <button
                         type="button"
                         onClick={() => navigate('/empleado/listar')}
-                        className="px-8 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors uppercase text-sm w-full sm:w-auto"
+                        className="px-8 py-3.5 bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors uppercase text-sm w-full sm:w-auto"
                     >
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         disabled={saving}
-                        className="w-full sm:w-auto bg-brand-red text-white px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 hover:bg-brand-red-dark transition-all disabled:opacity-50 tracking-wide"
+                        className="w-full sm:w-auto bg-brand-red dark:bg-brand-red-glow text-white dark:text-black px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 dark:shadow-black/30 hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50 tracking-wide"
                     >
                         {saving ? 'Guardando...' : 'Guardar Cambios'}
                     </button>

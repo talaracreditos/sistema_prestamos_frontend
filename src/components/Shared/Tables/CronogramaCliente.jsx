@@ -23,9 +23,9 @@ const fmt = (v) => `S/ ${parseFloat(v ?? 0).toFixed(2)}`;
 const ListaIntegrantes = ({ integrantes, miIntegranteId }) => {
     if (!integrantes?.length) return null;
     return (
-        <div data-tutorial="integrantes" className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-            <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">
-                <UsersIcon className="w-4 h-4 text-brand-red" />
+        <div data-tutorial="integrantes" className="bg-white dark:bg-dark-surface p-4 rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors">
+            <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest mb-3 transition-colors">
+                <UsersIcon className="w-4 h-4 text-brand-red dark:text-brand-gold" />
                 Integrantes del grupo ({integrantes.length})
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -34,19 +34,19 @@ const ListaIntegrantes = ({ integrantes, miIntegranteId }) => {
                     return (
                         <div
                             key={int.id}
-                            className={`flex items-center justify-between p-2.5 rounded-xl border ${
+                            className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
                                 soyYo
-                                    ? 'bg-brand-red-light/40 border-brand-red/20'
-                                    : 'bg-slate-50 border-slate-100'
+                                    ? 'bg-brand-red-light/40 dark:bg-brand-gold/10 border-brand-red/20 dark:border-brand-gold/20'
+                                    : 'bg-slate-50 dark:bg-dark-surface-alt border-slate-100 dark:border-dark-border'
                             }`}
                         >
                             <div className="flex flex-col">
-                                <span className={`text-[10px] font-black uppercase ${
-                                    soyYo ? 'text-brand-red' : 'text-slate-600'
+                                <span className={`text-[10px] font-black uppercase transition-colors ${
+                                    soyYo ? 'text-brand-red dark:text-brand-gold' : 'text-slate-600 dark:text-dark-text'
                                 }`}>
                                     {int.nombre} {soyYo && '(Tú)'}
                                 </span>
-                                <span className="text-[9px] font-bold text-brand-gold-dark uppercase">
+                                <span className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase transition-colors">
                                     {int.cargo}
                                 </span>
                             </div>
@@ -64,22 +64,22 @@ const ListaIntegrantes = ({ integrantes, miIntegranteId }) => {
 const ProgresoPago = ({ pagadas, total, esVistaPersonal }) => {
     const pct = total > 0 ? Math.round((pagadas / total) * 100) : 0;
     return (
-        <div data-tutorial="progreso" className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div data-tutorial="progreso" className="bg-white dark:bg-dark-surface p-4 rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors">
             <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest transition-colors">
                     {esVistaPersonal ? 'Tu avance de pago' : 'Avance del grupo'}
                 </p>
-                <p className="text-[11px] font-black text-brand-red">
+                <p className="text-[11px] font-black text-brand-red dark:text-brand-gold transition-colors">
                     {pagadas} de {total} cuotas pagadas
                 </p>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-dark-surface-alt rounded-full h-3 overflow-hidden transition-colors">
                 <div
                     className="h-full bg-gradient-to-r from-brand-red to-brand-gold rounded-full transition-all duration-700"
                     style={{ width: `${pct}%` }}
                 />
             </div>
-            <p className="text-[10px] font-bold text-slate-400 mt-1.5 text-right">{pct}% completado</p>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted mt-1.5 text-right transition-colors">{pct}% completado</p>
         </div>
     );
 };
@@ -97,17 +97,17 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
     const conAtraso  = esVencida && d.diasAtraso > 0;
 
     return (
-        <div data-tutorial="proxima" className={`p-5 rounded-2xl shadow-xl text-white ${
+        <div data-tutorial="proxima" className={`p-5 rounded-2xl shadow-xl dark:shadow-black/50 text-white dark:text-dark-text transition-colors ${
             conAtraso
-                ? 'bg-brand-red shadow-brand-red/30'
-                : 'bg-slate-800 shadow-slate-800/20'
+                ? 'bg-brand-red dark:bg-red-950/80 border dark:border-red-500/30 shadow-brand-red/30'
+                : 'bg-slate-800 dark:bg-dark-surface border dark:border-dark-border shadow-slate-800/20'
         }`}>
             <div className="flex items-center gap-2 mb-3">
                 {conAtraso
                     ? <ExclamationTriangleIcon className="w-5 h-5 text-brand-gold" />
                     : <CalendarDaysIcon className="w-5 h-5 text-brand-gold" />
                 }
-                <p className="text-[14px] font-black uppercase tracking-widest text-white/70">
+                <p className="text-[14px] font-black uppercase tracking-widest text-white/70 dark:text-dark-text-muted">
                     {conAtraso
                         ? 'Cuota atrasada — ponte al día'
                         : esVenceHoy
@@ -119,7 +119,7 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
             <div className="flex items-end justify-between flex-wrap gap-3">
                 <div>
                     <p className="text-3xl font-black">{fmt(d.saldo)}</p>
-                    <p className="text-[14px] font-bold text-white/70 mt-1">
+                    <p className="text-[14px] font-bold text-white/70 dark:text-dark-text-muted mt-1">
                         Cuota #{d.nro.toString().padStart(2, '0')} · Vence: {cuota.vencimiento}
                     </p>
                 </div>
@@ -129,7 +129,7 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
                             {d.diasAtraso} {d.diasAtraso === 1 ? 'día' : 'días'} de atraso
                         </p>
                         {d.moraPend > 0 && (
-                            <p className="text-[13px] font-bold text-white/80">
+                            <p className="text-[13px] font-bold text-white/80 dark:text-dark-text-muted">
                                 Incluye mora: {fmt(d.moraPend)}
                             </p>
                         )}
@@ -138,14 +138,14 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
             </div>
 
             {d.excAnterior > 0 && (
-                <p className="text-[11px] font-bold text-white/70 mt-2">
+                <p className="text-[11px] font-bold text-white/70 dark:text-dark-text-muted mt-2">
                     ✓ Ya se descontó {fmt(d.excAnterior)} que {esVistaPersonal ? 'tenías' : 'tenía el grupo'} a favor
                 </p>
             )}
 
             {esParcial && d.abonado > 0 && (
-                <div className="mt-3 pt-3 border-t border-white/20">
-                    <p className="text-[10px] font-bold text-white/80">
+                <div className="mt-3 pt-3 border-t border-white/20 dark:border-dark-border">
+                    <p className="text-[10px] font-bold text-white/80 dark:text-dark-text-muted">
                         Ya {esVistaPersonal ? 'abonaste' : 'se abonó'} {fmt(d.abonado)} de esta cuota. Falta {fmt(d.saldo)}.
                     </p>
                 </div>
@@ -165,35 +165,35 @@ const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante }) => {
     const esParcial = cuota.estado === 5;
 
     return (
-        <div className={`flex items-center justify-between bg-white p-3 rounded-xl border shadow-sm ${
-            esVencida ? 'border-brand-red/30' : 'border-slate-100'
+        <div className={`flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded-xl border shadow-sm dark:shadow-black/20 transition-colors ${
+            esVencida ? 'border-brand-red/30 dark:border-brand-gold/30' : 'border-slate-100 dark:border-dark-border'
         }`}>
             <div className="flex items-center gap-3">
-                <span className={`text-[10px] font-black font-mono rounded-lg px-2 py-1 ${
+                <span className={`text-[10px] font-black font-mono rounded-lg px-2 py-1 transition-colors ${
                     esVencida
-                        ? 'bg-brand-red-light text-brand-red'
-                        : 'bg-slate-100 text-slate-400'
+                        ? 'bg-brand-red-light dark:bg-red-500/20 text-brand-red dark:text-red-400'
+                        : 'bg-slate-100 dark:bg-dark-surface-alt text-slate-400 dark:text-dark-text-muted'
                 }`}>
                     #{d.nro.toString().padStart(2, '0')}
                 </span>
                 <div>
-                    <p className="text-xs font-bold text-slate-700">{cuota.vencimiento}</p>
+                    <p className="text-xs font-bold text-slate-700 dark:text-dark-text transition-colors">{cuota.vencimiento}</p>
                     {esVencida && d.diasAtraso > 0 ? (
-                        <p className="text-[9px] font-black text-brand-red uppercase">
+                        <p className="text-[9px] font-black text-brand-red dark:text-red-400 uppercase">
                             {d.diasAtraso} {d.diasAtraso === 1 ? 'día' : 'días'} de atraso
                             {d.moraPend > 0 && ` · Incluye mora: ${fmt(d.moraPend)}`}
                         </p>
                     ) : esParcial ? (
-                        <p className="text-[9px] font-black text-orange-500 uppercase">
+                        <p className="text-[9px] font-black text-orange-500 dark:text-orange-400 uppercase">
                             Pago parcial · Abonado: {fmt(d.abonado)}
                         </p>
                     ) : (
-                        <p className="text-[9px] font-bold text-slate-400 uppercase">Por pagar</p>
+                        <p className="text-[9px] font-bold text-slate-400 dark:text-dark-text-muted uppercase">Por pagar</p>
                     )}
                 </div>
             </div>
             <div className="text-right">
-                <p className={`text-sm font-black ${esVencida ? 'text-brand-red' : 'text-slate-800'}`}>
+                <p className={`text-sm font-black ${esVencida ? 'text-brand-red dark:text-red-400' : 'text-slate-800 dark:text-dark-text'}`}>
                     {fmt(d.saldo)}
                 </p>
             </div>
@@ -211,17 +211,17 @@ const CuotaPagadaItem = ({ cuota, i, esVistaIntegrante }) => {
     const tuvoMora = d.moraPagada > 0;
 
     return (
-        <div className="flex items-center justify-between bg-green-50/50 p-3 rounded-xl border border-green-100">
+        <div className="flex items-center justify-between bg-green-50/50 dark:bg-green-500/10 p-3 rounded-xl border border-green-100 dark:border-green-500/20 transition-colors">
             <div className="flex items-center gap-3">
-                <CheckSolidIcon className="w-5 h-5 text-green-500 shrink-0" />
+                <CheckSolidIcon className="w-5 h-5 text-green-500 dark:text-green-400 shrink-0" />
                 <div>
-                    <p className="text-xs font-bold text-slate-600">
+                    <p className="text-xs font-bold text-slate-600 dark:text-dark-text transition-colors">
                         Cuota #{d.nro.toString().padStart(2, '0')} · {cuota.vencimiento}
                     </p>
-                    <p className="text-[9px] font-black text-green-600 uppercase">
+                    <p className="text-[9px] font-black text-green-600 dark:text-green-400 uppercase">
                         ✓ Pagada
                         {tuvoMora && (
-                            <span className="text-brand-gold-dark ml-1.5">
+                            <span className="text-brand-gold-dark dark:text-brand-gold ml-1.5">
                                 · Mora pagada: {fmt(d.moraPagada)}
                             </span>
                         )}
@@ -229,11 +229,11 @@ const CuotaPagadaItem = ({ cuota, i, esVistaIntegrante }) => {
                 </div>
             </div>
             <div className="text-right">
-                <p className="text-sm font-black text-green-700">
+                <p className="text-sm font-black text-green-700 dark:text-green-400">
                     {tuvoMora ? fmt(d.monto + d.moraPagada) : fmt(d.monto)}
                 </p>
                 {tuvoMora && (
-                    <p className="text-[9px] font-bold text-slate-400 whitespace-nowrap">
+                    <p className="text-[9px] font-bold text-slate-400 dark:text-dark-text-muted whitespace-nowrap">
                         Cuota {fmt(d.monto)} + Mora {fmt(d.moraPagada)}
                     </p>
                 )}
@@ -274,7 +274,7 @@ const CronogramaCliente = ({
     const prestamoTerminado = estadoPrestamo === 3 || (pendientes.length === 0 && pagadas.length > 0);
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 transition-colors">
 
             {/* Tutorial spotlight — resalta las secciones reales de esta vista.
                 Se abre solo la primera vez (localStorage 'tutorial_cliente') */}
@@ -284,7 +284,7 @@ const CronogramaCliente = ({
             <button
                 data-tutorial="ayuda"
                 onClick={() => setTutorialKey(k => k + 1)}
-                className="flex items-center gap-1.5 self-end -mb-2 text-[9px] font-black text-slate-400 hover:text-brand-red uppercase tracking-wide transition-colors"
+                className="flex items-center gap-1.5 self-end -mb-2 text-[9px] font-black text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold uppercase tracking-wide transition-colors"
             >
                 <QuestionMarkCircleIcon className="w-3.5 h-3.5" />
                 ¿Cómo leer mi cronograma?
@@ -292,25 +292,25 @@ const CronogramaCliente = ({
 
             {eco !== null && !prestamoCancelado && (
                 <div data-tutorial="resumen" className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-brand-red rounded-2xl shadow-lg shadow-brand-red/20">
-                        <p className="text-[9px] font-black uppercase text-white/70 mb-1">
+                    <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-lg shadow-brand-red/20 dark:shadow-black/30 transition-colors">
+                        <p className="text-[9px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">
                             {prestamoTerminado
                                 ? 'Total pagado'
                                 : esVistaPersonal ? 'Mi saldo por pagar' : 'Saldo del grupo'}
                         </p>
-                        <p className="text-lg font-black text-white">
+                        <p className="text-lg font-black text-white dark:text-dark-text">
                             {fmt(eco?.total_prestamo)}
                         </p>
-                        <p className="text-[11px] font-bold text-white/60 mt-0.5">
+                        <p className="text-[11px] font-bold text-white/60 dark:text-dark-text-muted mt-0.5">
                             de {fmt(eco?.total_original)}
                         </p>
                     </div>
-                    <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <p className="text-[9px] font-black uppercase text-slate-400 mb-1">
+                    <div className="p-4 bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors">
+                        <p className="text-[9px] font-black uppercase text-slate-400 dark:text-dark-text-muted mb-1">
                             {esVistaPersonal ? 'Mi cuota' : 'Valor de la cuota'}
                         </p>
-                        <p className="text-lg font-black text-slate-800">{fmt(eco?.valor_cuota)}</p>
-                        <p className="text-[9px] font-bold text-brand-gold-dark uppercase mt-0.5">{eco?.frecuencia}</p>
+                        <p className="text-lg font-black text-slate-800 dark:text-dark-text">{fmt(eco?.valor_cuota)}</p>
+                        <p className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mt-0.5">{eco?.frecuencia}</p>
                     </div>
                 </div>
             )}
@@ -331,11 +331,11 @@ const CronogramaCliente = ({
 
             {/* Préstamo terminado 🎉 */}
             {prestamoTerminado && !prestamoCancelado && (
-                <div className="flex items-center gap-3 p-5 bg-green-50 border border-green-200 rounded-2xl">
-                    <SparklesIcon className="w-8 h-8 text-green-500 shrink-0" />
+                <div className="flex items-center gap-3 p-5 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-2xl transition-colors">
+                    <SparklesIcon className="w-8 h-8 text-green-500 dark:text-green-400 shrink-0" />
                     <div>
-                        <p className="text-sm font-black text-green-700 uppercase">¡Felicidades!</p>
-                        <p className="text-[11px] font-bold text-green-600">
+                        <p className="text-sm font-black text-green-700 dark:text-green-400 uppercase">¡Felicidades!</p>
+                        <p className="text-[11px] font-bold text-green-600 dark:text-green-300">
                             {esVistaPersonal
                                 ? 'Completaste el pago de tu préstamo. Gracias por tu puntualidad.'
                                 : 'El préstamo está completamente pagado. Gracias por su puntualidad.'}
@@ -357,7 +357,7 @@ const CronogramaCliente = ({
             {/* Resto de cuotas pendientes */}
             {pendientes.length > 1 && !prestamoCancelado && (
                 <div data-tutorial="pendientes" className="flex flex-col gap-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                    <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest px-1">
                         Cuotas siguientes ({pendientes.length - 1})
                     </p>
                     {pendientes.slice(1).map(({ cuota, i }) => (
@@ -376,15 +376,15 @@ const CronogramaCliente = ({
                 <div data-tutorial="pagadas" className="flex flex-col gap-2">
                     <button
                         onClick={() => setVerPagadas(v => !v)}
-                        className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 transition-all"
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-dark-surface-alt hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl border border-slate-100 dark:border-dark-border transition-all"
                     >
-                        <span className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                        <span className="flex items-center gap-2 text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest">
+                            <CheckCircleIcon className="w-4 h-4 text-green-500 dark:text-green-400" />
                             Cuotas pagadas ({pagadas.length})
                         </span>
                         {verPagadas
-                            ? <ChevronUpIcon className="w-4 h-4 text-slate-400" />
-                            : <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+                            ? <ChevronUpIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted" />
+                            : <ChevronDownIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted" />
                         }
                     </button>
                     {verPagadas && pagadas.map(({ cuota, i }) => (
@@ -401,7 +401,7 @@ const CronogramaCliente = ({
             {/* Sin cuotas */}
             {pendientes.length === 0 && pagadas.length === 0 && (
                 <div className="p-8 text-center">
-                    <p className="text-xs font-bold text-slate-400 uppercase">
+                    <p className="text-xs font-bold text-slate-400 dark:text-dark-text-muted uppercase">
                         Aún no hay cuotas registradas en el cronograma
                     </p>
                 </div>

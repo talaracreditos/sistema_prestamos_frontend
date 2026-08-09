@@ -20,7 +20,7 @@ const Store = () => {
     const esPersona = Number(formData.datos_cliente.tipo) === 1;
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader
                 title="Registrar Nuevo Cliente"
                 icon={UserPlusIcon}
@@ -53,9 +53,9 @@ const Store = () => {
                     </div>
                 </div>
 
-                <div className="mt-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-end sticky bottom-4 z-20">
+                <div className="mt-8 bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm dark:shadow-black/25 border border-slate-200 dark:border-dark-border flex justify-end sticky bottom-4 z-20 transition-colors">
                     <button type="submit" disabled={loading}
-                        className="w-full sm:w-auto bg-brand-red hover:bg-brand-red-dark text-white px-10 py-3.5 rounded-xl font-black uppercase transition-all disabled:opacity-50 shadow-lg shadow-brand-red/30">
+                        className="w-full sm:w-auto bg-brand-red dark:bg-brand-red-glow hover:bg-brand-red-dark dark:hover:brightness-110 text-white px-10 py-3.5 rounded-xl font-black uppercase transition-all disabled:opacity-50 shadow-lg shadow-brand-red/30 dark:shadow-black/30">
                         {loading ? 'Procesando...' : 'Guardar Cliente'}
                     </button>
                 </div>

@@ -50,14 +50,14 @@ const ExcelExportButton = ({
                 text-[10px] font-black uppercase tracking-widest
                 rounded-lg border transition-all select-none
                 ${loading || disabled || !exportService
-                    ? 'border-slate-200 text-slate-300 cursor-not-allowed bg-white'
-                    : 'border-emerald-600/30 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-600/50 active:scale-95'
+                    ? 'border-slate-200 dark:border-dark-border text-slate-300 dark:text-dark-text-muted/50 cursor-not-allowed bg-white dark:bg-dark-surface-alt/50'
+                    : 'border-emerald-600/30 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:border-emerald-600/50 dark:hover:border-emerald-500/50 active:scale-95'
                 }
             `}
         >
             {loading ? (
                 <>
-                    <span className="w-3.5 h-3.5 border-2 border-emerald-300 border-t-emerald-700 rounded-full animate-spin flex-shrink-0" />
+                    <span className="w-3.5 h-3.5 border-2 border-emerald-300 dark:border-emerald-500/30 border-t-emerald-700 dark:border-t-emerald-400 rounded-full animate-spin flex-shrink-0" />
                     Exportando…
                 </>
             ) : (

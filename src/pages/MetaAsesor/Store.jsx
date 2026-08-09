@@ -9,7 +9,7 @@ const Store = () => {
     const { loading, alert, setAlert, formData, handleChange, handleSubmit } = useStore();
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader
                 title="Registrar Meta"
                 icon={ChartBarIcon}
@@ -24,7 +24,7 @@ const Store = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full sm:w-auto bg-brand-red text-white px-10 py-3.5 rounded-xl font-black uppercase hover:bg-brand-red-dark transition-all disabled:opacity-50 shadow-lg shadow-brand-red/30"
+                        className="w-full sm:w-auto bg-brand-red dark:bg-brand-red-glow text-white px-10 py-3.5 rounded-xl font-black uppercase hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50 shadow-lg shadow-brand-red/30 dark:shadow-black/30"
                     >
                         {loading ? 'Guardando...' : 'Guardar Meta'}
                     </button>

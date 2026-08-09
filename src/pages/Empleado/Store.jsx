@@ -19,7 +19,7 @@ const Store = () => {
     } = useStore();
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader 
                 title="Nuevo Empleado" 
                 icon={UserPlusIcon} 
@@ -51,7 +51,7 @@ const Store = () => {
                     <button 
                         type="submit" 
                         disabled={loading} 
-                        className="w-full sm:w-auto bg-brand-red text-white px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 hover:bg-brand-red-dark transition-all disabled:opacity-50 tracking-wide"
+                        className="w-full sm:w-auto bg-brand-red dark:bg-brand-red-glow text-white dark:text-black px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 dark:shadow-black/30 hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50 tracking-wide"
                     >
                         {loading ? 'Guardando...' : 'Registrar Empleado'}
                     </button>

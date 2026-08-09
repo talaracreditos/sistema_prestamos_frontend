@@ -43,14 +43,14 @@ const Index = () => {
                 header: 'Producto',
                 render: (row) => (
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-brand-red-light/50 border border-brand-red/20">
-                            <CircleStackIcon className="w-5 h-5 text-brand-red" />
+                        <div className="p-2.5 rounded-xl bg-brand-red-light/50 dark:bg-dark-surface-alt border border-brand-red/20 dark:border-brand-gold/20 transition-colors">
+                            <CircleStackIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-black text-slate-800 uppercase text-xs tracking-tight">
+                            <span className="font-black text-slate-800 dark:text-dark-text uppercase text-xs tracking-tight transition-colors">
                                 {row.nombre}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">
+                            <span className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold tracking-widest uppercase transition-colors">
                                 ID: #{row.id.toString().padStart(3, '0')}
                             </span>
                         </div>
@@ -60,7 +60,7 @@ const Index = () => {
             {
                 header: 'Tasa Referencial',
                 render: (row) => (
-                    <span className="inline-flex items-center px-3 py-1 rounded-lg bg-brand-gold-light text-brand-gold-dark font-black text-xs border border-brand-gold/30 shadow-sm">
+                    <span className="inline-flex items-center px-3 py-1 rounded-lg bg-brand-gold-light dark:bg-brand-gold/10 text-brand-gold-dark dark:text-brand-gold font-black text-xs border border-brand-gold/30 dark:border-brand-gold/20 shadow-sm transition-colors">
                         {row.rango_tasa}%
                     </span>
                 )
@@ -75,8 +75,8 @@ const Index = () => {
                         onClick={() => handleToggleStatus(row.id)} 
                         className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase transition-all shadow-sm border
                             ${row.estado 
-                                ? 'bg-green-50 text-green-700 border-green-200 hover:scale-105' 
-                                : 'bg-brand-red-light text-brand-red border-brand-red/30 hover:scale-105'}`}
+                                ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20 hover:scale-105' 
+                                : 'bg-brand-red-light dark:bg-red-500/20 text-brand-red dark:text-red-400 border-brand-red/30 dark:border-red-500/20 hover:scale-105'}`}
                     >
                         {row.estado ? 'Activo' : 'Inactivo'}
                     </button>
@@ -93,7 +93,7 @@ const Index = () => {
                             <Link 
                                 to={`/producto/editar/${row.id}`} 
                                 title="Editar parámetros"
-                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-brand-gold/20 shadow-sm"
                             >
                                 <PencilSquareIcon className="w-4 h-4" />
                             </Link>
@@ -102,7 +102,7 @@ const Index = () => {
                             <button 
                                 onClick={() => openDeleteModal(row.id)} 
                                 title="Dar de baja"
-                                className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20 shadow-sm"
                             >
                                 <TrashIcon className="w-4 h-4" />
                             </button>
@@ -116,7 +116,7 @@ const Index = () => {
     }, [handleToggleStatus, openDeleteModal, canStatus, canUpdate, canDelete]);
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 animate-in fade-in duration-500">
+        <div className="container mx-auto p-4 sm:p-6 animate-in fade-in duration-500 transition-colors">
             <PageHeader 
                 title="Productos Financieros" 
                 subtitle="Configuración de tasas y catálogo de créditos disponibles."

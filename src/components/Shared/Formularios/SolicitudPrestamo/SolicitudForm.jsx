@@ -20,7 +20,6 @@ const SolicitudForm = ({
     updateTasaIntegrante,
     isUpdate           = false,
     onBlockedChange    = null,
-    // props renovación — solo Store las pasa; Update las omite
     esRenovacion       = false,
     prestamoOrigen     = null,
     comboKey           = null,
@@ -30,9 +29,9 @@ const SolicitudForm = ({
 }) => {
     const prestamoOrigenEfectivo = prestamoOrigen ?? (
         data.prestamo_origen_id ? {
-            id:        data.prestamo_origen_id,
-            cliente:   data.cliente_nombre   ?? '',
-            monto:     data.monto_solicitado ?? 0,
+            id:         data.prestamo_origen_id,
+            cliente:    data.cliente_nombre    ?? '',
+            monto:      data.monto_solicitado ?? 0,
             es_grupal: data.es_grupal,
             integrantes: data.integrantes
                 ?.filter(i => i.puede_excluirse === false)
@@ -57,8 +56,8 @@ const SolicitudForm = ({
         hasBlockedIntegrante,
         avalConfig,
     } = useSolicitudForm(data, handleChange, {
-        esRenovacion:       esRenovacionEfectiva,
-        prestamoOrigen:     prestamoOrigenEfectivo,
+        esRenovacion:        esRenovacionEfectiva,
+        prestamoOrigen:      prestamoOrigenEfectivo,
         comboKey,
         onToggleRenovacion,
         onSelectPrestamo,
@@ -89,8 +88,8 @@ const SolicitudForm = ({
             )}
 
             {formBloqueadoPorRenovacion ? (
-                <div className="py-16 text-center border-2 border-dashed border-brand-gold/30 rounded-2xl bg-brand-gold-light/10">
-                    <p className="text-[11px] font-black text-brand-gold-dark uppercase tracking-widest">
+                <div className="py-16 text-center border-2 border-dashed border-brand-gold/30 rounded-2xl bg-brand-gold-light/10 dark:bg-brand-gold/5 transition-colors">
+                    <p className="text-[11px] font-black text-brand-gold-dark dark:text-brand-gold uppercase tracking-widest">
                         ↑ Selecciona el préstamo a renovar para continuar
                     </p>
                 </div>
@@ -114,13 +113,13 @@ const SolicitudForm = ({
                     )}
 
                     {/* ── Switch individual/grupal ── */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl w-fit mx-auto border border-slate-200 shadow-inner">
+                    <div className="flex bg-slate-100 dark:bg-dark-surface-alt p-1 rounded-xl w-fit mx-auto border border-slate-200 dark:border-dark-border shadow-inner transition-colors">
                         <button
                             type="button"
                             onClick={() => !isUpdate && !bloqueado && handleChange('es_grupal', false)}
                             disabled={isUpdate || esRenovacionActiva || bloqueado}
                             className={`px-8 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
-                                !data.es_grupal ? 'bg-white text-brand-red shadow-sm ring-1 ring-brand-red/20' : 'text-slate-400 hover:text-slate-600'
+                                !data.es_grupal ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20' : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             Individual
@@ -130,7 +129,7 @@ const SolicitudForm = ({
                             onClick={() => !isUpdate && !bloqueado && handleChange('es_grupal', true)}
                             disabled={isUpdate || esRenovacionActiva || bloqueado}
                             className={`px-8 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
-                                data.es_grupal ? 'bg-white text-brand-red shadow-sm ring-1 ring-brand-red/20' : 'text-slate-400 hover:text-slate-600'
+                                data.es_grupal ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20' : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             Grupal
@@ -138,19 +137,19 @@ const SolicitudForm = ({
                     </div>
 
                     {/* ── Asesor ── */}
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
-                        <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Asesor Responsable</h3>
+                    <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/25 p-5 space-y-3 transition-colors">
+                        <h3 className="text-[10px] font-black uppercase text-slate-400 dark:text-dark-text-muted tracking-widest">Asesor Responsable</h3>
                         <EmpleadoSearchSelect
                             rol="asesor"
                             disabled={bloqueado}
                             initialName={data.asesor_nombre || ''}
                             onSelect={(asesor) => {
-                                handleChange('asesor_id',     asesor?.id              ?? '');
+                                handleChange('asesor_id',     asesor?.id            ?? '');
                                 handleChange('asesor_nombre', asesor?.nombre_completo ?? '');
                             }}
                         />
                         {!data.asesor_id && (
-                            <p className="text-[9px] text-brand-red font-bold uppercase">* Selecciona un asesor para continuar</p>
+                            <p className="text-[9px] text-brand-red dark:text-brand-gold font-bold uppercase">* Selecciona un asesor para continuar</p>
                         )}
                     </div>
 

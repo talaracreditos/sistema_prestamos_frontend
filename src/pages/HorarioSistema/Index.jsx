@@ -25,8 +25,8 @@ const Index = () => {
             header: 'Horario',
             render: (row) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-slate-800 text-sm uppercase">{row.nombre}</span>
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-brand-red mt-0.5">
+                    <span className="font-black text-slate-800 dark:text-dark-text text-sm uppercase transition-colors">{row.nombre}</span>
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-brand-red dark:text-brand-gold mt-0.5 transition-colors">
                         <ClockIcon className="w-3 h-3" />
                         {row.hora_inicio} — {row.hora_fin}
                     </span>
@@ -39,10 +39,10 @@ const Index = () => {
                 <div className="flex gap-1 flex-wrap">
                     {[1,2,3,4,5,6,0].map(d => (
                         <span key={d}
-                            className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase
+                            className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase transition-colors
                                 ${row.dias.includes(d)
-                                    ? 'bg-brand-red text-white'
-                                    : 'bg-slate-100 text-slate-300'}`}>
+                                    ? 'bg-brand-red dark:bg-brand-red-glow text-white dark:text-black'
+                                    : 'bg-slate-100 dark:bg-dark-surface-alt text-slate-300 dark:text-dark-text-muted/40'}`}>
                             {DIAS_LABELS[d]}
                         </span>
                     ))}
@@ -56,12 +56,12 @@ const Index = () => {
                     {row.roles.length > 0
                         ? row.roles.map(r => (
                             <span key={r.id}
-                                className="flex items-center gap-1 px-2 py-0.5 bg-brand-red-light border border-brand-red/20 rounded-lg text-[9px] font-black text-brand-red uppercase">
+                                className="flex items-center gap-1 px-2 py-0.5 bg-brand-red-light dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 rounded-lg text-[9px] font-black text-brand-red dark:text-brand-gold uppercase transition-colors">
                                 <ShieldCheckIcon className="w-3 h-3" />
                                 {r.nombre}
                             </span>
                         ))
-                        : <span className="text-[10px] text-slate-400 italic font-bold">Sin restricción</span>
+                        : <span className="text-[10px] text-slate-400 dark:text-dark-text-muted/60 italic font-bold transition-colors">Sin restricción</span>
                     }
                 </div>
             ),
@@ -69,19 +69,19 @@ const Index = () => {
         {
             header: 'Estado',
             render: (row) => row.activo
-                ? <span className="flex items-center gap-1 text-[10px] font-black text-green-600 uppercase"><CheckCircleIcon className="w-4 h-4" /> Activo</span>
-                : <span className="flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase"><XCircleIcon className="w-4 h-4" /> Inactivo</span>,
+                ? <span className="flex items-center gap-1 text-[10px] font-black text-green-600 dark:text-green-400 uppercase transition-colors"><CheckCircleIcon className="w-4 h-4" /> Activo</span>
+                : <span className="flex items-center gap-1 text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase transition-colors"><XCircleIcon className="w-4 h-4" /> Inactivo</span>,
         },
         {
             header: 'Acciones',
             render: (row) => (
                 <div className="flex justify-end gap-2">
                     <Link to={`/horario-sistema/editar/${row.id}`}
-                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                        className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-brand-gold/20 shadow-sm">
                         <PencilSquareIcon className="w-4 h-4" />
                     </Link>
                     <button onClick={() => handleAskDelete(row.id)}
-                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                        className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20 shadow-sm">
                         <TrashIcon className="w-4 h-4" />
                     </button>
                 </div>
@@ -107,7 +107,7 @@ const Index = () => {
     ];
  
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 transition-colors">
             <PageHeader
                 title="Horarios del Sistema"
                 icon={ClockIcon}

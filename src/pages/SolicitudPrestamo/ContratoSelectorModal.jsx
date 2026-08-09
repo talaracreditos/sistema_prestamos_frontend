@@ -63,29 +63,29 @@ const ContratoSelectorModal = ({ isOpen, onClose, data, onSelectContrato }) => {
     const totalContratos = 1 + contratos_individuales.length;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border-t sm:border border-slate-700 max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/80 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 transition-colors">
+            <div className="bg-white dark:bg-dark-surface rounded-t-2xl sm:rounded-2xl shadow-2xl dark:shadow-black/50 w-full max-w-md flex flex-col overflow-hidden border-t sm:border border-slate-700 dark:border-dark-border max-h-[90vh] transition-colors">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-surface-alt shrink-0 transition-colors">
                     <div className="min-w-0">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight truncate">
+                        <h3 className="text-sm font-black text-slate-800 dark:text-dark-text uppercase tracking-tight truncate transition-colors">
                             {title || 'Contratos disponibles'}
                         </h3>
-                        <p className="text-[10px] text-slate-500 font-medium uppercase">
+                        <p className="text-[10px] text-slate-500 dark:text-dark-text-muted font-medium uppercase transition-colors">
                             Selecciona para ver, o descarga todo
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors shrink-0"
+                        className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors shrink-0"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Body (Scrollable) */}
-                <div className="p-4 space-y-2 overflow-y-auto flex-1">
+                <div className="p-4 space-y-2 overflow-y-auto flex-1 transition-colors">
                     {/* Contrato grupal */}
                     <button
                         type="button"
@@ -95,20 +95,20 @@ const ContratoSelectorModal = ({ isOpen, onClose, data, onSelectContrato }) => {
                                 title: title || 'Contrato Grupal',
                             })
                         }
-                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-brand-red hover:bg-brand-red-light transition-colors text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-dark-border hover:border-brand-red dark:hover:border-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt transition-colors text-left"
                     >
-                        <div className="w-10 h-10 rounded-lg bg-brand-red-light flex items-center justify-center shrink-0">
-                            <DocumentArrowDownIcon className="w-5 h-5 text-brand-red" />
+                        <div className="w-10 h-10 rounded-lg bg-brand-red-light dark:bg-brand-gold/10 flex items-center justify-center shrink-0 transition-colors">
+                            <DocumentArrowDownIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-800">Contrato Grupal</p>
-                            <p className="text-[11px] text-slate-500">Documento completo del grupo</p>
+                            <p className="text-sm font-bold text-slate-800 dark:text-dark-text transition-colors">Contrato Grupal</p>
+                            <p className="text-[11px] text-slate-500 dark:text-dark-text-muted transition-colors">Documento completo del grupo</p>
                         </div>
                     </button>
 
                     {contratos_individuales.length > 0 && (
                         <>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase px-1 pt-3 border-t border-slate-100 mt-2">
+                            <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase px-1 pt-3 border-t border-slate-100 dark:border-dark-border mt-2 transition-colors">
                                 Integrantes
                             </p>
                             {contratos_individuales.map((integrante) => (
@@ -121,16 +121,16 @@ const ContratoSelectorModal = ({ isOpen, onClose, data, onSelectContrato }) => {
                                             title: `Contrato — ${integrante.cliente_nombre}`,
                                         })
                                     }
-                                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-dark-border hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-dark-surface-alt transition-colors text-left"
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                        <UserIcon className="w-5 h-5 text-blue-600" />
+                                    <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0 transition-colors">
+                                        <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-bold text-slate-800 truncate">
+                                        <p className="text-sm font-bold text-slate-800 dark:text-dark-text truncate transition-colors">
                                             {integrante.cliente_nombre}
                                         </p>
-                                        <p className="text-[11px] text-slate-500 uppercase font-medium">
+                                        <p className="text-[11px] text-slate-500 dark:text-dark-text-muted uppercase font-medium transition-colors">
                                             {integrante.cargo}
                                         </p>
                                     </div>
@@ -141,11 +141,11 @@ const ContratoSelectorModal = ({ isOpen, onClose, data, onSelectContrato }) => {
                 </div>
 
                 {/* Footer con el botón de descarga global */}
-                <div className="p-4 border-t border-slate-200 bg-white shrink-0">
+                <div className="p-4 border-t border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface shrink-0 transition-colors">
                     <button
                         onClick={handleDownloadAll}
                         disabled={isDownloading}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-wait shadow-md"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 dark:bg-black hover:bg-slate-900 dark:hover:bg-slate-900 text-white dark:text-dark-text rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-wait shadow-md dark:shadow-black/30"
                     >
                         <ArrowDownTrayIcon className={`w-4 h-4 ${isDownloading ? 'animate-bounce' : ''}`} />
                         {isDownloading ? 'Descargando...' : `Descargar Todos (${totalContratos})`}

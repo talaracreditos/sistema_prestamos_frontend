@@ -13,32 +13,32 @@ const NotFoundPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white text-slate-900 font-sans p-4 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-dark-surface text-slate-900 dark:text-dark-text font-sans p-4 relative transition-colors">
     
         {/* Icono animado de Búsqueda de Archivos */}
         <div className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out mb-10">
-          <div className="inline-flex items-center justify-center w-36 h-36 border-2 border-slate-100 rounded-full mb-4 animate-float relative shadow-sm bg-slate-50">
-            <div className="absolute inset-3 border border-dashed border-slate-300 rounded-full opacity-50"></div>
-            <DocumentMagnifyingGlassIcon className="w-16 h-16 text-slate-400" />
+          <div className="inline-flex items-center justify-center w-36 h-36 border-2 border-slate-100 dark:border-dark-border rounded-full mb-4 animate-float relative shadow-sm bg-slate-50 dark:bg-dark-surface-alt transition-colors">
+            <div className="absolute inset-3 border border-dashed border-slate-300 dark:border-dark-border rounded-full opacity-50"></div>
+            <DocumentMagnifyingGlassIcon className="w-16 h-16 text-slate-400 dark:text-dark-text-muted" />
           </div>
         </div>
         
-        <h1 className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out text-8xl font-black tracking-tighter text-slate-900 mb-2">
+        <h1 className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out text-8xl font-black tracking-tighter text-slate-900 dark:text-dark-text mb-2 transition-colors">
           404
         </h1>
         
-        <h2 className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out text-xs font-black uppercase tracking-[0.4em] text-slate-400 mb-8">
+        <h2 className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out text-xs font-black uppercase tracking-[0.4em] text-slate-400 dark:text-dark-text-muted mb-8 transition-colors">
           Recurso No Localizado
         </h2>
         
-        <p className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out mb-12 max-w-sm text-center leading-relaxed font-medium text-slate-500">
-           "La página, préstamo o expediente que intenta consultar no existe en nuestra base de datos activa. Verifique la URL e intente nuevamente."
+        <p className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out mb-12 max-w-sm text-center leading-relaxed font-medium text-slate-500 dark:text-dark-text-muted transition-colors">
+            "La página, préstamo o expediente que intenta consultar no existe en nuestra base de datos activa. Verifique la URL e intente nuevamente."
         </p>
         
         <div className="animate-in opacity-0 translate-y-4 transition-all duration-700 ease-out">
           <a
             href="/home"
-            className="group inline-flex items-center gap-3 px-10 py-4 bg-white text-slate-900 border-2 border-slate-900 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all duration-300"
+            className="group inline-flex items-center gap-3 px-10 py-4 bg-white dark:bg-dark-surface-alt text-slate-900 dark:text-dark-text border-2 border-slate-900 dark:border-dark-border rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] hover:bg-slate-900 hover:text-white dark:hover:bg-dark-surface dark:hover:text-brand-gold transition-all duration-300"
           >
             <HiOutlineArrowLongLeft className="text-xl group-hover:-translate-x-2 transition-transform duration-300" />
             Volver al Inicio

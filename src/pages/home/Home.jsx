@@ -31,9 +31,9 @@ const Home = () => {
       <div className="max-w-5xl mx-auto">
         
         {/* 1. SECCIÓN DE BIENVENIDA */}
-        <header className="flex flex-col md:flex-row items-center gap-6 mb-8 p-8 bg-gradient-to-r bg-black rounded-2xl text-white shadow-xl relative overflow-hidden">
+        <header className="flex flex-col md:flex-row items-center gap-6 mb-8 p-8 bg-gradient-to-r bg-black dark:bg-dark-surface rounded-2xl text-white shadow-xl dark:shadow-black/40 relative overflow-hidden border border-transparent dark:border-dark-border">
           <div className="relative z-10">
-            <div className="h-20 w-20 bg-red-900 rounded-xl flex items-center justify-center text-3xl font-black shadow-inner border border-slate-700 uppercase">
+            <div className="h-20 w-20 bg-red-900 dark:bg-brand-red-glow rounded-xl flex items-center justify-center text-3xl font-black shadow-inner border border-slate-700 dark:border-dark-border uppercase">
               {userData?.name?.charAt(0) || "U"}
             </div>
           </div>
@@ -56,46 +56,46 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Detalles de la Cuenta */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-slate-500 text-[11px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/20 transition-colors duration-300">
+            <h3 className="text-slate-500 dark:text-dark-text-muted text-[11px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
               <User size={16}/> Información de Sesión
             </h3>
             
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-400">
+                <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
                   <User size={18}/>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Nombre Completo</p>
-                  <p className="font-bold text-slate-800 text-sm">{toUpper(userData?.name) || 'No disponible'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Nombre Completo</p>
+                  <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.name) || 'No disponible'}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-400">
+                <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
                   <NotepadText size={18}/>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Username</p>
-                  <p className="font-bold text-slate-800 text-sm">{toUpper(userData?.username) || 'No disponible'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Username</p>
+                  <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.username) || 'No disponible'}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-400">
+                <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
                   <UserCircle size={18}/>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Rol</p>
-                  <p className="font-bold text-slate-800 text-sm">{toUpper(userData?.role) || 'No disponible'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Rol</p>
+                  <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.role) || 'No disponible'}</p>
                 </div>
               </div>
               
             </div>
           </div>
 
-            <div className="bg-red-900 p-6 rounded-2xl text-white shadow-lg flex flex-col justify-between relative overflow-hidden">
+            <div className="bg-red-900 dark:bg-brand-red-glow p-6 rounded-2xl text-white shadow-lg dark:shadow-black/30 flex flex-col justify-between relative overflow-hidden border border-transparent dark:border-dark-border transition-colors duration-300">
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
@@ -132,14 +132,14 @@ const Home = () => {
         </div>
 
         {/* 3. MENSAJE FINAL */}
-        <div className="mt-8 p-8 border border-dashed border-slate-300 bg-slate-50/50 rounded-2xl text-center">
-            <p className="text-slate-500 text-sm font-medium italic">
+        <div className="mt-8 p-8 border border-dashed border-slate-300 dark:border-dark-border bg-slate-50/50 dark:bg-dark-surface/50 rounded-2xl text-center transition-colors duration-300">
+            <p className="text-slate-500 dark:text-dark-text-muted text-sm font-medium italic">
                 "El verdadero valor de un sistema de préstamos no está en el dinero que entrega, sino en las oportunidades que crea."
             </p>
             <div className="mt-4 flex items-center justify-center gap-3 opacity-60">
-              <span className="h-px w-6 bg-slate-400"></span>
-              <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em]">TALARA CREDITOS E INVERSIONES</p>
-              <span className="h-px w-6 bg-slate-400"></span>
+              <span className="h-px w-6 bg-slate-400 dark:bg-dark-border"></span>
+              <p className="text-slate-500 dark:text-dark-text-muted text-[9px] font-black uppercase tracking-[0.2em]">TALARA CREDITOS E INVERSIONES</p>
+              <span className="h-px w-6 bg-slate-400 dark:bg-dark-border"></span>
             </div>
         </div>
 

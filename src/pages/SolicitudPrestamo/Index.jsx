@@ -6,8 +6,8 @@ import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import PdfModal from 'components/Shared/Modals/PdfModal';
-import {
-    DocumentTextIcon, CheckIcon, XMarkIcon,
+import { 
+    DocumentTextIcon, CheckIcon, XMarkIcon, 
     PencilSquareIcon, EyeIcon, DocumentArrowDownIcon, CheckBadgeIcon,
     IdentificationIcon,
 } from '@heroicons/react/24/outline';
@@ -30,7 +30,6 @@ const Index = () => {
         handleMarcarConforme, conformeLoading,
         isContratoSelectorOpen, contratoSelectorData,
         handleCloseContratoSelector, handleSelectContrato,
-        // Código de recaudo
         isCodigoRecaudoOpen, selectedForCodigo, codigoRecaudoLoading, codigoRecaudoAlert,
         openCodigoRecaudoModal, handleCloseCodigoRecaudoModal, handleAsignarCodigoRecaudo,
     } = useIndex();
@@ -40,34 +39,34 @@ const Index = () => {
     const columns = useMemo(() => [
         {
             header: 'ID',
-            render: (row) => <span className="font-black text-slate-600">#{row.id}</span>
+            render: (row) => <span className="font-black text-slate-600 dark:text-dark-text">#{row.id}</span>
         },
         {
             header: 'Sujeto / Grupo',
             render: (row) => (
                 <div className="flex flex-col">
-                    <span className={`font-bold text-xs uppercase ${row.es_grupal ? 'text-brand-red' : 'text-slate-800'}`}>
+                    <span className={`font-bold text-xs uppercase ${row.es_grupal ? 'text-brand-red dark:text-brand-gold' : 'text-slate-800 dark:text-dark-text'}`}>
                         {row.cliente_nombre}
                     </span>
-                    <span className="text-[9px] text-slate-400 font-medium">ASESOR: {row.asesor_nombre}</span>
+                    <span className="text-[9px] text-slate-400 dark:text-dark-text-muted font-medium">ASESOR: {row.asesor_nombre}</span>
                 </div>
             )
         },
         {
             header: 'Monto',
-            render: (row) => <span className="font-black text-brand-red italic underline">S/ {row.monto_solicitado}</span>
+            render: (row) => <span className="font-black text-brand-red dark:text-brand-gold italic underline">S/ {row.monto_solicitado}</span>
         },
         {
             header: 'Estado',
             render: (row) => {
                 const colors = {
-                    1: 'bg-brand-gold-light text-brand-gold-dark border border-brand-gold/30',
-                    2: 'bg-green-100 text-green-700 border border-green-200',
-                    3: 'bg-brand-red-light text-brand-red border border-brand-red/30',
+                    1: 'bg-brand-gold-light dark:bg-brand-gold/10 text-brand-gold-dark dark:text-brand-gold border border-brand-gold/30 dark:border-brand-gold/20',
+                    2: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30',
+                    3: 'bg-brand-red-light dark:bg-red-500/20 text-brand-red dark:text-red-400 border border-brand-red/30 dark:border-red-500/30',
                 };
                 const labels = { 1: 'PENDIENTE', 2: 'APROBADO', 3: 'RECHAZADO' };
                 return (
-                    <span className={`px-2 py-1 rounded-full text-[9px] font-black w-fit ${colors[row.estado]}`}>
+                    <span className={`px-2 py-1 rounded-full text-[9px] font-black w-fit transition-colors ${colors[row.estado]}`}>
                         {labels[row.estado]}
                     </span>
                 );
@@ -89,7 +88,7 @@ const Index = () => {
                     <div className="flex gap-1 justify-end items-center flex-wrap">
 
                         <button onClick={() => handleView(row.id)}
-                            className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-colors">
+                            className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-lg transition-colors">
                             <EyeIcon className="w-4 h-4" />
                         </button>
 
@@ -97,38 +96,35 @@ const Index = () => {
                             <>
                                 {can('solicitudPrestamo.update') && (
                                     <Link to={`/solicitudPrestamo/editar/${row.id}`}
-                                        className="p-1.5 text-slate-400 hover:text-brand-gold-dark hover:bg-brand-gold-light rounded-lg transition-colors">
+                                        className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:text-brand-gold-dark dark:hover:text-brand-gold hover:bg-brand-gold-light dark:hover:bg-dark-surface-alt rounded-lg transition-colors">
                                         <PencilSquareIcon className="w-4 h-4" />
                                     </Link>
                                 )}
 
-                                {/* Botón contrato — aplica a AMBOS tipos */}
                                 {can('solicitudPrestamo.generatePDF') && (
                                     <button
                                         onClick={() => handleVerContrato(row)}
                                         disabled={contratoLoading === row.id}
                                         title={row.es_grupal ? 'Ver contrato grupal' : 'Ver contrato individual'}
-                                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-dark-surface-alt rounded-lg transition-colors"
                                     >
                                         {contratoLoading === row.id
-                                            ? <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+                                            ? <div className="w-4 h-4 border-2 border-slate-300 dark:border-dark-border border-t-blue-500 rounded-full animate-spin" />
                                             : <DocumentArrowDownIcon className="w-4 h-4" />
                                         }
                                     </button>
                                 )}
 
-                                {/* Botón código de recaudo — digitador */}
                                 {!row.codigo_recaudo && can('solicitudPrestamo.codigoRecaudo') && (
                                     <button
                                         onClick={() => openCodigoRecaudoModal(row)}
                                         title="Asignar código de recaudo"
-                                        className="p-1.5 rounded-lg transition-colors text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                                        className="p-1.5 rounded-lg transition-colors text-slate-400 dark:text-dark-text-muted hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-dark-surface-alt"
                                     >
                                         <IdentificationIcon className="w-4 h-4" />
                                     </button>
                                 )}
 
-                                {/* Marcar conforme — aplica a AMBOS tipos */}
                                 {can('solicitudPrestamo.contratoConforme') && (
                                     <button
                                         onClick={() => !row.contrato_conforme && handleMarcarConforme(row.id)}
@@ -136,12 +132,12 @@ const Index = () => {
                                         title={row.contrato_conforme ? 'Contrato conforme' : 'Marcar conforme'}
                                         className={`p-1.5 rounded-lg transition-colors ${
                                             row.contrato_conforme
-                                                ? 'text-green-600 bg-green-50 cursor-default'
-                                                : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                                ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 cursor-default'
+                                                : 'text-slate-400 dark:text-dark-text-muted hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-dark-surface-alt'
                                         }`}
                                     >
                                         {conformeLoading === row.id
-                                            ? <div className="w-4 h-4 border-2 border-slate-300 border-t-green-500 rounded-full animate-spin" />
+                                            ? <div className="w-4 h-4 border-2 border-slate-300 dark:border-dark-border border-t-green-500 rounded-full animate-spin" />
                                             : <CheckBadgeIcon className="w-4 h-4" />
                                         }
                                     </button>
@@ -153,12 +149,12 @@ const Index = () => {
                                             onClick={() => openApproveModal(row)}
                                             disabled={!puedeAprobar}
                                             title={motivoBloqueo}
-                                            className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                            className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-dark-surface-alt rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                         >
                                             <CheckIcon className="w-4 h-4" />
                                         </button>
                                         <button onClick={() => handleUpdateStatus(row.id, 3)}
-                                            className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-colors">
+                                            className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-lg transition-colors">
                                             <XMarkIcon className="w-4 h-4" />
                                         </button>
                                     </>
@@ -175,7 +171,7 @@ const Index = () => {
     if (loading && solicitudes.length === 0) return <LoadingScreen />;
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 transition-colors">
             <PageHeader
                 title="Solicitudes"
                 icon={DocumentTextIcon}
@@ -211,7 +207,6 @@ const Index = () => {
                 isLoading={viewLoading}
             />
 
-            {/* Selector de contrato (grupal + integrantes) */}
             <ContratoSelectorModal
                 isOpen={isContratoSelectorOpen}
                 onClose={handleCloseContratoSelector}
@@ -219,7 +214,6 @@ const Index = () => {
                 onSelectContrato={handleSelectContrato}
             />
 
-            {/* Visor del PDF elegido */}
             <PdfModal
                 isOpen={isPdfOpen}
                 onClose={() => setIsPdfOpen(false)}
@@ -227,7 +221,6 @@ const Index = () => {
                 pdfUrl={contratoPdf}
             />
 
-            {/* Modal de código de recaudo */}
             <CodigoRecaudoModal
                 isOpen={isCodigoRecaudoOpen}
                 onClose={handleCloseCodigoRecaudoModal}

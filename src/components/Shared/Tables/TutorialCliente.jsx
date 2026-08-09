@@ -194,22 +194,22 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
                     }}
                 />
             ) : (
-                <div className="fixed inset-0 z-[9998] bg-slate-900/68 backdrop-blur-[2px] pointer-events-none" />
+                <div className="fixed inset-0 z-[9998] bg-slate-900/68 dark:bg-black/80 backdrop-blur-[2px] pointer-events-none transition-colors" />
             )}
 
             {/* ── Tooltip explicativo — flotante pegado al elemento en cualquier pantalla ── */}
             <div
-                className="fixed z-[9999] bg-white shadow-2xl rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
+                className="fixed z-[9999] bg-white dark:bg-dark-surface dark:border dark:border-dark-border shadow-2xl dark:shadow-black/50 rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 transition-colors"
                 style={tooltipStyle}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 pt-4 pb-1">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    <span className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">
                         Guía · Paso {idx + 1} de {pasosActivos.length}
                     </span>
                     <button
                         onClick={cerrar}
-                        className="p-1 text-slate-300 hover:text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="p-1 text-slate-300 dark:text-dark-text-muted/60 hover:text-slate-500 dark:hover:text-dark-text hover:bg-slate-100 dark:hover:bg-dark-surface-alt rounded-lg transition-colors"
                         title="Cerrar guía"
                     >
                         <XMarkIcon className="w-4 h-4" />
@@ -218,16 +218,16 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
 
                 {/* Contenido */}
                 <div className="px-4 pb-3">
-                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight mb-1">
+                    <h3 className="text-sm font-black text-slate-800 dark:text-dark-text uppercase tracking-tight mb-1">
                         {paso.titulo}
                     </h3>
-                    <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
+                    <p className="text-[12px] font-medium text-slate-500 dark:text-dark-text-muted leading-relaxed">
                         {paso.texto}
                     </p>
                 </div>
 
                 {/* Footer: dots + navegación */}
-                <div className="px-4 pb-4 pt-2 border-t border-slate-100">
+                <div className="px-4 pb-4 pt-2 border-t border-slate-100 dark:border-dark-border transition-colors">
                     <div className="flex items-center justify-center gap-1.5 mb-3">
                         {pasosActivos.map((_, i) => (
                             <button
@@ -235,8 +235,8 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
                                 onClick={() => { setRect(null); setIdx(i); }}
                                 className={`rounded-full transition-all ${
                                     i === idx
-                                        ? 'w-5 h-1.5 bg-brand-red'
-                                        : 'w-1.5 h-1.5 bg-slate-200 hover:bg-slate-300'
+                                        ? 'w-5 h-1.5 bg-brand-red dark:bg-brand-gold'
+                                        : 'w-1.5 h-1.5 bg-slate-200 dark:bg-dark-surface-alt hover:bg-slate-300 dark:hover:bg-slate-600'
                                 }`}
                             />
                         ))}
@@ -246,7 +246,7 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
                         {!esPrimero ? (
                             <button
                                 onClick={anterior}
-                                className="flex items-center gap-1 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all"
+                                className="flex items-center gap-1 px-3.5 py-2 bg-slate-100 dark:bg-dark-surface-alt hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-dark-text text-[10px] font-black uppercase rounded-xl transition-all"
                             >
                                 <ChevronLeftIcon className="w-3.5 h-3.5" />
                                 Anterior
@@ -254,7 +254,7 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
                         ) : (
                             <button
                                 onClick={cerrar}
-                                className="px-3.5 py-2 text-slate-400 hover:text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all"
+                                className="px-3.5 py-2 text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text text-[10px] font-black uppercase rounded-xl transition-all"
                             >
                                 Omitir
                             </button>
@@ -262,7 +262,7 @@ const TutorialCliente = ({ esGrupal = false, reabrir = 0 }) => {
 
                         <button
                             onClick={siguiente}
-                            className="flex-1 flex items-center justify-center gap-1 px-3.5 py-2 bg-brand-red hover:bg-brand-red-dark text-white text-[10px] font-black uppercase rounded-xl shadow-md shadow-brand-red/20 transition-all active:scale-95"
+                            className="flex-1 flex items-center justify-center gap-1 px-3.5 py-2 bg-brand-red dark:bg-brand-gold hover:bg-brand-red-dark dark:hover:brightness-110 text-white dark:text-black text-[10px] font-black uppercase rounded-xl shadow-md shadow-brand-red/20 dark:shadow-brand-gold/20 transition-all active:scale-95"
                         >
                             {esUltimo ? '¡Entendido!' : 'Siguiente'}
                             {!esUltimo && <ChevronRightIcon className="w-3.5 h-3.5" />}

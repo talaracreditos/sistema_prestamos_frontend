@@ -46,24 +46,24 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
             hideFooter={true}
         >
             {/* Desktop: dos columnas | Mobile: una columna scrolleable */}
-            <div className="flex flex-col md:flex-row md:overflow-hidden overflow-y-auto" style={{ height: 590 }}>
+            <div className="flex flex-col md:flex-row md:overflow-hidden overflow-y-auto transition-colors" style={{ height: 590 }}>
 
                 {/* ── IZQUIERDA ── */}
-                <div className="flex flex-col md:border-r border-b md:border-b-0 border-slate-100 shrink-0 md:w-[500px] w-full">
+                <div className="flex flex-col md:border-r border-b md:border-b-0 border-slate-100 dark:border-dark-border shrink-0 md:w-[500px] w-full transition-colors">
 
                     {/* Scroll area */}
                     <div className="md:flex-1 md:overflow-y-auto px-6 py-5 space-y-4">
 
                         {/* Card oscura */}
-                        <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800">
+                        <div className="bg-slate-900 dark:bg-black rounded-2xl p-5 border border-slate-800 dark:border-dark-border transition-colors">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-1.5">
                                     <ArrowsRightLeftIcon className="w-3.5 h-3.5 text-yellow-400" />
-                                    <span className="text-[9px] font-black uppercase tracking-[.18em] text-slate-500">
+                                    <span className="text-[9px] font-black uppercase tracking-[.18em] text-slate-500 dark:text-dark-text-muted">
                                         Importe Desembolso
                                     </span>
                                 </div>
-                                <span className="text-[9px] font-black uppercase tracking-wider text-blue-400 bg-slate-800 px-2.5 py-1 rounded-full">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-blue-400 bg-slate-800 dark:bg-dark-surface-alt px-2.5 py-1 rounded-full transition-colors">
                                     #{prestamo.id}
                                 </span>
                             </div>
@@ -72,54 +72,54 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                                 S/ {Number(prestamo.monto).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                             </p>
 
-                            <div className="mt-4 pt-4 border-t border-white/10">
-                                <p className="text-[9px] font-black uppercase tracking-[.15em] text-slate-500 mb-0.5">
+                            <div className="mt-4 pt-4 border-t border-white/10 dark:border-dark-border transition-colors">
+                                <p className="text-[9px] font-black uppercase tracking-[.15em] text-slate-500 dark:text-dark-text-muted mb-0.5">
                                     Beneficiario
                                 </p>
-                                <p className="text-sm font-black uppercase text-white leading-snug break-words">
+                                <p className="text-sm font-black uppercase text-white dark:text-dark-text leading-snug break-words transition-colors">
                                     {prestamo.cliente}
                                 </p>
                             </div>
 
                             {prestamo.es_grupal && presidente && (
-                                <div className="mt-3 pt-3 border-t border-white/10">
+                                <div className="mt-3 pt-3 border-t border-white/10 dark:border-dark-border transition-colors">
                                     <div className="flex items-center gap-1.5 mb-2">
                                         <BuildingLibraryIcon className="w-3 h-3 text-yellow-400" />
-                                        <p className="text-[9px] font-black uppercase tracking-[.12em] text-slate-400">
+                                        <p className="text-[9px] font-black uppercase tracking-[.12em] text-slate-400 dark:text-dark-text-muted">
                                             Cuentas · {presidente.nombre}
-                                            <span className="text-slate-600 ml-1">· {presidente.dni}</span>
+                                            <span className="text-slate-600 dark:text-dark-text-muted/60 ml-1">· {presidente.dni}</span>
                                         </p>
                                     </div>
                                     {cuentas.length > 0 ? (
                                         <div className="space-y-1.5">
                                             {cuentas.map((c, i) => (
-                                                <div key={i} className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                                <div key={i} className="bg-white/5 dark:bg-dark-surface-alt border border-white/10 dark:border-dark-border rounded-xl px-3 py-2 transition-colors">
                                                     <p className="text-[9px] font-black uppercase tracking-wider text-yellow-500/80">{c.banco}</p>
-                                                    <p className="text-xs font-black tracking-widest text-white mt-0.5">{c.numero_cuenta}</p>
-                                                    {c.cci && <p className="text-[9px] font-bold text-slate-500 mt-0.5">CCI: {c.cci}</p>}
+                                                    <p className="text-xs font-black tracking-widest text-white dark:text-dark-text mt-0.5">{c.numero_cuenta}</p>
+                                                    {c.cci && <p className="text-[9px] font-bold text-slate-500 dark:text-dark-text-muted mt-0.5">CCI: {c.cci}</p>}
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-[9px] italic text-slate-600 font-bold uppercase">Sin cuentas registradas</p>
+                                        <p className="text-[9px] italic text-slate-600 dark:text-dark-text-muted font-bold uppercase">Sin cuentas registradas</p>
                                     )}
                                 </div>
                             )}
 
                             {!prestamo.es_grupal && prestamo.cuentas_bancarias?.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-white/10">
+                                <div className="mt-3 pt-3 border-t border-white/10 dark:border-dark-border transition-colors">
                                     <div className="flex items-center gap-1.5 mb-2">
                                         <BuildingLibraryIcon className="w-3 h-3 text-yellow-400" />
-                                        <p className="text-[9px] font-black uppercase tracking-[.12em] text-slate-400">
+                                        <p className="text-[9px] font-black uppercase tracking-[.12em] text-slate-400 dark:text-dark-text-muted">
                                             Cuentas Bancarias
                                         </p>
                                     </div>
                                     <div className="space-y-1.5">
                                         {prestamo.cuentas_bancarias.map((c, i) => (
-                                            <div key={i} className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                            <div key={i} className="bg-white/5 dark:bg-dark-surface-alt border border-white/10 dark:border-dark-border rounded-xl px-3 py-2 transition-colors">
                                                 <p className="text-[9px] font-black uppercase tracking-wider text-yellow-500/80">{c.banco}</p>
-                                                <p className="text-xs font-black tracking-widest text-white mt-0.5">{c.numero_cuenta}</p>
-                                                {c.cci && <p className="text-[9px] font-bold text-slate-500 mt-0.5">CCI: {c.cci}</p>}
+                                                <p className="text-xs font-black tracking-widest text-white dark:text-dark-text mt-0.5">{c.numero_cuenta}</p>
+                                                {c.cci && <p className="text-[9px] font-bold text-slate-500 dark:text-dark-text-muted mt-0.5">CCI: {c.cci}</p>}
                                             </div>
                                         ))}
                                     </div>
@@ -129,25 +129,25 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
 
                         {/* Nro operación */}
                         <div>
-                            <label className="block text-[9px] font-black uppercase tracking-[.12em] text-slate-400 mb-1.5 ml-0.5">
+                            <label className="block text-[9px] font-black uppercase tracking-[.12em] text-slate-400 dark:text-dark-text-muted mb-1.5 ml-0.5">
                                 Nro de Operación Bancaria
                             </label>
                             <input
                                 type="text"
                                 value={nroOperacion}
                                 onChange={(e) => setNroOperacion(e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-900 outline-none transition-all focus:border-red-500 focus:bg-white"
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-surface-alt border-2 border-slate-100 dark:border-dark-border rounded-xl text-sm font-bold text-slate-900 dark:text-dark-text outline-none transition-all focus:border-red-500 focus:bg-white dark:focus:bg-dark-surface placeholder-slate-400 dark:placeholder-dark-text-muted/60"
                                 placeholder="Ej: BCP-009283"
                             />
                         </div>
                     </div>
 
                     {/* Botón confirmar — solo desktop */}
-                    <div className="hidden md:block shrink-0 px-6 py-4 border-t border-slate-100 bg-white">
+                    <div className="hidden md:block shrink-0 px-6 py-4 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-surface transition-colors">
                         <button
                             onClick={handleSubmit}
                             disabled={loading || !file}
-                            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg shadow-red-100 transition-all active:scale-[.98]"
+                            className="w-full flex items-center justify-center gap-2 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg shadow-red-100 dark:shadow-black/30 transition-all active:scale-[.98]"
                         >
                             {loading
                                 ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -159,10 +159,10 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                 </div>
 
                 {/* ── DERECHA: preview + upload ── */}
-                <div className="flex flex-col flex-1 bg-slate-50 p-4 gap-3 min-h-[320px]">
+                <div className="flex flex-col flex-1 bg-slate-50 dark:bg-dark-surface-alt p-4 gap-3 min-h-[320px] transition-colors">
 
                     {/* Preview */}
-                    <div className="relative flex-1 min-h-[220px] flex items-center justify-center rounded-2xl border border-slate-200 bg-white overflow-hidden group">
+                    <div className="relative flex-1 min-h-[220px] flex items-center justify-center rounded-2xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface overflow-hidden group transition-colors">
                         {preview ? (
                             <>
                                 <img
@@ -172,15 +172,15 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                                 />
                                 <button
                                     onClick={() => { setFile(null); setPreview(null); }}
-                                    className="absolute top-3 right-3 p-1.5 bg-white border border-slate-100 rounded-full text-red-400 shadow hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                                    className="absolute top-3 right-3 p-1.5 bg-white dark:bg-dark-surface border border-slate-100 dark:border-dark-border rounded-full text-red-400 shadow hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
                                 >
                                     <XMarkIcon className="w-3.5 h-3.5" />
                                 </button>
                             </>
                         ) : (
                             <div className="text-center select-none">
-                                <PhotoIcon className="w-10 h-10 text-slate-200 mx-auto mb-2" />
-                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-300">Sin Vista Previa</p>
+                                <PhotoIcon className="w-10 h-10 text-slate-200 dark:text-dark-border mx-auto mb-2" />
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-300 dark:text-dark-text-muted/60">Sin Vista Previa</p>
                             </div>
                         )}
                     </div>
@@ -192,8 +192,8 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                             htmlFor="modal-desembolso-upload"
                             className={`flex items-center justify-center gap-2 w-full py-3.5 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
                                 file
-                                    ? 'border-red-400 bg-red-50 text-red-500'
-                                    : 'border-slate-200 bg-white text-slate-400 hover:border-red-300 hover:bg-slate-50'
+                                    ? 'border-red-400 bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400'
+                                    : 'border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface text-slate-400 dark:text-dark-text-muted hover:border-red-300 hover:bg-slate-50 dark:hover:bg-dark-surface-alt'
                             }`}
                         >
                             <PhotoIcon className="w-4 h-4" />
@@ -208,7 +208,7 @@ const DesembolsoModal = ({ isOpen, onClose, prestamo, onConfirm, loading }) => {
                         <button
                             onClick={handleSubmit}
                             disabled={loading || !file}
-                            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg shadow-red-100 transition-all active:scale-[.98]"
+                            className="w-full flex items-center justify-center gap-2 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg shadow-red-100 dark:shadow-black/30 transition-all active:scale-[.98]"
                         >
                             {loading
                                 ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

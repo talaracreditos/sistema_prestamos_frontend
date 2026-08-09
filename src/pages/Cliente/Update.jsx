@@ -22,7 +22,7 @@ const Update = () => {
     if (loading) return <LoadingScreen />;
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader
                 title="Editar Cliente"
                 subtitle={formData.datos_cliente.tipo === 2
@@ -57,18 +57,18 @@ const Update = () => {
                 </div>
 
                 {/* Footer de Acción con botones de Cancelar y Guardar */}
-                <div className="mt-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-end gap-4 sticky bottom-4 z-20">
+                <div className="mt-8 bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm dark:shadow-black/25 border border-slate-200 dark:border-dark-border flex flex-col sm:flex-row justify-end gap-4 sticky bottom-4 z-20 transition-colors">
                     <button 
                         type="button" 
                         onClick={() => navigate('/cliente/listar')}
-                        className="px-8 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors uppercase text-sm"
+                        className="px-8 py-3.5 bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors uppercase text-sm"
                     >
                         Cancelar cambios
                     </button>
                     <button 
                         type="submit" 
                         disabled={saving}
-                        className="bg-brand-red text-white px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 hover:bg-brand-red-dark transition-all disabled:opacity-50"
+                        className="bg-brand-red dark:bg-brand-red-glow text-white px-10 py-3.5 rounded-xl font-black uppercase shadow-lg shadow-brand-red/30 dark:shadow-black/30 hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50"
                     >
                         {saving ? 'Actualizando...' : 'Guardar Cambios'}
                     </button>

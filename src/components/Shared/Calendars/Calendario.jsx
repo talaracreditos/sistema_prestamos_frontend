@@ -4,13 +4,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
 /**
- * Calendario mensual grid clásico.
- *
- * Props:
- *  - mode: 'single' (selección) | 'view' (solo visualización)
- *  - selected: 'YYYY-MM-DD' | null
- *  - onSelect: fn('YYYY-MM-DD')
- *  - feriados: [{fecha:'YYYY-MM-DD', descripcion:'...'}]
+ * Calendario mensual grid clásico adaptado con clases Tailwind + soporte Dark Mode.
  */
 const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
     const hoy = new Date();
@@ -24,14 +18,12 @@ const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
     const anio     = mes.getFullYear();
     const mesIndex = mes.getMonth();
 
-    // Primer día del mes (0=dom..6=sab), ajustado a lunes=0
     const primerDia = new Date(anio, mesIndex, 1);
-    let offsetLunes = primerDia.getDay() - 1; // lunes=0
-    if (offsetLunes < 0) offsetLunes = 6;     // domingo=6
+    let offsetLunes = primerDia.getDay() - 1;
+    if (offsetLunes < 0) offsetLunes = 6;
 
     const diasEnMes = new Date(anio, mesIndex + 1, 0).getDate();
 
-    // Construir grid de 6 semanas x 7 días
     const celdas = [];
     for (let i = 0; i < offsetLunes; i++) celdas.push(null);
     for (let d = 1; d <= diasEnMes; d++) celdas.push(d);
@@ -55,26 +47,23 @@ const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
     for (let i = 0; i < celdas.length; i += 7) semanas.push(celdas.slice(i, i + 7));
 
     return (
-        <div style={styles.container}>
+        <div className="bg-white dark:bg-dark-surface rounded-[24px] border border-slate-100 dark:border-dark-border shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12)] dark:shadow-black/50 p-6 select-none w-full max-w-[720px] transition-colors">
             {/* Cabecera mes + flechas */}
-            <div style={styles.header}>
-                <button onClick={prevMes} style={styles.navBtn}>
-                    <ChevronLeftIcon style={{ width: 16, height: 16 }} type='button' />
+            <div className="flex items-center justify-between mb-5">
+                <button type="button" onClick={prevMes} className="bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-[10px] p-2 cursor-pointer flex items-center text-slate-600 dark:text-dark-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                    <ChevronLeftIcon className="w-4 h-4" />
                 </button>
-                <span style={styles.mesLabel}>{MESES[mesIndex]} {anio}</span>
-                <button onClick={nextMes} style={styles.navBtn}>
-                    <ChevronRightIcon style={{ width: 16, height: 16 }} type='button' />
+                <span className="text-[15px] font-black tracking-[2px] text-slate-800 dark:text-dark-text uppercase transition-colors">{MESES[mesIndex]} {anio}</span>
+                <button type="button" onClick={nextMes} className="bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-[10px] p-2 cursor-pointer flex items-center text-slate-600 dark:text-dark-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                    <ChevronRightIcon className="w-4 h-4" />
                 </button>
             </div>
 
             {/* Grid */}
-            <div style={styles.grid}>
+            <div className="grid grid-cols-7 gap-1">
                 {/* Cabecera días */}
                 {DIAS_SEMANA.map((d, i) => (
-                    <div key={d} style={{
-                        ...styles.headerCell,
-                        color: i === 6 ? '#ef4444' : '#94a3b8',
-                    }}>
+                    <div key={d} className={`text-center text-[10px] font-extrabold uppercase py-2 tracking-[1px] transition-colors ${i === 6 ? 'text-red-500' : 'text-slate-400 dark:text-dark-text-muted'}`}>
                         {d}
                     </div>
                 ))}
@@ -82,7 +71,7 @@ const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
                 {/* Semanas */}
                 {semanas.map((semana, si) =>
                     semana.map((dia, di) => {
-                        if (!dia) return <div key={`e-${si}-${di}`} style={styles.emptyCell} />;
+                        if (!dia) return <div key={`e-${si}-${di}`} className="min-h-[64px] rounded-xl bg-slate-50/50 dark:bg-dark-surface-alt/40 border border-slate-100 dark:border-dark-border/50 transition-colors" />;
 
                         const iso       = toISO(dia);
                         const esFeriado = !!feriadoMap[iso];
@@ -91,22 +80,23 @@ const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
                         const esDomingo = di === 6;
                         const esSelec   = mode === 'single' && !esDomingo && !esFeriado;
 
-                        let cellStyle = { ...styles.cell };
-                        if (esFeriado)  cellStyle = { ...cellStyle, ...styles.cellFeriado };
-                        if (esHoy)      cellStyle = { ...cellStyle, ...styles.cellHoy };
-                        if (esSel)      cellStyle = { ...cellStyle, ...styles.cellSelected };
-                        if (esDomingo && !esFeriado) cellStyle = { ...cellStyle, ...styles.cellDomingo };
+                        let cellClass = "min-h-[64px] rounded-xl border p-2 cursor-pointer flex flex-col gap-1 transition-all bg-white dark:bg-dark-surface border-slate-100 dark:border-dark-border";
+                        
+                        if (esFeriado)  cellClass = "min-h-[64px] rounded-xl p-2 flex flex-col gap-1 transition-all bg-orange-50 dark:bg-orange-500/10 border-[1.5px] border-orange-200 dark:border-orange-500/20 cursor-default";
+                        if (esHoy)      cellClass = "min-h-[64px] rounded-xl p-2 flex flex-col gap-1 transition-all border-2 border-red-500 bg-red-50 dark:bg-red-500/10 shadow-[0_0_0_1px_#ef4444]";
+                        if (esSel)      cellClass = "min-h-[64px] rounded-xl p-2 flex flex-col gap-1 transition-all bg-brand-red dark:bg-brand-red-glow border-2 border-red-600 dark:border-transparent shadow-[0_8px_16px_-4px_rgba(239,68,68,0.4)] text-white";
+                        if (esDomingo && !esFeriado) cellClass += " opacity-35 cursor-default";
 
                         return (
                             <div
                                 key={iso}
-                                style={cellStyle}
+                                className={cellClass}
                                 title={esFeriado ? feriadoMap[iso] : ''}
                                 onClick={() => esSelec && onSelect && onSelect(iso)}
                             >
-                                <span style={styles.diaNum}>{dia}</span>
+                                <span className={`text-[13px] font-extrabold leading-none transition-colors ${esSel ? 'text-white' : 'text-slate-700 dark:text-dark-text'}`}>{dia}</span>
                                 {esFeriado && (
-                                    <span style={styles.feriadoDesc}>
+                                    <span className="text-[8px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-[0.3px] leading-tight overflow-hidden line-clamp-2 transition-colors">
                                         {feriadoMap[iso]}
                                     </span>
                                 )}
@@ -117,111 +107,6 @@ const Calendario = ({ mode = 'single', selected, onSelect, feriados = [] }) => {
             </div>
         </div>
     );
-};
-
-const styles = {
-    container: {
-        background: '#fff',
-        borderRadius: 24,
-        border: '1px solid #f1f5f9',
-        boxShadow: '0 8px 32px -8px rgba(0,0,0,0.12)',
-        padding: '24px',
-        userSelect: 'none',
-        width: '100%',
-        maxWidth: 720,
-    },
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    mesLabel: {
-        fontSize: 15,
-        fontWeight: 900,
-        letterSpacing: 2,
-        color: '#1e293b',
-        textTransform: 'uppercase',
-    },
-    navBtn: {
-        background: '#f8fafc',
-        border: '1px solid #e2e8f0',
-        borderRadius: 10,
-        padding: '6px 8px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        color: '#64748b',
-        transition: 'all 0.15s',
-    },
-    grid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: 4,
-    },
-    headerCell: {
-        textAlign: 'center',
-        fontSize: 10,
-        fontWeight: 800,
-        textTransform: 'uppercase',
-        padding: '8px 0',
-        letterSpacing: 1,
-    },
-    emptyCell: {
-        minHeight: 64,
-        borderRadius: 12,
-        background: '#fafafa',
-        border: '1px solid #f8fafc',
-    },
-    cell: {
-        minHeight: 64,
-        borderRadius: 12,
-        border: '1px solid #f1f5f9',
-        padding: '8px 6px',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
-        transition: 'all 0.15s',
-        background: '#fff',
-    },
-    cellFeriado: {
-        background: '#fff7ed',
-        border: '1.5px solid #fed7aa',
-        cursor: 'default',
-    },
-    cellHoy: {
-        border: '2px solid #ef4444',
-        background: '#fef2f2',
-        boxShadow: '0 0 0 1px #ef4444',
-    },
-    cellSelected: {
-        background: '#ef4444',
-        border: '2px solid #dc2626',
-        boxShadow: '0 8px 16px -4px rgba(239,68,68,0.4)',
-    },
-    cellDomingo: {
-        opacity: 0.35,
-        cursor: 'default',
-    },
-    diaNum: {
-        fontSize: 13,
-        fontWeight: 800,
-        color: '#374151',
-        lineHeight: 1,
-    },
-    feriadoDesc: {
-        fontSize: 8,
-        fontWeight: 700,
-        color: '#ea580c',
-        textTransform: 'uppercase',
-        letterSpacing: 0.3,
-        lineHeight: 1.2,
-        overflow: 'hidden',
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
-    },
 };
 
 export default Calendario;

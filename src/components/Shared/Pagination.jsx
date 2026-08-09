@@ -28,12 +28,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     if (totalPages <= 1) return null;
 
     return (
-        <nav className="flex flex-wrap justify-center items-center gap-1.5 md:gap-2 w-full mt-4 md:mt-0">
+        <nav className="flex flex-wrap justify-center items-center gap-1.5 md:gap-2 w-full mt-4 md:mt-0 transition-colors">
             <button
                 type="button"
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-2.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-brand-red-light hover:text-brand-red hover:border-brand-red/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="px-2.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-sm font-bold text-slate-600 dark:text-dark-text bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-lg hover:bg-brand-red-light dark:hover:bg-dark-surface-alt hover:text-brand-red dark:hover:text-brand-gold hover:border-brand-red/30 dark:hover:border-brand-gold/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
                 Anterior
             </button>
@@ -42,7 +42,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 {paginationRange.map((pageNumber, index) => {
                     if (pageNumber === DOTS) {
                         return (
-                            <span key={`dots-${index}`} className="px-1 md:px-2 py-1 text-xs font-bold text-slate-400">
+                            <span key={`dots-${index}`} className="px-1 md:px-2 py-1 text-xs font-bold text-slate-400 dark:text-dark-text-muted">
                                 …
                             </span>
                         );
@@ -54,8 +54,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                             onClick={() => onPageChange(pageNumber)}
                             className={`px-2.5 py-1.5 md:px-3.5 md:py-2 text-[11px] md:text-xs font-black border rounded-lg transition-all ${
                                 currentPage === pageNumber
-                                    ? 'bg-brand-red text-white border-brand-red shadow-sm shadow-brand-red/20'
-                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-brand-red-light hover:text-brand-red hover:border-brand-red/30'
+                                    ? 'bg-brand-red dark:bg-brand-gold text-white dark:text-black border-brand-red dark:border-brand-gold shadow-sm shadow-brand-red/20 dark:shadow-brand-gold/20'
+                                    : 'bg-white dark:bg-dark-surface text-slate-600 dark:text-dark-text border-slate-200 dark:border-dark-border hover:bg-brand-red-light dark:hover:bg-dark-surface-alt hover:text-brand-red dark:hover:text-brand-gold hover:border-brand-red/30 dark:hover:border-brand-gold/30'
                             }`}
                         >
                             {pageNumber}
@@ -68,7 +68,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 type="button"
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-2.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-brand-red-light hover:text-brand-red hover:border-brand-red/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="px-2.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-sm font-bold text-slate-600 dark:text-dark-text bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-lg hover:bg-brand-red-light dark:hover:bg-dark-surface-alt hover:text-brand-red dark:hover:text-brand-gold hover:border-brand-red/30 dark:hover:border-brand-gold/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
                 Siguiente
             </button>

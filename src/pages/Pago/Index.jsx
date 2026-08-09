@@ -45,11 +45,11 @@ const Index = () => {
             name: 'tipo', type: 'select', label: 'Tipo',
             colSpan: 'col-span-12 md:col-span-2',
             options: [
-                { value: '',                      label: 'TODOS'              },
-                { value: 'NORMAL',                label: 'NORMAL'             },
-                { value: 'EXCEDENTE',             label: 'EXCEDENTE'          },
+                { value: '',                      label: 'TODOS'             },
+                { value: 'NORMAL',                label: 'NORMAL'            },
+                { value: 'EXCEDENTE',             label: 'EXCEDENTE'         },
                 { value: 'DESGLOSE_REFINANCIADO', label: 'DESGLOSE REFINANC.' },
-                { value: 'RENOVACION',            label: 'RENOVACIÓN'         },
+                { value: 'RENOVACION',            label: 'RENOVACIÓN'        },
             ]
         },
         {
@@ -81,26 +81,26 @@ const Index = () => {
             header: 'ID / Fecha',
             render: (row) => (
                 <div className="flex flex-col">
-                    <span className="font-mono text-[14px] font-black text-slate-600">#{row.id}</span>
+                    <span className="font-mono text-[14px] font-black text-slate-600 dark:text-dark-text">#{row.id}</span>
                     {row.pago_origen_id && (
                         <span className={`text-[11px] font-bold mt-0.5 ${
-                            row.tipo === 'DESGLOSE_REFINANCIADO' ? 'text-blue-500' : 'text-slate-400'
+                            row.tipo === 'DESGLOSE_REFINANCIADO' ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-dark-text-muted'
                         }`}>
                             {row.tipo === 'DESGLOSE_REFINANCIADO' ? (
-                                <>Saldo refinanciado conservado de Pago <span className="text-blue-600 font-black">#{row.pago_origen_id}</span></>
+                                <>Saldo refinanciado conservado de Pago <span className="text-blue-600 dark:text-blue-400 font-black">#{row.pago_origen_id}</span></>
                             ) : (
-                                <>Excedente de Pago <span className="text-amber-600 font-black">#{row.pago_origen_id}</span></>
+                                <>Excedente de Pago <span className="text-amber-600 dark:text-amber-400 font-black">#{row.pago_origen_id}</span></>
                             )}
                         </span>
                     )}
-                    <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap mt-0.5">{row.fecha}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold whitespace-nowrap mt-0.5">{row.fecha}</span>
                     {row.dia_operativo_fecha && (
-                        <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap mt-0.5">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted whitespace-nowrap mt-0.5">
                             Día Operativo: {row.dia_operativo_fecha}
                         </span>
                     )}
                     {row.registro_extemporaneo && (
-                        <span className="text-[8px] font-black text-orange-600 bg-orange-50 border border-orange-200 w-fit px-1.5 py-0.5 rounded mt-1 uppercase tracking-wider">
+                        <span className="text-[8px] font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 w-fit px-1.5 py-0.5 rounded mt-1 uppercase tracking-wider">
                             Extemporáneo
                         </span>
                     )}
@@ -112,15 +112,15 @@ const Index = () => {
             render: (row) => (
                 <div className="flex flex-col">
                     {row.numero_comprobante ? (
-                        <span className="font-mono text-[11px] font-black text-brand-red bg-brand-red-light px-2 py-0.5 rounded border border-brand-red/20 w-fit">
+                        <span className="font-mono text-[11px] font-black text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-brand-gold/10 px-2 py-0.5 rounded border border-brand-red/20 dark:border-brand-gold/20 w-fit">
                             {row.numero_comprobante}
                         </span>
                     ) : (
-                        <span className="font-mono text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 border-dashed w-fit italic">
+                        <span className="font-mono text-[9px] font-bold text-slate-400 dark:text-dark-text-muted bg-slate-50 dark:bg-dark-surface-alt px-2 py-0.5 rounded border border-slate-100 dark:border-dark-border border-dashed w-fit italic">
                             Sin Recibo
                         </span>
                     )}
-                    <span className="font-mono text-[9px] font-bold text-slate-400 mt-1 uppercase">
+                    <span className="font-mono text-[9px] font-bold text-slate-400 dark:text-dark-text-muted mt-1 uppercase">
                         Op: {row.numero_operacion || '---'}
                     </span>
                 </div>
@@ -130,14 +130,14 @@ const Index = () => {
             header: 'Titular y Detalle',
             render: (row) => (
                 <div className="flex flex-col uppercase">
-                    <span className="font-black text-[11px] text-slate-800 leading-tight">
-                        <span className="text-slate-400 mr-1.5">{row.numero_prestamo}</span>
+                    <span className="font-black text-[11px] text-slate-800 dark:text-dark-text leading-tight">
+                        <span className="text-slate-400 dark:text-dark-text-muted mr-1.5">{row.numero_prestamo}</span>
                         {row.prestamo}
                     </span>
-                    <span className="text-[9px] text-slate-500 font-bold mt-0.5">
-                        Depositó: <span className="text-slate-700">{row.depositado_por}</span>
+                    <span className="text-[9px] text-slate-500 dark:text-dark-text-muted font-bold mt-0.5">
+                        Depositó: <span className="text-slate-700 dark:text-dark-text">{row.depositado_por}</span>
                     </span>
-                    <span className="text-[9px] font-black text-brand-red bg-brand-red-light border border-brand-red/20 w-fit px-1.5 py-0.5 rounded mt-1 tracking-wider">
+                    <span className="text-[9px] font-black text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 w-fit px-1.5 py-0.5 rounded mt-1 tracking-wider">
                         CUOTA #{row.cuota_nro}
                     </span>
                 </div>
@@ -149,24 +149,24 @@ const Index = () => {
                 <div className="flex flex-col">
                     {esCliente && row.mi_aporte != null ? (
                         <>
-                            <span className="font-black text-emerald-600 text-sm">
+                            <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">
                                 S/ {parseFloat(row.mi_aporte).toFixed(2)}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 mt-0.5 whitespace-nowrap">
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted mt-0.5 whitespace-nowrap">
                                 Total grupo: S/ {parseFloat(row.monto).toFixed(2)}
                             </span>
                         </>
                     ) : (
-                        <span className="font-black text-emerald-600 text-sm">
+                        <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">
                             S/ {parseFloat(row.monto).toFixed(2)}
                         </span>
                     )}
                     {row.comision && (
-                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded border bg-amber-50 text-amber-600 border-amber-200 uppercase tracking-widest w-fit mt-1">
+                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded border bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20 uppercase tracking-widest w-fit mt-1">
                             Comisión: S/ {parseFloat(row.comision).toFixed(2)}
                         </span>
                     )}
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded w-fit mt-1 border border-slate-200 uppercase tracking-widest">
+                    <span className="text-[9px] font-bold text-slate-500 dark:text-dark-text-muted bg-slate-100 dark:bg-dark-surface-alt px-1.5 py-0.5 rounded w-fit mt-1 border border-slate-200 dark:border-dark-border uppercase tracking-widest">
                         {row.modalidad}
                     </span>
                     <TipoBadge tipo={row.tipo} />
@@ -179,17 +179,17 @@ const Index = () => {
                 <div className="flex flex-col items-start gap-1">
                     <span className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase tracking-wider ${
                         row.estado === 1
-                            ? 'bg-green-100 text-green-700 border-green-200'
-                            : 'bg-red-100 text-brand-red border-brand-red/30'
+                            ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
+                            : 'bg-red-100 dark:bg-red-500/10 text-brand-red dark:text-red-400 border-brand-red/30 dark:border-red-500/20'
                     }`}>
                         {row.estado === 1 ? 'APROBADO' : 'ANULADO'}
                     </span>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">
-                        Cajero: <span className="text-slate-600">{row.registrado_por}</span>
+                    <span className="text-[8px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mt-0.5">
+                        Cajero: <span className="text-slate-600 dark:text-dark-text">{row.registrado_por}</span>
                     </span>
                     {row.estado === 0 && row.observaciones && (
-                        <div className="pl-2 border-l-2 border-brand-red max-w-[180px] mt-1">
-                            <span className="text-[9px] font-semibold text-brand-red break-words leading-tight block">
+                        <div className="pl-2 border-l-2 border-brand-red dark:border-red-400 max-w-[180px] mt-1">
+                            <span className="text-[9px] font-semibold text-brand-red dark:text-red-400 break-words leading-tight block">
                                 {row.observaciones}
                             </span>
                         </div>
@@ -203,21 +203,21 @@ const Index = () => {
                 <div className="flex gap-2 items-center justify-end">
                     {row.comprobante_url && (
                         <button onClick={() => openVoucher(row.comprobante_url)} title="Ver Voucher"
-                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl border border-transparent hover:border-emerald-100 transition-all shadow-sm">
+                            className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-dark-surface-alt rounded-xl border border-transparent hover:border-emerald-100 dark:hover:border-dark-border transition-all shadow-sm">
                             <FileSearch className="w-4 h-4" />
                         </button>
                     )}
                     {canVerPdf(row) && (
                         <button onClick={() => handleViewPdf(row.id)} disabled={pdfLoading} title="Imprimir Recibo"
                             className={`p-2 rounded-xl transition-all border border-transparent shadow-sm ${
-                                pdfLoading ? 'bg-slate-50 text-slate-300' : 'text-slate-400 hover:text-brand-red hover:bg-brand-red-light hover:border-brand-red/20'
+                                pdfLoading ? 'bg-slate-50 dark:bg-dark-surface-alt text-slate-300 dark:text-dark-text-muted/40' : 'text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt hover:border-brand-red/20 dark:hover:border-brand-gold/20'
                             }`}>
                             <PrinterIcon className={`w-4 h-4 ${pdfLoading ? 'animate-spin' : ''}`} />
                         </button>
                     )}
                     {canAnular(row) && (
                         <button onClick={() => openAnularModal(row)} title="Anular Pago"
-                            className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                            className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20 shadow-sm">
                             <TrashIcon className="w-4 h-4" />
                         </button>
                     )}
@@ -227,7 +227,7 @@ const Index = () => {
     ], [esCliente, canVerPdf, canAnular, pdfLoading, handleViewPdf, openAnularModal, openVoucher]);
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 transition-colors">
             <PageHeader title="Control de Pagos" icon={BanknotesIcon} />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 
@@ -240,7 +240,7 @@ const Index = () => {
             />
 
             <ViewModal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title="Voucher de Pago">
-                <div className="flex justify-center bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+                <div className="flex justify-center bg-slate-50 dark:bg-dark-surface-alt rounded-xl overflow-hidden border border-slate-200 dark:border-dark-border transition-colors">
                     <img src={selectedVoucher} alt="Voucher" className="max-w-full h-auto object-contain" style={{ maxHeight: '70vh' }} />
                 </div>
             </ViewModal>
@@ -264,15 +264,15 @@ const Index = () => {
 
 // ── Badge de tipo de pago ─────────────────────────────────────────────────────
 const TIPO_STYLES = {
-    NORMAL:                { label: 'NORMAL',             cls: 'bg-slate-100 text-slate-500 border-slate-200'   },
-    EXCEDENTE:             { label: 'EXCEDENTE',          cls: 'bg-amber-50  text-amber-600 border-amber-200'   },
-    DESGLOSE_REFINANCIADO: { label: 'DESGLOSE REFINANC.', cls: 'bg-blue-50   text-blue-600  border-blue-200'    },
-    RENOVACION:            { label: 'RENOVACIÓN',         cls: 'bg-purple-50 text-purple-600 border-purple-200' },
+    NORMAL:                { label: 'NORMAL',                cls: 'bg-slate-100 dark:bg-dark-surface-alt text-slate-500 dark:text-dark-text-muted border-slate-200 dark:border-dark-border'    },
+    EXCEDENTE:             { label: 'EXCEDENTE',             cls: 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30'   },
+    DESGLOSE_REFINANCIADO: { label: 'DESGLOSE REFINANC.', cls: 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/30'     },
+    RENOVACION:            { label: 'RENOVACIÓN',            cls: 'bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-500/30' },
 };
 
 const TipoBadge = ({ tipo }) => {
     if (!tipo) return null;
-    const cfg = TIPO_STYLES[tipo] ?? { label: tipo, cls: 'bg-slate-100 text-slate-500 border-slate-200' };
+    const cfg = TIPO_STYLES[tipo] ?? { label: tipo, cls: 'bg-slate-100 dark:bg-dark-surface-alt text-slate-500 dark:text-dark-text-muted border-slate-200 dark:border-dark-border' };
     return (
         <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border uppercase tracking-widest w-fit mt-1 ${cfg.cls}`}>
             {cfg.label}

@@ -27,7 +27,7 @@ const Index = () => {
         { 
             header: 'ID', 
             render: (row) => (
-                <span className="font-mono text-[15px] font-black px-2 py-1 rounded text-slate-600">
+                <span className="font-mono text-[15px] font-black px-2 py-1 rounded text-slate-600 dark:text-dark-text transition-colors">
                     {row.id}
                 </span>
             )
@@ -36,11 +36,11 @@ const Index = () => {
             header: 'Grupo Solidario',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl border bg-slate-100 border-slate-200">
-                        <UserGroupIcon className="w-5 h-5 text-slate-600" />
+                    <div className="p-2.5 rounded-xl border bg-slate-100 dark:bg-dark-surface-alt border-slate-200 dark:border-dark-border transition-colors">
+                        <UserGroupIcon className="w-5 h-5 text-slate-600 dark:text-dark-text-muted" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-black text-slate-800 text-sm uppercase">{row.nombre}</span>
+                        <span className="font-black text-slate-800 dark:text-dark-text text-sm uppercase transition-colors">{row.nombre}</span>
                     </div>
                 </div>
             )
@@ -48,8 +48,7 @@ const Index = () => {
         {
             header: 'Zona Operativa',
             render: (row) => (
-                // Dejamos el azul aquí porque es un badge informativo de zona (no es una acción)
-                <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100 uppercase">
+                <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded-md border border-blue-100 dark:border-blue-500/20 uppercase transition-colors">
                     {row.zona}
                 </span>
             )
@@ -58,8 +57,8 @@ const Index = () => {
             header: 'Ciclos',
             render: (row) => (
                 <div className="flex items-center gap-2">
-                    <ChartBarIcon className="w-4 h-4 text-slate-400" />
-                    <span className="text-xs font-bold text-slate-600">
+                    <ChartBarIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted" />
+                    <span className="text-xs font-bold text-slate-600 dark:text-dark-text transition-colors">
                         {row.ciclos_count} Ciclos
                     </span>
                 </div>
@@ -71,13 +70,13 @@ const Index = () => {
                 <div className="flex items-center gap-2 justify-end">
                     <Link 
                         to={`/grupo/editar/${row.id}`}
-                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                        className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-brand-gold/20 shadow-sm"
                     >
                         <PencilSquareIcon className="w-4 h-4" />
                     </Link>
                     <button 
                         onClick={() => handleAskDelete(row.id)}
-                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm"
+                        className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20 shadow-sm"
                     >
                         <TrashIcon className="w-4 h-4" />
                     </button>
@@ -87,7 +86,7 @@ const Index = () => {
     ], [handleAskDelete]);
 
     return (
-        <div className="container mx-auto p-4 sm:p-6">
+        <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader title="Grupos Solidarios" icon={UserGroupIcon} buttonText="+ Nuevo Grupo" buttonLink="/grupo/agregar" />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 

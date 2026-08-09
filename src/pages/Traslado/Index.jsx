@@ -27,11 +27,11 @@ const Index = () => {
             header: 'Préstamo',
             render: (row) => (
                 <div className="flex flex-col gap-0.5">
-                    <span className="font-mono text-xs font-black text-slate-500 bg-slate-100 border border-slate-200 rounded px-1.5 py-0.5 w-fit">
+                    <span className="font-mono text-xs font-black text-slate-500 dark:text-dark-text-muted bg-slate-100 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded px-1.5 py-0.5 w-fit transition-colors">
                         #{row.prestamo_codigo}
                     </span>
                     {row.es_grupal && (
-                        <span className="text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5 w-fit uppercase">
+                        <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded px-1.5 py-0.5 w-fit uppercase transition-colors">
                             Grupal
                         </span>
                     )}
@@ -41,7 +41,7 @@ const Index = () => {
         {
             header: 'Titular',
             render: (row) => (
-                <span className="text-[11px] font-black text-slate-700 uppercase">{row.titular}</span>
+                <span className="text-[11px] font-black text-slate-700 dark:text-dark-text uppercase transition-colors">{row.titular}</span>
             ),
         },
         {
@@ -49,7 +49,7 @@ const Index = () => {
             render: (row) => (
                 <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase">{row.asesor_origen}</span>
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-dark-text-muted uppercase transition-colors">{row.asesor_origen}</span>
                 </div>
             ),
         },
@@ -58,20 +58,20 @@ const Index = () => {
             render: (row) => (
                 <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase">{row.asesor_destino}</span>
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-dark-text-muted uppercase transition-colors">{row.asesor_destino}</span>
                 </div>
             ),
         },
         {
             header: 'Registrado por',
             render: (row) => (
-                <span className="text-[10px] font-bold text-slate-500 uppercase">{row.registrado_por}</span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-dark-text-muted uppercase transition-colors">{row.registrado_por}</span>
             ),
         },
         {
             header: 'Motivo',
             render: (row) => (
-                <span className="text-[10px] text-slate-400 font-medium italic">
+                <span className="text-[10px] text-slate-400 dark:text-dark-text-muted/80 font-medium italic transition-colors">
                     {row.motivo || '—'}
                 </span>
             ),
@@ -81,7 +81,7 @@ const Index = () => {
             render: (row) => {
                 const d = new Date(row.fecha);
                 return (
-                    <div className="text-[10px] text-slate-500">
+                    <div className="text-[10px] text-slate-500 dark:text-dark-text-muted transition-colors">
                         <span className="font-bold block whitespace-nowrap">
                             {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         </span>
@@ -123,7 +123,7 @@ const Index = () => {
     ];
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 w-full max-w-full">
+        <div className="container mx-auto p-4 sm:p-6 w-full max-w-full transition-colors">
             <PageHeader
                 title="Historial de Traslados"
                 icon={ArrowsRightLeftIcon}

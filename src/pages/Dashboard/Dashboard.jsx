@@ -20,8 +20,8 @@ const Dashboard = () => {
     return (
         <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
             <div className="mb-6">
-                <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Dashboard</h1>
-                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                <h1 className="text-2xl font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Dashboard</h1>
+                <p className="text-[11px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest mt-0.5">
                     Metricas — Talara Créditos e Inversiones
                 </p>
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { combobox } from 'services/rolService';
 import { MagnifyingGlassIcon, ShieldCheckIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
@@ -11,7 +11,7 @@ import { MagnifyingGlassIcon, ShieldCheckIcon, XMarkIcon, ArrowPathIcon } from '
  *   incluirCliente — bool, si true trae también el rol cliente (default false)
  */
 const RolesMultiSelect = ({ selectedIds = [], onChange, initialRoles = [], incluirCliente = false }) => {
-    const [input,       setInput]       = useState('');
+    const [input,        setInput]        = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [showDrop,    setShowDrop]    = useState(false);
     const [loading,     setLoading]     = useState(false);
@@ -73,7 +73,7 @@ const RolesMultiSelect = ({ selectedIds = [], onChange, initialRoles = [], inclu
 
     return (
         <div ref={wrapperRef} className="w-full">
-            <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">
+            <label className="block text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase mb-1.5 tracking-widest transition-colors">
                 Roles que aplican
             </label>
 
@@ -81,11 +81,11 @@ const RolesMultiSelect = ({ selectedIds = [], onChange, initialRoles = [], inclu
                 <div className="flex flex-wrap gap-1.5 mb-2">
                     {rolesObj.map(r => (
                         <span key={r.id}
-                            className="flex items-center gap-1 px-2.5 py-1 bg-brand-red-light border border-brand-red/20 rounded-xl text-[10px] font-black text-brand-red uppercase">
+                            className="flex items-center gap-1 px-2.5 py-1 bg-brand-red-light dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 rounded-xl text-[10px] font-black text-brand-red dark:text-brand-gold uppercase transition-colors">
                             <ShieldCheckIcon className="w-3 h-3" />
                             {r.nombre}
                             <button type="button" onClick={() => handleRemove(r.id)}
-                                className="ml-0.5 text-brand-red/60 hover:text-brand-red">
+                                className="ml-0.5 text-brand-red/60 dark:text-brand-gold/60 hover:text-brand-red dark:hover:text-brand-gold transition-colors">
                                 <XMarkIcon className="w-3 h-3" />
                             </button>
                         </span>
@@ -100,14 +100,13 @@ const RolesMultiSelect = ({ selectedIds = [], onChange, initialRoles = [], inclu
                     onChange={handleInputChange}
                     onClick={() => { if (!showDrop) fetchRoles(input); }}
                     placeholder="Buscar rol..."
-                    className="w-full border border-slate-300 rounded-xl px-4 py-2.5 pl-9 pr-8 text-sm font-bold
-                        focus:ring-2 focus:ring-brand-red outline-none transition-all bg-white"
+                    className="w-full border border-slate-300 dark:border-dark-border rounded-xl px-4 py-2.5 pl-9 pr-8 text-sm font-bold text-slate-800 dark:text-dark-text focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold outline-none transition-all bg-white dark:bg-dark-surface"
                     autoComplete="off"
                 />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-dark-text-muted transition-colors">
                     <ShieldCheckIcon className="w-4 h-4" />
                 </div>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-dark-text-muted transition-colors">
                     {loading
                         ? <ArrowPathIcon className="w-4 h-4 animate-spin" />
                         : <MagnifyingGlassIcon className="w-4 h-4" />
@@ -115,16 +114,16 @@ const RolesMultiSelect = ({ selectedIds = [], onChange, initialRoles = [], inclu
                 </div>
 
                 {showDrop && (
-                    <ul className="absolute z-50 top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-52 overflow-y-auto">
+                    <ul className="absolute z-50 top-full left-0 w-full mt-1 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl shadow-xl dark:shadow-black/50 max-h-52 overflow-y-auto transition-colors">
                         {visibleSuggestions.length > 0
                             ? visibleSuggestions.map(r => (
                                 <li key={r.id} onClick={() => handleSelect(r)}
-                                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-600 cursor-pointer hover:bg-brand-red-light hover:text-brand-red transition-colors">
+                                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-dark-text cursor-pointer hover:bg-brand-red-light dark:hover:bg-dark-surface-alt hover:text-brand-red dark:hover:text-brand-gold transition-colors">
                                     <ShieldCheckIcon className="w-4 h-4 opacity-50" />
                                     {r.nombre}
                                 </li>
                             ))
-                            : <li className="px-4 py-3 text-xs text-center text-slate-400 italic">
+                            : <li className="px-4 py-3 text-xs text-center text-slate-400 dark:text-dark-text-muted/60 italic transition-colors">
                                 {loading ? 'Buscando...' : 'Sin resultados'}
                               </li>
                         }
@@ -133,7 +132,7 @@ const RolesMultiSelect = ({ selectedIds = [], onChange, initialRoles = [], inclu
             </div>
 
             {selectedIds.length === 0 && (
-                <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase">
+                <p className="text-[9px] text-slate-400 dark:text-dark-text-muted/80 font-bold mt-1 uppercase transition-colors">
                     Sin roles = cualquier rol puede ingresar sin restricción de horario
                 </p>
             )}

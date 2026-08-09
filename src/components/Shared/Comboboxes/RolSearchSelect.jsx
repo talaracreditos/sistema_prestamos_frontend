@@ -90,8 +90,8 @@ const RolSearchSelect = ({ form, setForm, disabled, isFilter = false }) => {
         <div className="relative w-full" ref={wrapperRef}>
             
             {!isFilter && (
-                <label className="block text-sm font-black text-slate-700 uppercase mb-2">
-                    Rol de Usuario <span className="text-red-500">*</span>
+                <label className="block text-sm font-black text-slate-700 dark:text-dark-text uppercase mb-2 transition-colors">
+                    Rol de Usuario <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
             )}
             
@@ -104,33 +104,33 @@ const RolSearchSelect = ({ form, setForm, disabled, isFilter = false }) => {
                     onClick={handleInputClick}
                     disabled={disabled}
                     placeholder={isFilter ? "Todos los roles" : "Ej: Administrador, Editor..."}
-                    className={`w-full border border-slate-300 rounded-md shadow-sm pl-9 pr-8 text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-all placeholder-slate-400 
+                    className={`w-full border border-slate-300 dark:border-dark-border rounded-md shadow-sm pl-9 pr-8 text-sm focus:ring-1 focus:ring-black dark:focus:ring-brand-gold focus:border-black dark:focus:border-brand-gold outline-none transition-all placeholder-slate-400 dark:placeholder-dark-text-muted text-slate-800 dark:text-dark-text bg-white dark:bg-dark-surface
                         ${isFilter ? 'py-2' : 'py-3'} 
-                        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
+                        ${disabled ? 'bg-gray-100 dark:bg-dark-surface-alt cursor-not-allowed text-slate-400 dark:text-dark-text-muted/60' : ''}
                     `}
                     autoComplete="off"
                 />
 
                 {/* Icono izquierdo (Escudo para Roles) */}
-                <div className="absolute left-3 text-slate-400">
+                <div className="absolute left-3 text-slate-400 dark:text-dark-text-muted transition-colors">
                     <ShieldCheckIcon className="w-4 h-4" />
                 </div>
 
                 <div className="absolute right-2 flex items-center">
                     {loading ? (
-                        <div className="w-4 h-4 border-2 border-slate-300 border-t-black rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-slate-300 dark:border-dark-surface-alt border-t-black dark:border-t-brand-gold rounded-full animate-spin"></div>
                     ) : inputValue ? (
-                        <button onClick={handleClear} type="button" className="text-slate-400 hover:text-red-500">
+                        <button onClick={handleClear} type="button" className="text-slate-400 dark:text-dark-text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors">
                             <XMarkIcon className="w-4 h-4" />
                         </button>
                     ) : (
-                        <MagnifyingGlassIcon className="w-4 h-4 text-slate-400" />
+                        <MagnifyingGlassIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted transition-colors" />
                     )}
                 </div>
 
 
                 {showSuggestions && (
-                    <ul className="absolute z-50 top-full left-0 w-full bg-white border border-slate-200 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-xl animate-in fade-in zoom-in duration-100">
+                    <ul className="absolute z-50 top-full left-0 w-full bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-lg mt-1 max-h-60 overflow-y-auto shadow-xl dark:shadow-black/50 animate-in fade-in zoom-in duration-100 transition-colors">
                         {suggestions.length > 0 ? (
                             suggestions.map((rol) => (
                                 <li
@@ -138,8 +138,8 @@ const RolSearchSelect = ({ form, setForm, disabled, isFilter = false }) => {
                                     onClick={() => handleSelect(rol)}
                                     className={`px-4 py-2.5 cursor-pointer text-sm flex items-center gap-2 transition-colors ${
                                         form.rol_id === rol.id 
-                                        ? 'bg-slate-100 text-black font-bold' 
-                                        : 'text-slate-600 hover:bg-slate-50 hover:text-black'
+                                            ? 'bg-slate-100 dark:bg-dark-surface-alt text-black dark:text-dark-text font-bold' 
+                                            : 'text-slate-600 dark:text-dark-text-muted hover:bg-slate-50 dark:hover:bg-dark-surface-alt hover:text-black dark:hover:text-dark-text'
                                     }`}
                                 >
                                     {/* Icono en la lista (Grupo de usuarios) */}
@@ -148,7 +148,7 @@ const RolSearchSelect = ({ form, setForm, disabled, isFilter = false }) => {
                                 </li>
                             ))
                         ) : (
-                            <li className="px-4 py-3 text-slate-400 text-xs text-center italic">
+                            <li className="px-4 py-3 text-slate-400 dark:text-dark-text-muted/60 text-xs text-center italic transition-colors">
                                 {loading ? 'Buscando...' : 'No se encontraron roles'}
                             </li>
                         )}
@@ -159,11 +159,11 @@ const RolSearchSelect = ({ form, setForm, disabled, isFilter = false }) => {
             {!isFilter && (
                 <div className="mt-2 text-xs h-4">
                     {form.rol_id ? (
-                        <span className="text-green-600 font-bold flex items-center gap-1 animate-pulse">
+                        <span className="text-green-600 dark:text-green-400 font-bold flex items-center gap-1 animate-pulse transition-colors">
                             ✓ Seleccionado: {form.rolNombre}
                         </span>
                     ) : (
-                        <span className="text-gray-400 italic">
+                        <span className="text-gray-400 dark:text-dark-text-muted/60 italic transition-colors">
                             {inputValue && !loading ? 'Selecciona una opción de la lista' : 'Busca y selecciona un rol'}
                         </span>
                     )}

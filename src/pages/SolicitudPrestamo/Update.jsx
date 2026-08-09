@@ -19,7 +19,7 @@ const Update = () => {
     if (loading || !formData) return <LoadingScreen />;
 
     return (
-        <div className="container mx-auto p-6 max-w-5xl">
+        <div className="container mx-auto p-6 max-w-5xl transition-colors">
             <PageHeader
                 title="Editar Solicitud"
                 subtitle={`ID: ${formData?.id}`}
@@ -50,7 +50,7 @@ const Update = () => {
                     <button
                         type="button"
                         onClick={() => navigate('/solicitudPrestamo/listar')}
-                        className="px-8 py-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl font-bold uppercase transition-colors"
+                        className="px-8 py-4 bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold uppercase transition-colors"
                     >
                         Cancelar
                     </button>
@@ -59,8 +59,8 @@ const Update = () => {
                         disabled={saving || isBlocked}
                         className={`px-10 py-4 rounded-xl font-black uppercase transition-all shadow-xl ${
                             isBlocked
-                                ? 'bg-slate-300 text-slate-500 shadow-none'
-                                : 'bg-brand-red hover:bg-brand-red-dark text-white shadow-brand-red/30'
+                                ? 'bg-slate-300 dark:bg-dark-surface-alt text-slate-500 dark:text-dark-text-muted/60 shadow-none'
+                                : 'bg-brand-red dark:bg-brand-red-glow hover:bg-brand-red-dark dark:hover:brightness-110 text-white shadow-brand-red/30 dark:shadow-black/30'
                         }`}
                     >
                         {saving ? 'Guardando...' : 'Actualizar'}

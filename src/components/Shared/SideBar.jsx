@@ -30,10 +30,10 @@ const LiveClock = ({ collapsed = false }) => {
         // Modo colapsado: solo hora centrada, compacta
         return (
             <div className="flex flex-col items-center gap-0.5 mt-1">
-                <span className="text-[10px] font-black text-brand-red tabular-nums tracking-tight leading-none">
+                <span className="text-[10px] font-black text-brand-red dark:text-brand-gold tabular-nums tracking-tight leading-none">
                     {hora.slice(0, 5)}
                 </span>
-                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wide leading-none">
+                <span className="text-[8px] font-bold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide leading-none">
                     {now.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}
                 </span>
             </div>
@@ -43,10 +43,10 @@ const LiveClock = ({ collapsed = false }) => {
     // Modo expandido: hora grande + fecha debajo
     return (
         <div className="mt-1">
-            <p className="text-[11px] font-black text-brand-red tabular-nums tracking-tight leading-none">
+            <p className="text-[11px] font-black text-brand-red dark:text-brand-gold tabular-nums tracking-tight leading-none">
                 {hora}
             </p>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide leading-none mt-0.5">
+            <p className="text-[9px] font-bold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide leading-none mt-0.5">
                 {fecha}
             </p>
         </div>
@@ -264,7 +264,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
             {/* Botón hamburguesa móvil */}
             <button
-                className={`md:hidden fixed top-4 left-4 z-50 p-2 bg-brand-red text-white rounded-md shadow-lg transition-all duration-300 ${
+                className={`md:hidden fixed top-4 left-4 z-50 p-2 bg-brand-red dark:bg-brand-red-glow text-white rounded-md shadow-lg transition-all duration-300 ${
                     isOpen ? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible'
                 }`}
                 onClick={() => setIsOpen(true)}
@@ -281,7 +281,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-100 shadow-sm z-40 transition-all duration-300 ease-in-out flex flex-col
+                className={`fixed left-0 top-0 h-screen bg-white dark:bg-dark-surface border-r border-gray-100 dark:border-dark-border shadow-sm dark:shadow-black/20 z-40 transition-all duration-300 ease-in-out flex flex-col
                     ${isOpen ? 'translate-x-0 w-72' : '-translate-x-full'}
                     ${sidebarWidth} md:translate-x-0`}
                 style={{ height: '100dvh' }}
@@ -289,13 +289,13 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 {/* Botón colapsar PC */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="hidden md:flex absolute -right-3.5 top-8 bg-white border border-gray-200 rounded-full p-1.5 shadow-md z-50 hover:bg-brand-red-light text-gray-600 hover:text-brand-red transition-all"
+                    className="hidden md:flex absolute -right-3.5 top-8 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-full p-1.5 shadow-md dark:shadow-black/20 z-50 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt text-gray-600 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold transition-all"
                 >
                     <ChevronLeftIcon className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* HEADER */}
-                <div className={`flex items-center justify-center flex-shrink-0 border-b border-gray-100 transition-all duration-300 relative bg-white ${isCollapsed ? 'h-24 md:h-24' : 'h-24'}`}>
+                <div className={`flex items-center justify-center flex-shrink-0 border-b border-gray-100 dark:border-dark-border transition-all duration-300 relative bg-white dark:bg-dark-surface ${isCollapsed ? 'h-24 md:h-24' : 'h-24'}`}>
 
                     {/* Modo colapsado — logo + reloj centrados */}
                     <div className={`hidden md:flex flex-col items-center gap-0.5 absolute transition-all duration-300 ${
@@ -310,8 +310,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                         ${isCollapsed ? 'md:w-0 md:opacity-0' : 'w-auto opacity-100'}`}>
                         <img src={logo} alt="Logo" className="w-8 h-8 object-contain flex-shrink-0" />
                         <div className="leading-tight">
-                            <p className="font-black text-sm text-brand-red uppercase tracking-tight">TALARA</p>
-                            <p className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">Créditos e Inversiones</p>
+                            <p className="font-black text-sm text-brand-red dark:text-brand-gold uppercase tracking-tight">TALARA</p>
+                            <p className="font-bold text-[10px] text-gray-400 dark:text-dark-text-muted uppercase tracking-widest">Créditos e Inversiones</p>
                             <LiveClock />
                         </div>
                     </div>
@@ -321,13 +321,13 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-4 hide-scrollbar px-3">
                     {userMenuGroups.map((group, gIndex) => (
                         <div key={gIndex} className="mb-2">
-                            <div className={`px-4 mb-2 text-[9px] font-black text-gray-400 uppercase tracking-widest transition-all duration-300
+                            <div className={`px-4 mb-2 text-[9px] font-black text-gray-400 dark:text-dark-text-muted uppercase tracking-widest transition-all duration-300
                                 ${isCollapsed ? 'md:opacity-0 md:h-0 md:mb-0 overflow-hidden' : 'opacity-100'}`}>
                                 {group.groupName}
                             </div>
 
                             {isCollapsed && gIndex !== 0 && (
-                                <div className="hidden md:block border-t border-gray-100 my-3 mx-4" />
+                                <div className="hidden md:block border-t border-gray-100 dark:border-dark-border my-3 mx-4" />
                             )}
 
                             <div className="space-y-0.5">
@@ -337,8 +337,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                     const IconComponent = item.icon || CubeIcon;
 
                                     const base     = "flex items-center flex-nowrap w-full px-3 py-2.5 rounded-xl transition-all duration-200 group relative";
-                                    const active   = "bg-brand-red text-white shadow-md shadow-brand-red/20";
-                                    const inactive = "text-gray-600 hover:bg-brand-red-light hover:text-brand-red";
+                                    const active   = "bg-brand-red dark:bg-brand-red-glow text-white shadow-md shadow-brand-red/20 dark:shadow-black/30";
+                                    const inactive = "text-gray-600 dark:text-dark-text-muted hover:bg-brand-red-light dark:hover:bg-dark-surface-alt hover:text-brand-red dark:hover:text-brand-gold";
 
                                     return (
                                         <div key={idx}>
@@ -346,7 +346,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                                 <>
                                                     <button
                                                         onClick={() => handleSectionClick(item.section)}
-                                                        className={`${base} ${isActive && isCollapsed ? 'bg-brand-red-light text-brand-red' : (isActive ? active : inactive)}`}
+                                                        className={`${base} ${isActive && isCollapsed ? 'bg-brand-red-light dark:bg-dark-surface-alt text-brand-red dark:text-brand-gold' : (isActive ? active : inactive)}`}
                                                         title={isCollapsed ? item.section : ''}
                                                     >
                                                         <IconComponent className="h-5 w-5 flex-shrink-0 min-w-[20px]" />
@@ -363,7 +363,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                                     <div className={`overflow-hidden transition-all duration-300 ease-in-out
                                                         ${isSubOpen ? 'max-h-96 opacity-100 mt-0.5' : 'max-h-0 opacity-0'}
                                                         ${isCollapsed ? 'md:hidden' : ''}`}>
-                                                        <ul className="ml-4 pl-3 border-l-2 border-brand-red/20 space-y-0.5 py-1">
+                                                        <ul className="ml-4 pl-3 border-l-2 border-brand-red/20 dark:border-brand-gold/20 space-y-0.5 py-1">
                                                             {item.subs.map((sub, sIdx) => (
                                                                 <li key={sIdx}>
                                                                     <Link
@@ -371,8 +371,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                                                         onClick={() => setIsOpen(false)}
                                                                         className={`block py-2 px-3 rounded-lg text-[12px] font-medium transition-all truncate
                                                                             ${location.pathname.startsWith(sub.link)
-                                                                                ? 'text-brand-red bg-brand-red-light font-black'
-                                                                                : 'text-gray-500 hover:text-brand-red hover:bg-brand-red-light'}`}
+                                                                                ? 'text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-dark-surface-alt font-black'
+                                                                                : 'text-gray-500 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt'}`}
                                                                     >
                                                                         {sub.name}
                                                                     </Link>
@@ -404,10 +404,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 </div>
 
                 {/* FOOTER */}
-                <div className="p-4 border-t border-gray-100 flex-shrink-0 bg-white">
+                <div className="p-4 border-t border-gray-100 dark:border-dark-border flex-shrink-0 bg-white dark:bg-dark-surface">
                     <button
                         onClick={() => setShowConfirm(true)}
-                        className={`flex items-center w-full px-3 py-2.5 rounded-xl text-gray-500 hover:bg-red-50 hover:text-brand-red transition-all duration-200 ${isCollapsed ? 'md:justify-center' : ''}`}
+                        className={`flex items-center w-full px-3 py-2.5 rounded-xl text-gray-500 dark:text-dark-text-muted hover:bg-red-50 dark:hover:bg-dark-surface-alt hover:text-brand-red dark:hover:text-brand-gold transition-all duration-200 ${isCollapsed ? 'md:justify-center' : ''}`}
                         title="Cerrar Sesión"
                     >
                         <ArrowRightOnRectangleIcon className="h-5 w-5 flex-shrink-0 min-w-[20px]" />

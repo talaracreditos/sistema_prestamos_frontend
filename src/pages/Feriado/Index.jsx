@@ -22,19 +22,19 @@ const Index = () => {
     const [vistaCalendario, setVistaCalendario] = useState(false);
 
     const columns = [
-        { header: 'Fecha',       render: (row) => <span className="font-bold text-slate-700">{row.fecha_display || row.fecha}</span> },
-        { header: 'Descripción', render: (row) => <span className="uppercase text-xs font-black text-slate-500">{row.descripcion}</span> },
-        { header: 'Día',         render: (row) => <span className="capitalize text-xs text-slate-400">{row.dia}</span> },
+        { header: 'Fecha',     render: (row) => <span className="font-bold text-slate-700 dark:text-dark-text">{row.fecha_display || row.fecha}</span> },
+        { header: 'Descripción', render: (row) => <span className="uppercase text-xs font-black text-slate-500 dark:text-dark-text-muted">{row.descripcion}</span> },
+        { header: 'Día',         render: (row) => <span className="capitalize text-xs text-slate-400 dark:text-dark-text-muted/70">{row.dia}</span> },
         {
             header: 'Acciones',
             render: (row) => (
                 <div className="flex justify-end gap-2">
                     <Link to={`/feriados/editar/${row.id}`}
-                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                        className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-brand-gold/20 shadow-sm">
                         <PencilSquareIcon className="w-4 h-4" />
                     </Link>
                     <button onClick={() => handleAskDelete(row.id)}
-                        className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                        className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20 shadow-sm">
                         <TrashIcon className="w-4 h-4" />
                     </button>
                 </div>
@@ -72,14 +72,8 @@ const Index = () => {
         },
     ];
 
-    // IMPORTANTE: el calendario se pinta con `feriadosCalendario` (listado COMPLETO
-    // sin paginar, viene ya en formato Y-m-d desde el backend), no con `feriados`
-    // (que solo trae los 7 registros de la página actual de la tabla). Antes se
-    // derivaba de `feriados` y por eso faltaban feriados de otras páginas al
-    // cambiar a vista calendario.
-
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 transition-colors">
             <PageHeader
                 title="Feriados Registrados"
                 icon={CalendarIcon}
@@ -93,13 +87,13 @@ const Index = () => {
                 onClick={() => setVistaCalendario(v => !v)}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase transition-all border shadow-sm mt-4 mb-4 ${
                     vistaCalendario
-                        ? 'bg-brand-red text-white border-brand-red hover:bg-brand-red-dark'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                        ? 'bg-brand-red dark:bg-brand-red-glow text-white dark:text-black border-brand-red dark:border-transparent hover:bg-brand-red-dark dark:hover:brightness-110'
+                        : 'bg-white dark:bg-dark-surface text-slate-600 dark:text-dark-text border-slate-200 dark:border-dark-border hover:bg-slate-50 dark:hover:bg-dark-surface-alt hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
             >
                 {vistaCalendario
                     ? <><TableCellsIcon className="w-4 h-4" /> Ver Tabla</>
-                    : <><CalendarDaysIcon className="w-4 h-4 text-brand-red" /> Ver Calendario</>
+                    : <><CalendarDaysIcon className="w-4 h-4 text-brand-red dark:text-brand-gold" /> Ver Calendario</>
                 }
             </button>
 
@@ -126,17 +120,17 @@ const Index = () => {
                 <div className="flex flex-col items-center gap-6 mt-2">
                     <Calendario mode="view" feriados={feriadosCalendario} size="large" />
 
-                    <div className="flex items-center gap-6 text-xs font-bold text-slate-400">
+                    <div className="flex items-center gap-6 text-xs font-bold text-slate-400 dark:text-dark-text-muted transition-colors">
                         <span className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-md bg-brand-red-light border-2 border-brand-red/30 inline-block" />
+                            <span className="w-4 h-4 rounded-md bg-brand-red-light dark:bg-red-500/20 border-2 border-brand-red/30 dark:border-red-500/40 inline-block" />
                             Feriado
                         </span>
                         <span className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-md border-2 border-brand-gold-dark inline-block" />
+                            <span className="w-4 h-4 rounded-md border-2 border-brand-gold-dark dark:border-brand-gold inline-block" />
                             Hoy
                         </span>
                     </div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">
+                    <p className="text-[10px] text-slate-400 dark:text-dark-text-muted/60 uppercase tracking-widest transition-colors">
                         Pasa el cursor sobre un día marcado para ver la descripción
                     </p>
                 </div>

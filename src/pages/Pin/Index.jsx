@@ -22,13 +22,13 @@ const Index = () => {
         {
             header: 'Generado Por',
             render: (row) => (
-                <span className="text-[10px] font-black text-slate-700 uppercase">{row.generado_por}</span>
+                <span className="text-[10px] font-black text-slate-700 dark:text-dark-text uppercase transition-colors">{row.generado_por}</span>
             ),
         },
         {
             header: 'Para Usuario',
             render: (row) => (
-                <span className={`text-[10px] font-bold uppercase ${row.para_usuario === 'Cualquier usuario' ? 'text-slate-400 italic' : 'text-slate-700'}`}>
+                <span className={`text-[10px] font-bold uppercase transition-colors ${row.para_usuario === 'Cualquier usuario' ? 'text-slate-400 dark:text-dark-text-muted italic' : 'text-slate-700 dark:text-dark-text'}`}>
                     {row.para_usuario}
                 </span>
             ),
@@ -37,11 +37,11 @@ const Index = () => {
             header: 'Usos',
             render: (row) => (
                 <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-black text-slate-700">
+                    <span className="text-[10px] font-black text-slate-700 dark:text-dark-text transition-colors">
                         {row.usos_realizados} / {row.usos_maximos === 0 ? '∞' : row.usos_maximos}
                     </span>
                     {row.usos_restantes !== '∞' && row.usos_restantes === 0 && (
-                        <span className="text-[8px] font-black text-slate-400 bg-slate-100 rounded px-1">AGOTADO</span>
+                        <span className="text-[8px] font-black text-slate-400 dark:text-dark-text-muted bg-slate-100 dark:bg-dark-surface-alt rounded px-1 transition-colors">AGOTADO</span>
                     )}
                 </div>
             ),
@@ -49,7 +49,7 @@ const Index = () => {
         {
             header: 'Expira',
             render: (row) => (
-                <span className="text-[10px] text-slate-500 font-medium">
+                <span className="text-[10px] text-slate-500 dark:text-dark-text-muted font-medium transition-colors">
                     {row.expira_at
                         ? new Date(row.expira_at).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
                         : '—'}
@@ -59,10 +59,10 @@ const Index = () => {
         {
             header: 'Estado',
             render: (row) => (
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${
+                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border transition-colors ${
                     row.vigente
-                        ? 'bg-green-50 text-green-700 border-green-200'
-                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                        ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
+                        : 'bg-slate-50 dark:bg-dark-surface-alt text-slate-500 dark:text-dark-text-muted border-slate-200 dark:border-dark-border'
                 }`}>
                     {row.vigente ? 'VIGENTE' : 'INACTIVO'}
                 </span>
@@ -73,7 +73,7 @@ const Index = () => {
             render: (row) => {
                 const d = new Date(row.created_at);
                 return (
-                    <div className="text-[10px] text-slate-500">
+                    <div className="text-[10px] text-slate-500 dark:text-dark-text-muted transition-colors">
                         <span className="font-bold block whitespace-nowrap">
                             {d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         </span>
@@ -90,7 +90,7 @@ const Index = () => {
                 <button
                     onClick={() => openInhabilitarModal(row.id)}
                     title="Inhabilitar PIN"
-                    className="p-1.5 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-lg transition-all border border-transparent hover:border-brand-red/20"
+                    className="p-1.5 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-red-400 hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-lg transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-red-500/20"
                 >
                     <TrashIcon className="w-4 h-4" />
                 </button>
@@ -134,7 +134,7 @@ const Index = () => {
     ];
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 w-full max-w-full">
+        <div className="container mx-auto p-4 sm:p-6 w-full max-w-full transition-colors">
             <PageHeader
                 title="PINs de Autorización"
                 icon={ShieldCheckIcon}

@@ -106,7 +106,7 @@ const Index = () => {
         {
             header: 'ID',
             render: (row) => (
-                <span className="font-mono text-[15px] font-black px-2 py-1 rounded text-slate-600">
+                <span className="font-mono text-[15px] font-black px-2 py-1 rounded text-slate-600 dark:text-dark-text">
                     {row.id}
                 </span>
             )
@@ -115,15 +115,15 @@ const Index = () => {
             header: 'Prospecto',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full border ${row.tipo === 2 ? 'bg-amber-50 border-amber-200' : 'bg-brand-red-light border-brand-red/20'}`}>
+                    <div className={`p-2 rounded-full border transition-colors ${row.tipo === 2 ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' : 'bg-brand-red-light dark:bg-dark-surface-alt border-brand-red/20 dark:border-brand-gold/20'}`}>
                         {row.tipo === 2
-                            ? <BuildingOfficeIcon className="w-5 h-5 text-amber-600" />
-                            : <UserIcon className="w-5 h-5 text-brand-red" />
+                            ? <BuildingOfficeIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                            : <UserIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                         }
                     </div>
                     <div>
-                        <p className="font-bold text-slate-800 text-sm">{row.nombre_completo}</p>
-                        <p className="text-[11px] text-slate-400">{row.documento || 'Sin documento'}</p>
+                        <p className="font-bold text-slate-800 dark:text-dark-text text-sm transition-colors">{row.nombre_completo}</p>
+                        <p className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">{row.documento || 'Sin documento'}</p>
                     </div>
                 </div>
             )
@@ -132,10 +132,10 @@ const Index = () => {
             header: 'Contacto',
             render: (row) => (
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-slate-600 flex items-center gap-1">
-                        <PhoneIcon className="w-3 h-3 text-slate-400" /> {row.telefono}
+                    <span className="text-xs text-slate-600 dark:text-dark-text flex items-center gap-1 transition-colors">
+                        <PhoneIcon className="w-3 h-3 text-slate-400 dark:text-dark-text-muted" /> {row.telefono}
                     </span>
-                    {row.correo && <span className="text-[11px] text-slate-400">{row.correo}</span>}
+                    {row.correo && <span className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">{row.correo}</span>}
                 </div>
             )
         },
@@ -144,15 +144,15 @@ const Index = () => {
             render: (row) => (
                 <div className="flex flex-col gap-0.5">
                     {row.monto_solicitado && (
-                        <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                            <CurrencyDollarIcon className="w-3 h-3 text-green-500" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-dark-text flex items-center gap-1 transition-colors">
+                            <CurrencyDollarIcon className="w-3 h-3 text-green-500 dark:text-green-400" />
                             S/ {parseFloat(row.monto_solicitado).toLocaleString()}
                         </span>
                     )}
                     {row.ingreso_estimado && (
-                        <span className="text-[11px] text-slate-400">Ingreso: S/ {parseFloat(row.ingreso_estimado).toLocaleString()}</span>
+                        <span className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">Ingreso: S/ {parseFloat(row.ingreso_estimado).toLocaleString()}</span>
                     )}
-                    {!row.monto_solicitado && !row.ingreso_estimado && <span className="text-slate-300 text-xs">—</span>}
+                    {!row.monto_solicitado && !row.ingreso_estimado && <span className="text-slate-300 dark:text-dark-text-muted/60 text-xs">—</span>}
                 </div>
             )
         },
@@ -164,15 +164,15 @@ const Index = () => {
             header: 'Asesor / Zona',
             render: (row) => (
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-bold text-slate-600">{row.asesor}</span>
-                    <span className="text-[11px] text-slate-400">{row.zona}</span>
+                    <span className="text-xs font-bold text-slate-600 dark:text-dark-text transition-colors">{row.asesor}</span>
+                    <span className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">{row.zona}</span>
                 </div>
             )
         },
         {
             header: 'Registro',
             render: (row) => (
-                <span className="text-xs text-slate-500 flex items-center gap-1">
+                <span className="text-xs text-slate-500 dark:text-dark-text-muted flex items-center gap-1 transition-colors">
                     <CalendarDaysIcon className="w-3 h-3" /> {row.created_at?.split(' ')[0]}
                 </span>
             )
@@ -186,13 +186,13 @@ const Index = () => {
                 return (
                     <div className="flex items-center gap-2 justify-end">
                         <button onClick={() => handleView(row.id)} title="Ver Detalle"
-                            className="p-2 text-slate-400 hover:text-brand-red hover:bg-brand-red-light rounded-xl transition-all border border-transparent hover:border-brand-red/20 shadow-sm">
+                            className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-brand-red/20 dark:hover:border-brand-gold/20 shadow-sm">
                             <EyeIcon className="w-4 h-4" />
                         </button>
 
                         {puedeEditar && (
                             <Link to={`/prospecto/editar/${row.id}`} title="Editar"
-                                className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 shadow-sm">
+                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-slate-800 dark:hover:text-dark-text hover:bg-slate-50 dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-dark-border shadow-sm">
                                 <PencilSquareIcon className="w-4 h-4" />
                             </Link>
                         )}
@@ -201,7 +201,7 @@ const Index = () => {
                             <button
                                 onClick={() => handleAbrirConvertir(row.id)}
                                 title="Convertir a Cliente"
-                                className="p-2 text-green-500 hover:text-white hover:bg-green-500 rounded-xl transition-all border border-green-200 hover:border-green-500 shadow-sm"
+                                className="p-2 text-green-500 dark:text-green-400 hover:text-white dark:hover:text-black hover:bg-green-500 dark:hover:bg-green-400 rounded-xl transition-all border border-green-200 dark:border-green-500/30 hover:border-green-500 shadow-sm"
                             >
                                 <ArrowRightCircleIcon className="w-4 h-4" />
                             </button>
@@ -221,7 +221,7 @@ const Index = () => {
     };
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 transition-colors">
             <PageHeader
                 title="Gestión de Prospectos"
                 icon={UsersIcon}

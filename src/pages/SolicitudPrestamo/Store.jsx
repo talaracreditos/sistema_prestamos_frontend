@@ -20,7 +20,7 @@ const Store = () => {
     const puedeEnviar = !loading && !isBlocked && (!esRenovacion || !!prestamoOrigen);
 
     return (
-        <div className="container mx-auto p-6 max-w-5xl">
+        <div className="container mx-auto p-6 max-w-5xl transition-colors">
             <PageHeader title="Nueva Solicitud" buttonText="Volver" buttonLink="/solicitudPrestamo/listar" />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 
@@ -48,8 +48,8 @@ const Store = () => {
                         disabled={!puedeEnviar}
                         className={`px-10 py-4 rounded-xl font-black uppercase transition-all shadow-lg ${
                             !puedeEnviar
-                                ? 'bg-slate-300 text-slate-500 shadow-none cursor-not-allowed'
-                                : 'bg-brand-red hover:bg-brand-red-dark text-white shadow-brand-red/30'
+                                ? 'bg-slate-300 dark:bg-dark-surface-alt text-slate-500 dark:text-dark-text-muted/60 shadow-none cursor-not-allowed'
+                                : 'bg-brand-red dark:bg-brand-red-glow hover:bg-brand-red-dark dark:hover:brightness-110 text-white shadow-brand-red/30 dark:shadow-black/30'
                         }`}
                     >
                         {loading ? 'Enviando...' : 'Registrar Solicitud'}
