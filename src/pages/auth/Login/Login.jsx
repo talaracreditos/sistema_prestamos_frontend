@@ -4,7 +4,7 @@ import LoginForm from './components/LoginForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import useLogin from 'hooks/Auth/useLogin';
 import background from 'assets/img/background.jpg';
-import logo from 'assets/img/logo.png';
+import logo from 'assets/img/logoblanco.png';
 
 const Login = () => {
   const {
@@ -20,23 +20,39 @@ const Login = () => {
   } = useLogin();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-      <div className="absolute inset-0 z-0">
-        <img src={background} alt="Fondo corporativo Talara" className="w-full h-full object-cover opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/40 via-slate-900/90 to-black" />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-900 lg:bg-white">
+
+      {/* Panel imagen */}
+      <div className="relative h-[45vh] sm:h-[50vh] lg:h-auto lg:w-1/2 overflow-hidden">
+        <img
+          src={background}
+          alt="Fondo corporativo Talara"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/50 to-red-900/30 lg:bg-gradient-to-r lg:from-slate-950/95 lg:via-slate-900/60 lg:to-red-900/20" />
+
+        {/* Branding sobre la imagen */}
+        <div className="absolute inset-0 flex flex-col justify-center items-center lg:items-start p-6 sm:p-10 lg:p-16 lg:justify-center">
+          <img
+            src={logo}
+            alt="Logo Talara Créditos"
+            className="h-20 sm:h-24 lg:h-28 w-auto object-contain mb-4 lg:mb-6 drop-shadow-xl"
+          />
+          <h1 className="text-2xl lg:text-4xl font-extrabold text-white text-center lg:text-left tracking-tight drop-shadow-sm">
+            Talara
+          </h1>
+          <h2 className="text-[10px] lg:text-xs font-black text-red-400 tracking-[0.3em] uppercase mt-1">
+            Créditos e Inversiones
+          </h2>
+          <p className="hidden lg:block text-slate-300 text-sm font-medium mt-6 max-w-xs leading-relaxed">
+            Gestión de créditos, pagos y cobranza en un solo panel.
+          </p>
+        </div>
       </div>
 
-      <div className="w-full max-w-[420px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(220,_38,_38,_0.15)] p-8 sm:p-10 relative z-10 border border-white/20">
-
-        <div className="flex flex-col items-center mb-10">
-          <div className="h-20 w-20 bg-white rounded-2xl shadow-lg flex items-center justify-center mb-5 relative overflow-hidden border border-gray-100 p-2 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-            <img src={logo} alt="Logo Talara Créditos" className="h-full w-full object-contain" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-800 text-center tracking-tight">Talara</h1>
-          <h2 className="text-[10px] font-black text-red-500 tracking-[0.3em] uppercase mb-1">Créditos e Inversiones</h2>
-        </div>
-
-        <div>
+      {/* Panel formulario */}
+      <div className="relative flex-1 -mt-8 sm:-mt-10 lg:mt-0 z-10 bg-white rounded-t-[2.5rem] lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.15)] lg:shadow-none flex items-center justify-center p-6 pt-10 sm:p-10 sm:pt-12 lg:p-16">
+        <div className="w-full max-w-[420px]">
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <LoadingScreen />
@@ -61,12 +77,12 @@ const Login = () => {
               setShowForgotPassword={setShowForgotPassword}
             />
           )}
-        </div>
 
-        <div className="mt-10 text-center">
-          <p className="text-[10px] text-slate-400 font-medium tracking-wider">
-            © {new Date().getFullYear()} TALARA CRÉDITOS E INVERSIONES.
-          </p>
+          <div className="mt-10 text-center lg:text-left">
+            <p className="text-[10px] text-slate-400 font-medium tracking-wider">
+              © {new Date().getFullYear()} TALARA CRÉDITOS E INVERSIONES.
+            </p>
+          </div>
         </div>
       </div>
     </div>
