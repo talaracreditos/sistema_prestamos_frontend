@@ -73,8 +73,8 @@ export const CuotaCard = ({
             : 'border-l-slate-200 dark:border-l-dark-border';
 
     return (
-        <div
-            className={`relative bg-white dark:bg-dark-surface rounded-2xl border border-slate-200 dark:border-dark-border border-l-4 ${borderColor} shadow-sm dark:shadow-black/25 overflow-hidden transition-all ${
+         <div
+            className={`relative bg-white dark:bg-dark-surface rounded-2xl border-t border-r border-b border-t-slate-200 border-r-slate-200 border-b-slate-200 dark:border-t-dark-border dark:border-r-dark-border dark:border-b-dark-border border-l-4 ${borderColor} shadow-sm dark:shadow-black/25 overflow-hidden transition-all ${
                 d.esInactiva ? 'opacity-55' : ''
             }`}
         >
