@@ -118,6 +118,10 @@ import DiaOperativo from 'pages/DiaOperativo/Index';
 import ListarParametros from 'pages/Parametro/Index';
 import EditarParametro from 'pages/Parametro/Update';
 
+// UI LEGAL
+import PoliticaPrivacidad from 'pages/Legal/PoliticaPrivacidad';
+import PoliticaCookies from 'pages/Legal/PoliticaCookies';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -133,6 +137,10 @@ function AppContent() {
     <Routes>
       {/* 1. LOGIN */}
       <Route path="/" element={<ProtectedRouteHome element={<Login />} />} />
+
+      {/* LEGAL — público, sin sesión */}
+      <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+      <Route path="/politica-cookies" element={<PoliticaCookies />} />
 
       {/* 2. LAYOUT GLOBAL */}
       <Route element={<ProtectedRoute element={<SidebarLayout />} />}>

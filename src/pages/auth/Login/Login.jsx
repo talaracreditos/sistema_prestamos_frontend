@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import LoginForm from './components/LoginForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
@@ -78,9 +79,20 @@ const Login = () => {
             />
           )}
 
-          <div className="mt-10 text-center lg:text-left">
+          <div className="mt-10 text-center lg:text-left space-y-1.5">
             <p className="text-[10px] text-slate-400 font-medium tracking-wider">
               © {new Date().getFullYear()} TALARA CRÉDITOS E INVERSIONES.
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium tracking-wider">
+              Al ingresar aceptas nuestra{' '}
+              <Link to="/politica-privacidad" className="text-red-600 font-bold hover:underline">
+                Política de Privacidad
+              </Link>{' '}
+              y{' '}
+              <Link to="/politica-cookies" className="text-red-600 font-bold hover:underline">
+                Política de Cookies
+              </Link>
+              .
             </p>
           </div>
         </div>
