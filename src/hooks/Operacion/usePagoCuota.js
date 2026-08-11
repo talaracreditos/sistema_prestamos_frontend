@@ -13,11 +13,16 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const [tieneComision, setTieneComision] = useState(false);
     const [comision,      setComision]      = useState('');
 
-    // ── PIN de autorización (cuota anterior pendiente) ──────────────────────────
-    // pinRequerido: si true, se muestra el campo PIN inline en el MISMO form
-    // (no una pantalla aparte). Arranca en true si el front ya sabía de
-    // antemano (cuota.requierePinAnticipado, seteado en OperacionForm) y
-    // también se activa si el backend lo exige de sorpresa al hacer submit.
+    // ── PIN de autorización ──────────────────────────────────────────────────
+    // `cuota.requierePinAnticipado` ya viene decidido desde OperacionForm:
+    // - Individual: la cuota anterior está pendiente (adelanto de pago).
+    // - Grupal: la cuota en sí todavía no corresponde (estado PENDIENTE).
+    //   Los integrantes bloqueados por deuda de la cuota anterior NUNCA llegan
+    //   hasta acá — ya fueron excluidos antes de abrir el modal, así que el
+    //   PIN solo autoriza el adelanto para los habilitados.
+    // pinRequerido puede además activarse en caliente si el backend lo exige
+    // al hacer submit (onRequierePin), por ejemplo si el PIN enviado era
+    // inválido o el backend detecta algo que el frontend no vio.
     const [pinRequerido, setPinRequerido] = useState(false);
     const [pinContexto,  setPinContexto]  = useState(null);
     const [pin,          setPin]          = useState('');
@@ -86,7 +91,8 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             setAlertLocal(null);
             setTieneComision(false);
             setComision('');
-            // PIN: arranca visible si el front ya sabía que hacía falta
+            // PIN: arranca visible si el front ya sabía de antemano
+            // (cuota.requierePinAnticipado, decidido en OperacionForm).
             setPinRequerido(pinAnticipado);
             setPinContexto(null);
             setPin('');
