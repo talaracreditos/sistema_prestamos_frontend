@@ -251,6 +251,7 @@ const SaldoCapitalCard = () => {
                                         ) : asesores.map((a, i) => {
                                             const variacion = parseFloat(a.variacion ?? 0);
                                             const varPos    = variacion >= 0;
+                                            const ajuste    = parseFloat(a.ajuste ?? 0);
                                             // abrev: primeras letras de cada palabra del nombre
                                             const abrev = (a.nombre ?? '')
                                                 .split(' ')
@@ -286,6 +287,14 @@ const SaldoCapitalCard = () => {
                                                         <span className={`text-xs font-black tabular-nums ${varPos ? 'text-green-600 dark:text-green-400' : 'text-brand-red dark:text-red-400'}`}>
                                                             {varPos ? '+' : ''}{fmtS(a.variacion)}
                                                         </span>
+                                                        {Math.abs(ajuste) > 0.009 && (
+                                                            <div
+                                                                className="text-[9px] text-slate-400 dark:text-dark-text-muted/70 font-bold mt-0.5 cursor-help underline decoration-dotted underline-offset-2"
+                                                                title="Monto de refinanciamientos/renovaciones del periodo que no pasó por caja (ni desembolso ni cobro), por eso no aparece en el calendario Desembolso/Capital cobrado."
+                                                            >
+                                                                {ajuste >= 0 ? '+' : '−'} {fmtS(Math.abs(ajuste))} por refinanciamiento/renovación
+                                                            </div>
+                                                        )}
                                                     </td>
 
                                                     {/* Meta crecimiento */}
@@ -323,6 +332,14 @@ const SaldoCapitalCard = () => {
                                                 <span className={varPos ? 'text-green-400' : 'text-red-400'}>
                                                     {varPos ? '+' : ''}{fmtS(totales.variacion)}
                                                 </span>
+                                                {Math.abs(parseFloat(totales.ajuste_refinanciamiento ?? 0)) > 0.009 && (
+                                                    <div
+                                                        className="text-[9px] text-slate-500 font-bold mt-0.5 cursor-help underline decoration-dotted underline-offset-2"
+                                                        title="Monto de refinanciamientos/renovaciones del periodo que no pasó por caja (ni desembolso ni cobro), por eso no aparece en el calendario Desembolso/Capital cobrado."
+                                                    >
+                                                        {totales.ajuste_refinanciamiento >= 0 ? '+' : '−'} {fmtS(Math.abs(totales.ajuste_refinanciamiento))} por refinanciamiento/renovación
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-4 py-3 text-right text-xs font-bold tabular-nums text-slate-400 dark:text-dark-text-muted">
                                                 {totales.meta > 0 ? fmtS(totales.meta) : '—'}
