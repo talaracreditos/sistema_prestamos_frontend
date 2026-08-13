@@ -1,8 +1,14 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { index, justificar as justificarService } from 'services/asistenciaService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
+import { useAuth } from 'context/AuthContext';
 
 export const useIndex = () => {
+    const { can } = useAuth();
+
+    const canRegistrar  = can('asistencia.registrar');
+    const canJustificar = can('asistencia.justificar');
+
     const [loading,        setLoading]        = useState(true);
     const [asistencias,    setAsistencias]    = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
@@ -54,11 +60,14 @@ export const useIndex = () => {
         fetchAsistencias(1);
     };
 
-    const handleAbrirJustificar = (asistencia) => setAsistenciaParaJustificar(asistencia);
+    const handleAbrirJustificar = (asistencia) => {
+        if (!canJustificar) return;
+        setAsistenciaParaJustificar(asistencia);
+    };
     const handleCerrarJustificar = () => setAsistenciaParaJustificar(null);
 
     const handleConfirmarJustificar = async (payload) => {
-        if (!asistenciaParaJustificar) return;
+        if (!canJustificar || !asistenciaParaJustificar) return;
         setJustificando(true);
         try {
             await justificarService(asistenciaParaJustificar.id, payload);
@@ -78,5 +87,6 @@ export const useIndex = () => {
         fetchAsistencias, handleFilterChange, handleFilterSubmit, handleFilterClear, handleUsuarioFilter,
         asistenciaParaJustificar, justificando,
         handleAbrirJustificar, handleCerrarJustificar, handleConfirmarJustificar,
+        canRegistrar, canJustificar,
     };
 };

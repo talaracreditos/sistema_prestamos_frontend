@@ -15,6 +15,7 @@ const Index = () => {
         fetchAsistencias, handleFilterChange, handleFilterSubmit, handleFilterClear, handleUsuarioFilter,
         asistenciaParaJustificar, justificando,
         handleAbrirJustificar, handleCerrarJustificar, handleConfirmarJustificar,
+        canRegistrar, canJustificar,
     } = useIndex();
 
     const columns = useMemo(() => [
@@ -70,27 +71,33 @@ const Index = () => {
                 if (!row.tardanza) {
                     return <span className="text-slate-300 dark:text-dark-text-muted text-xs">—</span>;
                 }
+
+                if (!canJustificar) {
+                    return row.justificada ? (
+                        <span title={row.motivo_justificacion} className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20">
+                            <CheckBadgeIcon className="w-3.5 h-3.5" /> Justificada
+                        </span>
+                    ) : (
+                        <span className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20">
+                            <ExclamationTriangleIcon className="w-3.5 h-3.5" /> Sin justificar
+                        </span>
+                    );
+                }
+
                 return row.justificada ? (
-                    <button
-                        type="button"
-                        onClick={() => handleAbrirJustificar(row)}
-                        title={row.motivo_justificacion}
-                        className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20 hover:brightness-95 transition-all"
-                    >
+                    <button type="button" onClick={() => handleAbrirJustificar(row)} title={row.motivo_justificacion}
+                        className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20 hover:brightness-95 transition-all">
                         <CheckBadgeIcon className="w-3.5 h-3.5" /> Justificada
                     </button>
                 ) : (
-                    <button
-                        type="button"
-                        onClick={() => handleAbrirJustificar(row)}
-                        className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20 hover:brightness-95 transition-all"
-                    >
+                    <button type="button" onClick={() => handleAbrirJustificar(row)}
+                        className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20 hover:brightness-95 transition-all">
                         <ExclamationTriangleIcon className="w-3.5 h-3.5" /> Justificar
                     </button>
                 );
             }
         }
-    ], [handleAbrirJustificar]);
+    ], [handleAbrirJustificar, canJustificar]);
 
     const filterConfig = useMemo(() => [
         {
@@ -111,7 +118,12 @@ const Index = () => {
 
     return (
         <div className="container mx-auto p-4 sm:p-6 transition-colors">
-            <PageHeader title="Asistencia de Personal" icon={ClockIcon} buttonText="Registrar Asistencia" buttonLink="/asistencia/registrar" />
+            <PageHeader
+                title="Asistencia de Personal"
+                icon={ClockIcon}
+                buttonText={canRegistrar ? "Registrar Asistencia" : null}
+                buttonLink={canRegistrar ? "/asistencia/registrar" : null}
+            />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 
             <div className="flex justify-end mt-6 mb-3">
@@ -130,7 +142,7 @@ const Index = () => {
                 pagination={{ ...paginationInfo, onPageChange: fetchAsistencias }}
             />
 
-            {asistenciaParaJustificar && (
+            {canJustificar && asistenciaParaJustificar && (
                 <JustificarTardanzaModal
                     asistencia={asistenciaParaJustificar}
                     loading={justificando}
