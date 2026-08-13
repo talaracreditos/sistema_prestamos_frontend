@@ -1,37 +1,44 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { index } from 'services/asistenciaService';
+import { index, justificar as justificarService } from 'services/asistenciaService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
-const initialFilters = { fecha_desde: '', fecha_hasta: '', usuario: '' };
-
 export const useIndex = () => {
-    const [loading, setLoading] = useState(true);
-    const [asistencias, setAsistencias] = useState([]);
+    const [loading,        setLoading]        = useState(true);
+    const [asistencias,    setAsistencias]    = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
+    const [filters,        setFilters]        = useState({ usuario: '', fecha_desde: '', fecha_hasta: '' });
+    const [appliedFilters, setAppliedFilters]  = useState({ usuario: '', fecha_desde: '', fecha_hasta: '' });
+    const filtersRef                          = useRef({ usuario: '', fecha_desde: '', fecha_hasta: '' });
+    const [alert,          setAlert]          = useState(null);
 
-    const [filters, setFilters] = useState(initialFilters);
-    const [appliedFilters, setAppliedFilters] = useState(initialFilters);
-    const filtersRef = useRef(initialFilters);
-    const [alert, setAlert] = useState(null);
+    // Justificación de tardanza
+    const [asistenciaParaJustificar, setAsistenciaParaJustificar] = useState(null);
+    const [justificando, setJustificando] = useState(false);
 
     const fetchAsistencias = useCallback(async (page = 1) => {
         setLoading(true);
         try {
-            const response = await index(page, filtersRef.current);
-            setAsistencias(response.data || []);
+            const res = await index(page, filtersRef.current);
+            setAsistencias(res.data || []);
             setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-                total: response.total
+                currentPage: res.current_page,
+                totalPages:  res.last_page,
+                total:       res.total,
             });
         } catch (err) {
             setAlert(handleApiError(err));
-        } finally { setLoading(false); }
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     useEffect(() => { fetchAsistencias(1); }, [fetchAsistencias]);
 
     const handleFilterChange = (name, val) => setFilters(prev => ({ ...prev, [name]: val }));
+
+    const handleUsuarioFilter = useCallback((empleado) => {
+        setFilters(prev => ({ ...prev, usuario: empleado?.id ?? '' }));
+    }, []);
 
     const handleFilterSubmit = () => {
         filtersRef.current = filters;
@@ -40,24 +47,36 @@ export const useIndex = () => {
     };
 
     const handleFilterClear = () => {
-        setFilters(initialFilters);
-        filtersRef.current = initialFilters;
-        setAppliedFilters(initialFilters);
+        const reset = { usuario: '', fecha_desde: '', fecha_hasta: '' };
+        setFilters(reset);
+        filtersRef.current = reset;
+        setAppliedFilters(reset);
         fetchAsistencias(1);
     };
 
-    // Filtro por empleado — se aplica al toque, sin esperar el botón "Aplicar"
-    const handleUsuarioFilter = (empleado) => {
-        const usuarioId = empleado?.usuario_id ?? empleado?.id ?? '';
-        const nuevosFiltros = { ...filtersRef.current, usuario: usuarioId };
-        setFilters(nuevosFiltros);
-        filtersRef.current = nuevosFiltros;
-        setAppliedFilters(nuevosFiltros);
-        fetchAsistencias(1);
+    const handleAbrirJustificar = (asistencia) => setAsistenciaParaJustificar(asistencia);
+    const handleCerrarJustificar = () => setAsistenciaParaJustificar(null);
+
+    const handleConfirmarJustificar = async (payload) => {
+        if (!asistenciaParaJustificar) return;
+        setJustificando(true);
+        try {
+            await justificarService(asistenciaParaJustificar.id, payload);
+            setAlert({ type: 'success', message: 'Asistencia actualizada correctamente.' });
+            setAsistenciaParaJustificar(null);
+            fetchAsistencias(paginationInfo.currentPage);
+        } catch (err) {
+            setAlert(handleApiError(err));
+        } finally {
+            setJustificando(false);
+        }
     };
 
     return {
-        loading, asistencias, paginationInfo, filters, appliedFilters, alert, setAlert,
-        fetchAsistencias, handleFilterChange, handleFilterSubmit, handleFilterClear, handleUsuarioFilter
+        loading, asistencias, paginationInfo, filters, appliedFilters,
+        alert, setAlert,
+        fetchAsistencias, handleFilterChange, handleFilterSubmit, handleFilterClear, handleUsuarioFilter,
+        asistenciaParaJustificar, justificando,
+        handleAbrirJustificar, handleCerrarJustificar, handleConfirmarJustificar,
     };
 };

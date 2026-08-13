@@ -11,7 +11,7 @@ import {
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import { useAuth } from 'context/AuthContext';
 import logo from 'assets/img/logo.png'; 
-import { Calendar1Icon, ChartBarIcon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, SettingsIcon, ShieldCheckIcon, ShoppingBagIcon, TagIcon, UserCheck2Icon, UserPlusIcon } from 'lucide-react';
+import { Calendar1Icon, ChartBarIcon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, PcCaseIcon, SettingsIcon, ShieldCheckIcon, ShoppingBagIcon, TagIcon, UserCheck2Icon, UserPlusIcon } from 'lucide-react';
 
 // ── Reloj en tiempo real ──────────────────────────────────────────────────────
 const LiveClock = ({ collapsed = false }) => {
@@ -142,6 +142,32 @@ export const MENU_GROUPS = [
         ]
     },
     {
+        groupName: 'Horarios y Asistencia',
+        items: [
+            {
+                section: 'Horarios Sistema', icon: PcCaseIcon,
+                subs: [
+                    { name: 'Listar Horarios',  link: '/horario-sistema/listar',  requiredPermission: 'horarioSistema.index' },
+                    { name: 'Nuevo Horario',    link: '/horario-sistema/agregar', requiredPermission: 'horarioSistema.store' },
+                ],
+            },
+            {
+                section: 'Horarios Asistencia', icon: ClockIcon,
+                subs: [
+                    { name: 'Listar Horarios',  link: '/horario-asistencia/listar',  requiredPermission: 'horarioAsistencia.index' },
+                    { name: 'Nuevo Horario',    link: '/horario-asistencia/agregar', requiredPermission: 'horarioAsistencia.store' },
+                ],
+            },
+            {
+                section: 'Asistencia', icon: UserCheck2Icon,
+                subs: [
+                    { name: 'Historial de Asistencia', link: '/asistencia/listar',    requiredPermission: 'asistencia.index' },
+                    { name: 'Registrar Asistencia',    link: '/asistencia/registrar', requiredPermission: 'asistencia.registrar' },
+                ],
+            },
+        ]
+    },
+    {
         groupName: 'Administración y Ajustes',
         items: [
             {
@@ -181,14 +207,6 @@ export const MENU_GROUPS = [
             },
             { section: 'Feriados',         icon: Calendar1Icon, link: '/feriados/listar', requiredPermission: 'feriado.index'   },
             { section: 'Roles y Permisos', icon: Lock,          link: '/rol/listar',       requiredPermission: 'rol.index'       },
-            { section: 'Horarios Sistema', icon: ClockIcon,     link: '/horario-sistema/listar', requiredPermission: 'horarioSistema.index' },
-            {
-                section: 'Asistencia', icon: UserCheck2Icon,
-                subs: [
-                    { name: 'Historial de Asistencia', link: '/asistencia/listar',    requiredPermission: 'asistencia.index' },
-                    { name: 'Registrar Asistencia',    link: '/asistencia/registrar', requiredPermission: 'asistencia.registrar' },
-                ],
-            },
             { section: 'Auditoria',        icon: ClipboardDocumentListIcon,     link: '/auditoria/listar', requiredPermission: 'auditoria.index' },
             { section: 'Parámetros',       icon: SettingsIcon,  link: '/parametro/listar', requiredPermission: 'parametro.index' },
             {

@@ -126,6 +126,11 @@ import PoliticaCookies from 'pages/Legal/PoliticaCookies';
 import ListarAsistencia from 'pages/Asistencia/Index';
 import RegistrarAsistencia from 'pages/Asistencia/Registrar';
 
+// UI HORARIOS ASISTENCIA
+import ListarHorarioAsistencia  from 'pages/HorarioAsistencia/Index';
+import AgregarHorarioAsistencia from 'pages/HorarioAsistencia/Store';
+import EditarHorarioAsistencia  from 'pages/HorarioAsistencia/Update';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -252,6 +257,11 @@ function AppContent() {
         {/* ASISTENCIA */}
         <Route path="/asistencia/listar" element={<ProtectedRoute requiredPermission="asistencia.index" element={<ListarAsistencia />} />} />
         <Route path="/asistencia/registrar" element={<ProtectedRoute requiredPermission="asistencia.registrar" element={<RegistrarAsistencia />} />} />
+
+        {/* HORARIOS ASISTENCIA */}
+        <Route path="/horario-asistencia/listar"     element={<ProtectedRoute requiredPermission="horarioAsistencia.index"  element={<SecureRoute element={<ListarHorarioAsistencia />} />} />} />
+        <Route path="/horario-asistencia/agregar"    element={<ProtectedRoute requiredPermission="horarioAsistencia.store"   element={<SecureRoute element={<AgregarHorarioAsistencia />} />} />} />
+        <Route path="/horario-asistencia/editar/:id" element={<ProtectedRoute requiredPermission="horarioAsistencia.update"  element={<SecureRoute element={<EditarHorarioAsistencia />} />} />} />
 
         {/* SETTINGS */}
         <Route path="/parametro/listar" element={<ProtectedRoute requiredPermission="parametro.index" element={<SecureRoute element={<ListarParametros />} />} />} />   

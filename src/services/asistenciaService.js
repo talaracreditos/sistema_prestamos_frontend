@@ -16,11 +16,20 @@ export const index = async (page = 1, filters = {}) => {
     return handleResponse(response);
 };
 
-export const registrar = async (qr) => {
+export const registrar = async ({ qr, usuario_id }) => {
     const response = await fetchWithAuth(`${BASE_URL}/registrar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ qr }),
+        body: JSON.stringify(qr ? { qr } : { usuario_id }),
+    });
+    return handleResponse(response);
+};
+
+export const justificar = async (asistenciaId, { justificada, motivo_justificacion }) => {
+    const response = await fetchWithAuth(`${BASE_URL}/${asistenciaId}/justificar`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ justificada, motivo_justificacion }),
     });
     return handleResponse(response);
 };
@@ -35,7 +44,6 @@ export const exportar = async (filters = {}) => {
     const response = await fetchWithAuth(`${BASE_URL}/export/?${params.toString()}`, { method: 'GET' });
 
     if (!response.ok) {
-        // el backend puede responder JSON de error (via errorResponse) si algo falla
         const data = await response.json().catch(() => null);
         const error = new Error(data?.message || 'No se pudo exportar la asistencia.');
         error.details = data?.error;

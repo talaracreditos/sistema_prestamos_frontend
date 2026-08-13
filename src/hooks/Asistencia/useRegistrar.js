@@ -6,9 +6,10 @@ export const useRegistrar = () => {
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState(null);
     const [resultado, setResultado] = useState(null);
+    const [modo, setModo] = useState('qr'); // 'qr' | 'manual'
+    const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
 
     const yaEscaneadoRef = useRef(false);
-
 
     const handleQrScan = useCallback(async (contenidoQr) => {
         if (!contenidoQr?.trim() || yaEscaneadoRef.current) return;
@@ -19,7 +20,7 @@ export const useRegistrar = () => {
         setLoading(true);
 
         try {
-            const response = await registrar(contenidoQr.trim());
+            const response = await registrar({ qr: contenidoQr.trim() });
 
             setResultado(response.data);
             setAlert({
@@ -31,13 +32,37 @@ export const useRegistrar = () => {
             setAlert(handleApiError(err, 'No se pudo registrar la asistencia.'));
         } finally {
             setLoading(false);
-            
+
             // A los 1.5 segundos abrimos el candado para que el siguiente asesor pase
             setTimeout(() => {
                 yaEscaneadoRef.current = false;
             }, 1500);
         }
-    }, []); 
+    }, []);
+
+    const handleRegistrarManual = useCallback(async () => {
+        if (!empleadoSeleccionado) return;
+
+        setAlert(null);
+        setResultado(null);
+        setLoading(true);
+
+        try {
+            const response = await registrar({ usuario_id: empleadoSeleccionado.id });
+
+            setResultado(response.data);
+            setAlert({
+                type: 'success',
+                message: response.message || 'Asistencia registrada manualmente.'
+            });
+            setEmpleadoSeleccionado(null);
+
+        } catch (err) {
+            setAlert(handleApiError(err, 'No se pudo registrar la asistencia.'));
+        } finally {
+            setLoading(false);
+        }
+    }, [empleadoSeleccionado]);
 
     const resetearEscaneo = () => {
         setAlert(null);
@@ -45,11 +70,23 @@ export const useRegistrar = () => {
         yaEscaneadoRef.current = false;
     };
 
-    return { 
-        loading, 
-        alert, 
-        resultado, 
-        handleQrScan, 
-        resetearEscaneo 
+    const cambiarModo = (nuevoModo) => {
+        setModo(nuevoModo);
+        setAlert(null);
+        setResultado(null);
+        setEmpleadoSeleccionado(null);
+    };
+
+    return {
+        loading,
+        alert,
+        resultado,
+        handleQrScan,
+        resetearEscaneo,
+        modo,
+        cambiarModo,
+        empleadoSeleccionado,
+        setEmpleadoSeleccionado,
+        handleRegistrarManual,
     };
 };

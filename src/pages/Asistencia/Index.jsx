@@ -6,12 +6,15 @@ import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
-import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import JustificarTardanzaModal from './JustificarTardanzaModal';
+import { ClockIcon, UserCircleIcon, ExclamationTriangleIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
 
 const Index = () => {
     const {
         loading, asistencias, paginationInfo, filters, appliedFilters, alert, setAlert,
-        fetchAsistencias, handleFilterChange, handleFilterSubmit, handleFilterClear, handleUsuarioFilter
+        fetchAsistencias, handleFilterChange, handleFilterSubmit, handleFilterClear, handleUsuarioFilter,
+        asistenciaParaJustificar, justificando,
+        handleAbrirJustificar, handleCerrarJustificar, handleConfirmarJustificar,
     } = useIndex();
 
     const columns = useMemo(() => [
@@ -32,7 +35,17 @@ const Index = () => {
         {
             header: 'Fecha',
             render: (row) => (
-                <span className="text-sm font-bold text-slate-600 dark:text-dark-text">{row.fecha}</span>
+                <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-600 dark:text-dark-text">{row.fecha}</span>
+                    {row.turno && row.turno !== 'unico' && (
+                        <span className={`w-fit mt-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wide
+                            ${row.turno === 'manana'
+                                ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                                : 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'}`}>
+                            {row.turno === 'manana' ? 'Mañana' : 'Tarde'}
+                        </span>
+                    )}
+                </div>
             )
         },
         {
@@ -51,7 +64,33 @@ const Index = () => {
                     : <span className="text-slate-300 dark:text-dark-text-muted text-xs">—</span>
             )
         },
-    ], []);
+        {
+            header: 'Tardanza',
+            render: (row) => {
+                if (!row.tardanza) {
+                    return <span className="text-slate-300 dark:text-dark-text-muted text-xs">—</span>;
+                }
+                return row.justificada ? (
+                    <button
+                        type="button"
+                        onClick={() => handleAbrirJustificar(row)}
+                        title={row.motivo_justificacion}
+                        className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20 hover:brightness-95 transition-all"
+                    >
+                        <CheckBadgeIcon className="w-3.5 h-3.5" /> Justificada
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => handleAbrirJustificar(row)}
+                        className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20 hover:brightness-95 transition-all"
+                    >
+                        <ExclamationTriangleIcon className="w-3.5 h-3.5" /> Justificar
+                    </button>
+                );
+            }
+        }
+    ], [handleAbrirJustificar]);
 
     const filterConfig = useMemo(() => [
         {
@@ -75,7 +114,6 @@ const Index = () => {
             <PageHeader title="Asistencia de Personal" icon={ClockIcon} buttonText="Registrar Asistencia" buttonLink="/asistencia/registrar" />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
 
-            {/* Botón Excel arriba, esquina derecha de la tabla */}
             <div className="flex justify-end mt-6 mb-3">
                 <ExcelExportButton
                     exportService={exportarAsistencias}
@@ -91,6 +129,15 @@ const Index = () => {
                 filters={filters} onFilterChange={handleFilterChange} onFilterSubmit={handleFilterSubmit} onFilterClear={handleFilterClear}
                 pagination={{ ...paginationInfo, onPageChange: fetchAsistencias }}
             />
+
+            {asistenciaParaJustificar && (
+                <JustificarTardanzaModal
+                    asistencia={asistenciaParaJustificar}
+                    loading={justificando}
+                    onClose={handleCerrarJustificar}
+                    onConfirm={handleConfirmarJustificar}
+                />
+            )}
         </div>
     );
 };
