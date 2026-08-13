@@ -122,6 +122,10 @@ import EditarParametro from 'pages/Parametro/Update';
 import PoliticaPrivacidad from 'pages/Legal/PoliticaPrivacidad';
 import PoliticaCookies from 'pages/Legal/PoliticaCookies';
 
+// ASISTENCIA
+import ListarAsistencia from 'pages/Asistencia/Index';
+import RegistrarAsistencia from 'pages/Asistencia/Registrar';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -244,6 +248,10 @@ function AppContent() {
       
         {/* DIA OPERATIVO */}
         <Route path="/dia-operativo" element={<ProtectedRoute requiredPermission="diaOperativo.index" element={<SecureRoute element={<DiaOperativo />} />} />} />
+
+        {/* ASISTENCIA */}
+        <Route path="/asistencia/listar" element={<ProtectedRoute requiredPermission="asistencia.index" element={<ListarAsistencia />} />} />
+        <Route path="/asistencia/registrar" element={<ProtectedRoute requiredPermission="asistencia.registrar" element={<RegistrarAsistencia />} />} />
 
         {/* SETTINGS */}
         <Route path="/parametro/listar" element={<ProtectedRoute requiredPermission="parametro.index" element={<SecureRoute element={<ListarParametros />} />} />} />   

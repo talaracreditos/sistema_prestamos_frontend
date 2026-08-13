@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import jwtUtils from "utilities/Token/jwtUtils";
+import { useAuth } from "context/AuthContext";
 import { 
   User, 
   ShieldCheck, 
@@ -9,12 +10,16 @@ import {
   MapPin,
   Phone,
   Mail,
-  Clock
+  Clock,
+  QrCode
 } from "lucide-react"; 
 import { toUpper } from 'utilities/Validations/validations';
+import Gafete from "./Gafete";
 
 const Home = () => {
   const token = jwtUtils.getAccessTokenFromCookie();
+  const { user } = useAuth();
+  const [showGafete, setShowGafete] = useState(false);
   
   const userData = useMemo(() => {
     if (!token) return null;
@@ -27,7 +32,7 @@ const Home = () => {
   }, [token]);
 
   return (
-    <div className="container mx-auto p-6 min-h-screen"> 
+    <div className="container mx-auto p-6 min-h-screen relative"> 
       <div className="max-w-5xl mx-auto">
         
         {/* 1. SECCIÓN DE BIENVENIDA */}
@@ -56,78 +61,90 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Detalles de la Cuenta */}
-          <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/20 transition-colors duration-300">
-            <h3 className="text-slate-500 dark:text-dark-text-muted text-[11px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
-              <User size={16}/> Información de Sesión
-            </h3>
-            
-            <div className="space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
-                  <User size={18}/>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Nombre Completo</p>
-                  <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.name) || 'No disponible'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
-                  <NotepadText size={18}/>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Username</p>
-                  <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.username) || 'No disponible'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
-                  <UserCircle size={18}/>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Rol</p>
-                  <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.role) || 'No disponible'}</p>
-                </div>
-              </div>
+          <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/20 transition-colors duration-300 flex flex-col justify-between">
+            <div>
+              <h3 className="text-slate-500 dark:text-dark-text-muted text-[11px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                <User size={16}/> Información de Sesión
+              </h3>
               
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
+                    <User size={18}/>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Nombre Completo</p>
+                    <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.name) || 'No disponible'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
+                    <NotepadText size={18}/>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Username</p>
+                    <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.username) || 'No disponible'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-slate-50 dark:bg-dark-surface-alt rounded-lg border border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted">
+                    <UserCircle size={18}/>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase tracking-tight mb-0.5">Rol</p>
+                    <p className="font-bold text-slate-800 dark:text-dark-text text-sm">{toUpper(userData?.role) || 'No disponible'}</p>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Botón para abrir el Gafete */}
+            {user?.qr_gafete && (
+              <button 
+                onClick={() => setShowGafete(true)}
+                className="mt-6 w-full py-3 bg-slate-800 hover:bg-slate-900 dark:bg-brand-red-glow dark:hover:bg-red-800 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-md active:scale-[0.98]"
+              >
+                <QrCode size={16} /> Ver Fotocheck de Asistencia
+              </button>
+            )}
           </div>
 
-            <div className="bg-red-900 dark:bg-brand-red-glow p-6 rounded-2xl text-white shadow-lg dark:shadow-black/30 flex flex-col justify-between relative overflow-hidden border border-transparent dark:border-dark-border transition-colors duration-300">
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
-                    <Building2 size={20} className="text-white"/>
-                  </div>
-                  <h3 className="text-lg font-black tracking-tight text-yellow-300">Talara Créditos e Inversiones</h3>
+          {/* Tarjeta de la Empresa */}
+          <div className="bg-red-900 dark:bg-brand-red-glow p-6 rounded-2xl text-white shadow-lg dark:shadow-black/30 flex flex-col justify-between relative overflow-hidden border border-transparent dark:border-dark-border transition-colors duration-300">
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
+                  <Building2 size={20} className="text-white"/>
                 </div>
-
-                <div className="space-y-3 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <MapPin size={15} className="text-yellow-300 shrink-0"/>
-                    <p className="text-white text-sm font-medium">Av. D Nro. 14 C.H. Talara (Frente a la Curacao)</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone size={15} className="text-yellow-300 shrink-0"/>
-                    <p className="text-white text-sm font-medium">+51 908 886 179</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail size={15} className="text-yellow-300 shrink-0"/>
-                    <a href="mailto:talaracreditos@gmail.com" className="text-white text-sm font-medium hover:underline">
-                      talaracreditos@gmail.com
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Clock size={15} className="text-yellow-300 shrink-0"/>
-                    <p className="text-white text-sm font-medium">Lun – Sáb: 8:00 am – 6:00 pm</p>
-                  </div>
-                </div>
+                <h3 className="text-lg font-black tracking-tight text-yellow-300">Talara Créditos e Inversiones</h3>
               </div>
 
-              <Building2 size={120} className="absolute -bottom-10 -right-6 text-white/5" />
+              <div className="space-y-3 relative z-10">
+                <div className="flex items-center gap-3">
+                  <MapPin size={15} className="text-yellow-300 shrink-0"/>
+                  <p className="text-white text-sm font-medium">Av. D Nro. 14 C.H. Talara (Frente a la Curacao)</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone size={15} className="text-yellow-300 shrink-0"/>
+                  <p className="text-white text-sm font-medium">+51 908 886 179</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail size={15} className="text-yellow-300 shrink-0"/>
+                  <a href="mailto:talaracreditos@gmail.com" className="text-white text-sm font-medium hover:underline">
+                    talaracreditos@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock size={15} className="text-yellow-300 shrink-0"/>
+                  <p className="text-white text-sm font-medium">Lun – Sáb: 8:00 am – 6:00 pm</p>
+                </div>
+              </div>
             </div>
+
+            <Building2 size={120} className="absolute -bottom-10 -right-6 text-white/5" />
+          </div>
 
         </div>
 
@@ -144,6 +161,14 @@ const Home = () => {
         </div>
 
       </div>
+
+      <Gafete 
+        isOpen={showGafete} 
+        onClose={() => setShowGafete(false)} 
+        user={user} 
+        userData={userData} 
+      />
+
     </div>
   );
 };
