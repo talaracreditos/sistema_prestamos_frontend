@@ -36,18 +36,27 @@ const Index = () => {
         {
             header: 'Fecha',
             render: (row) => (
-                <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-600 dark:text-dark-text">{row.fecha}</span>
-                    {row.turno && row.turno !== 'unico' && (
-                        <span className={`w-fit mt-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wide
-                            ${row.turno === 'manana'
-                                ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400'
-                                : 'bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'}`}>
-                            {row.turno === 'manana' ? 'Mañana' : 'Tarde'}
-                        </span>
-                    )}
-                </div>
+                <span className="text-sm font-bold text-slate-600 dark:text-dark-text">{row.fecha}</span>
             )
+        },
+        {
+            header: 'Turno',
+            render: (row) => {
+                // Si es turno único o no tiene, ponemos un guion para no saturar
+                if (!row.turno || row.turno === 'unico') {
+                    return <span className="text-slate-300 dark:text-dark-text-muted text-xs">—</span>;
+                }
+
+                // Badges con el mismo estilo de Ingreso/Salida
+                return (
+                    <span className={`px-2 py-1 text-[10px] font-black uppercase tracking-wide rounded-full border 
+                        ${row.turno === 'manana'
+                            ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                            : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20'}`}>
+                        {row.turno === 'manana' ? 'Mañana' : 'Tarde'}
+                    </span>
+                );
+            }
         },
         {
             header: 'Ingreso',
@@ -74,11 +83,11 @@ const Index = () => {
 
                 if (!canJustificar) {
                     return row.justificada ? (
-                        <span title={row.motivo_justificacion} className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20">
+                        <span title={row.motivo_justificacion} className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20 w-fit">
                             <CheckBadgeIcon className="w-3.5 h-3.5" /> Justificada
                         </span>
                     ) : (
-                        <span className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20">
+                        <span className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20 w-fit">
                             <ExclamationTriangleIcon className="w-3.5 h-3.5" /> Sin justificar
                         </span>
                     );
@@ -86,12 +95,12 @@ const Index = () => {
 
                 return row.justificada ? (
                     <button type="button" onClick={() => handleAbrirJustificar(row)} title={row.motivo_justificacion}
-                        className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20 hover:brightness-95 transition-all">
+                        className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-black rounded-full border border-blue-200 dark:border-blue-500/20 hover:brightness-95 transition-all w-fit">
                         <CheckBadgeIcon className="w-3.5 h-3.5" /> Justificada
                     </button>
                 ) : (
                     <button type="button" onClick={() => handleAbrirJustificar(row)}
-                        className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20 hover:brightness-95 transition-all">
+                        className="flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full border border-amber-200 dark:border-amber-500/20 hover:brightness-95 transition-all w-fit">
                         <ExclamationTriangleIcon className="w-3.5 h-3.5" /> Justificar
                     </button>
                 );
