@@ -16,6 +16,7 @@ export const index = async (page = 1, filters = {}) => {
         fecha_fin:              filters.fecha_fin                || '',
         dia_operativo_fecha:    filters.dia_operativo_fecha     || '',
         registro_extemporaneo:  filters.registro_extemporaneo   ?? '',
+        asesor_id:              filters.asesor_id               || '',
     });
     const response = await fetchWithAuth(`${BASE_URL}/index?${params.toString()}`, { method: 'GET' });
     return handleResponse(response);

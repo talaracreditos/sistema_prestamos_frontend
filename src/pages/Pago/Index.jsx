@@ -6,6 +6,7 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
+import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import { BanknotesIcon, PrinterIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { FileSearch } from 'lucide-react';
 
@@ -23,6 +24,12 @@ const Index = () => {
     const [selectedVoucher, setSelectedVoucher] = useState(null);
     const openVoucher = useCallback((url) => { setSelectedVoucher(url); setIsViewModalOpen(true); }, []);
 
+    const [asesorKey, setAsesorKey] = useState(Date.now());
+    const onClearFilters = () => {
+        handleFilterClear();
+        setAsesorKey(Date.now());
+    };
+
     const filterConfig = useMemo(() => [
         {
             name: 'search', type: 'text', label: 'Pago',
@@ -38,6 +45,18 @@ const Index = () => {
             name: 'cliente', type: 'text', label: 'Cliente / Grupo',
             placeholder: 'Nombre, DNI, RUC...',
             colSpan: 'col-span-12 md:col-span-3'
+        },
+        {
+            name: 'asesor_id', type: 'custom', label: 'Filtrar por Asesor',
+            colSpan: 'col-span-12 md:col-span-3',
+            render: () => (
+                <EmpleadoSearchSelect
+                    key={asesorKey}
+                    rol="asesor"
+                    onSelect={(a) => setFilters(p => ({ ...p, asesor_id: a ? a.id : '' }))}
+                    clearOnSelect={false}
+                />
+            ),
         },
         { name: 'fecha_inicio', type: 'date', label: 'Fecha Inicio', colSpan: 'col-span-12 md:col-span-2' },
         { name: 'fecha_fin',    type: 'date', label: 'Fecha Fin',    colSpan: 'col-span-12 md:col-span-2' },
@@ -74,7 +93,7 @@ const Index = () => {
                 { value: '0', label: 'NO'    },
             ]
         },
-    ], []);
+    ], [asesorKey, setFilters]);
 
     const columns = useMemo(() => [
         {
@@ -140,6 +159,19 @@ const Index = () => {
                     <span className="text-[9px] font-black text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 w-fit px-1.5 py-0.5 rounded mt-1 tracking-wider">
                         CUOTA #{row.cuota_nro}
                     </span>
+                    {/* {row.dias_mora > 0 && (
+                        <span className="text-[9px] font-black text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 w-fit px-1.5 py-0.5 rounded mt-1 uppercase tracking-wider">
+                            {row.dias_mora} día{row.dias_mora === 1 ? '' : 's'} de mora
+                        </span>
+                    )} */}
+                </div>
+            )
+        },
+        {
+            header: 'Asesor',
+            render: (row) => (
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-black dark:text-dark-text w-fit uppercase">
+                    {row.asesor}
                 </div>
             )
         },
@@ -235,7 +267,7 @@ const Index = () => {
                 columns={columns} data={pagos} loading={loading}
                 filterConfig={filterConfig} filters={filters}
                 onFilterChange={(n, v) => setFilters(p => ({ ...p, [n]: v }))}
-                onFilterSubmit={handleFilterSubmit} onFilterClear={handleFilterClear}
+                onFilterSubmit={handleFilterSubmit} onFilterClear={onClearFilters}
                 pagination={{ ...paginationInfo, onPageChange: fetchPagos }}
             />
 
