@@ -159,11 +159,11 @@ const Index = () => {
                     <span className="text-[9px] font-black text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 w-fit px-1.5 py-0.5 rounded mt-1 tracking-wider">
                         CUOTA #{row.cuota_nro}
                     </span>
-                    {/* {row.dias_mora > 0 && (
+                    {row.dias_mora > 0 && (
                         <span className="text-[9px] font-black text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 w-fit px-1.5 py-0.5 rounded mt-1 uppercase tracking-wider">
                             {row.dias_mora} día{row.dias_mora === 1 ? '' : 's'} de mora
                         </span>
-                    )} */}
+                    )}
                 </div>
             )
         },
