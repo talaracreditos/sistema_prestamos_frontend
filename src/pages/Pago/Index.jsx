@@ -170,7 +170,7 @@ const Index = () => {
         {
             header: 'Asesor',
             render: (row) => (
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-black dark:text-dark-text w-fit uppercase">
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-black dark:text-dark-text w-fit uppercase">
                     {row.asesor}
                 </div>
             )
