@@ -1,6 +1,6 @@
 import React from 'react';
-import { CuotaCard } from './components/CuotaCard';
-import DatosEconomicosCards, { DatosEconomicosCardsSkeleton } from './components/DatosEconomicosCards';
+import { CuotaCard } from './components/CronogramaTable/CuotaCard';
+import DatosEconomicosCards, { DatosEconomicosCardsSkeleton } from './components/CronogramaTable/DatosEconomicosCards';
 
 const CronogramaTable = ({
     cronograma = [],

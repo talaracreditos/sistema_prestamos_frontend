@@ -1,6 +1,6 @@
 import React from 'react';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
-import DatosEconomicosCards from 'components/Shared/Tables/components/DatosEconomicosCards';
+import DatosEconomicosCards from 'components/Shared/Tables/components/CronogramaTable/DatosEconomicosCards';
 import {
     BanknotesIcon,
     UserGroupIcon,

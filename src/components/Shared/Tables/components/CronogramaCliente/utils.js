@@ -1,0 +1,1 @@
+export const fmt = (v) => `S/ ${parseFloat(v ?? 0).toFixed(2)}`;

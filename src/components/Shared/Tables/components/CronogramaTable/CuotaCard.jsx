@@ -5,7 +5,7 @@ import {
     ScissorsIcon
 } from '@heroicons/react/24/outline';
 
-import { useCuotaData } from '../hooks/useCuotaData';
+import { useCuotaData } from '../../hooks/useCuotaData';
 import { getStatusBadge } from './StatusBadge';
 
 import {
