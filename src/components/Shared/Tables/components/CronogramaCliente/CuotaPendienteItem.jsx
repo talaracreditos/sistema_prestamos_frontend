@@ -6,10 +6,8 @@ import { fmt } from './utils';
  * CUOTA PENDIENTE (item de lista) — usa useCuotaData
  * Se usa tanto en la sección de "Atrasadas" como en "Siguientes".
  *
- * La mora TOTAL agregada (d.moraPend) solo tiene sentido en vista
- * personal ("mi saldo"), donde es TU mora. En vista grupal global
- * la mora es individual de cada integrante — nunca se agrega arriba,
- * solo se muestra al costado del nombre de quien la debe.
+ * Jerarquía de color: días de atraso en rojo (alerta), nombre en
+ * texto normal (negro/blanco), monto pendiente en rojo (lo urgente).
  * ───────────────────────────────────────────────────────────── */
 const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante }) => {
 
@@ -42,62 +40,27 @@ const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante }) => {
                 <div>
                     <p className="text-xs font-bold text-slate-700 dark:text-dark-text transition-colors">{cuota.vencimiento}</p>
 
-                    {conAtraso ? (
+                    {conAtraso && (
+                        <p className="text-[9px] font-black text-brand-red dark:text-red-400 uppercase">
+                            {d.diasAtraso} {d.diasAtraso === 1 ? 'día' : 'días'} de atraso
+                        </p>
+                    )}
+
+                    {esParcial && integrantesPendientes.length > 0 ? (
                         <div className="flex flex-col gap-0.5">
-                            <p className="text-[9px] font-black text-brand-red dark:text-red-400 uppercase">
-                                {d.diasAtraso} {d.diasAtraso === 1 ? 'día' : 'días'} de atraso
-                                {/* La mora total solo se muestra en vista personal ("mi saldo").
-                                    En vista grupal, la mora va individual junto al nombre abajo. */}
-                                {esVistaIntegrante && d.moraPend > 0 && ` · Incluye mora: ${fmt(d.moraPend)}`}
+                            <p className="text-[9px] font-black text-slate-700 dark:text-dark-text uppercase">
+                                Falta que pague:
                             </p>
-                            {esParcial && (
-                                integrantesPendientes.length > 0 ? (
-                                    <>
-                                        <p className="text-[9px] font-black text-brand-red dark:text-red-400 uppercase">
-                                            Falta que pague:
-                                        </p>
-                                        {integrantesPendientes.map((int) => (
-                                            <p key={int.id} className="text-[9px] font-bold text-brand-red dark:text-red-400">
-                                                - {int.nombre}
-                                                {int.mora_pendiente > 0 && (
-                                                    <span className="ml-1">
-                                                        (Incluye mora: {fmt(int.mora_pendiente)})
-                                                    </span>
-                                                )}
-                                            </p>
-                                        ))}
-                                    </>
-                                ) : (
-                                    <p className="text-[9px] font-bold text-brand-red dark:text-red-400">
-                                        Abonado: {fmt(d.abonado)}
-                                    </p>
-                                )
-                            )}
-                        </div>
-                    ) : esParcial ? (
-                        integrantesPendientes.length > 0 ? (
-                            <div className="flex flex-col gap-0.5">
-                                <p className="text-[9px] font-black text-orange-500 dark:text-orange-400 uppercase">
-                                    Falta que pague:
+                            {integrantesPendientes.map((int) => (
+                                <p key={int.id} className="text-[9px] font-bold text-slate-700 dark:text-dark-text">
+                                    - {int.nombre}: <span className="text-brand-red dark:text-red-400 font-black">{fmt(int.saldo)}</span>
                                 </p>
-                                {integrantesPendientes.map((int) => (
-                                    <p key={int.id} className="text-[9px] font-bold text-orange-500 dark:text-orange-400">
-                                        - {int.nombre}
-                                        {int.mora_pendiente > 0 && (
-                                            <span className="text-brand-red dark:text-red-400 ml-1">
-                                                (Incluye mora: {fmt(int.mora_pendiente)})
-                                            </span>
-                                        )}
-                                    </p>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-[9px] font-black text-orange-500 dark:text-orange-400 uppercase">
-                                Pago parcial · Abonado: {fmt(d.abonado)}
-                            </p>
-                        )
+                            ))}
+                        </div>
                     ) : (
-                        <p className="text-[9px] font-bold text-slate-400 dark:text-dark-text-muted uppercase">Por pagar</p>
+                        !conAtraso && (
+                            <p className="text-[9px] font-bold text-slate-400 dark:text-dark-text-muted uppercase">Por pagar</p>
+                        )
                     )}
                 </div>
             </div>
