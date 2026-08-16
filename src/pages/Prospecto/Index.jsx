@@ -11,8 +11,7 @@ import ZonaSearchSelect from 'components/Shared/Comboboxes/ZonaSearchSelect';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import {
     UsersIcon, EyeIcon, PencilSquareIcon, ArrowRightCircleIcon,
-    PhoneIcon, CalendarDaysIcon, UserIcon, BuildingOfficeIcon,
-    CurrencyDollarIcon
+    PhoneIcon, CalendarDaysIcon, UserIcon, BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from 'context/AuthContext';
 
