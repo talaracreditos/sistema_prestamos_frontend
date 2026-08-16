@@ -2,16 +2,19 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { index, show, deletePrestamo } from 'services/prestamoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
+const FILTERS_INITIAL = {
+    search: '', cliente: '', estado: '1', asesor_id: '',
+    fecha_inicio: '', fecha_fin: '',
+    fecha_desembolso_inicio: '', fecha_desembolso_fin: ''
+};
+
 export const useIndex = () => {
     const [loading, setLoading] = useState(true);
     const [prestamos, setPrestamos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
 
-    const [filters, setFilters] = useState({
-        search: '', cliente: '', estado: '1', asesor_id: '',
-        fecha_inicio: '', fecha_fin: '',
-        fecha_desembolso_inicio: '', fecha_desembolso_fin: ''
-    });
+    const [filters, setFilters] = useState(FILTERS_INITIAL);
+    const [appliedFilters, setAppliedFilters] = useState(FILTERS_INITIAL);
     const filtersRef = useRef(filters);
     const [alert, setAlert] = useState(null);
 
@@ -100,15 +103,17 @@ export const useIndex = () => {
     };
 
     const handleFilterChange = (name, val) => setFilters(prev => ({ ...prev, [name]: val }));
-    const handleFilterSubmit = () => { filtersRef.current = filters; fetchPrestamos(1); };
+
+    const handleFilterSubmit = () => {
+        filtersRef.current = filters;
+        setAppliedFilters(filters);
+        fetchPrestamos(1);
+    };
+
     const handleFilterClear = () => {
-        const res = {
-            search: '', cliente: '', estado: '1', asesor_id: '',
-            fecha_inicio: '', fecha_fin: '',
-            fecha_desembolso_inicio: '', fecha_desembolso_fin: ''
-        };
-        setFilters(res);
-        filtersRef.current = res;
+        setFilters(FILTERS_INITIAL);
+        filtersRef.current = FILTERS_INITIAL;
+        setAppliedFilters(FILTERS_INITIAL);
         fetchPrestamos(1);
     };
 
@@ -119,5 +124,7 @@ export const useIndex = () => {
         handleRefreshView,
         handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
         isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading,
+        // filtros aplicados (para exportar)
+        appliedFilters,
     };
 };

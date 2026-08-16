@@ -122,7 +122,7 @@ const Index = () => {
                         }
                     </div>
                     <div>
-                        <p className="font-bold text-slate-800 dark:text-dark-text text-sm transition-colors">{row.nombre_completo}</p>
+                        <p className="font-bold text-slate-800 dark:text-dark-text text-[12px] transition-colors">{row.nombre_completo}</p>
                         <p className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">{row.documento || 'Sin documento'}</p>
                     </div>
                 </div>
@@ -140,23 +140,6 @@ const Index = () => {
             )
         },
         {
-            header: 'Monto / Ingreso',
-            render: (row) => (
-                <div className="flex flex-col gap-0.5">
-                    {row.monto_solicitado && (
-                        <span className="text-xs font-bold text-slate-700 dark:text-dark-text flex items-center gap-1 transition-colors">
-                            <CurrencyDollarIcon className="w-3 h-3 text-green-500 dark:text-green-400" />
-                            S/ {parseFloat(row.monto_solicitado).toLocaleString()}
-                        </span>
-                    )}
-                    {row.ingreso_estimado && (
-                        <span className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">Ingreso: S/ {parseFloat(row.ingreso_estimado).toLocaleString()}</span>
-                    )}
-                    {!row.monto_solicitado && !row.ingreso_estimado && <span className="text-slate-300 dark:text-dark-text-muted/60 text-xs">—</span>}
-                </div>
-            )
-        },
-        {
             header: 'Estado',
             render: (row) => <EstadoBadge estado={row.estado} />
         },
@@ -164,7 +147,7 @@ const Index = () => {
             header: 'Asesor / Zona',
             render: (row) => (
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-bold text-slate-600 dark:text-dark-text transition-colors">{row.asesor}</span>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-dark-text transition-colors">{row.asesor}</span>
                     <span className="text-[11px] text-slate-400 dark:text-dark-text-muted transition-colors">{row.zona}</span>
                 </div>
             )

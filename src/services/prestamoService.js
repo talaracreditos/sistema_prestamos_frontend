@@ -97,3 +97,27 @@ export const castigarDetalle = async (detalleId, castigado) => {
     });
     return handleResponse(response);
 };
+
+export const exportar = async (filters = {}) => {
+    const params = new URLSearchParams({
+        search: filters.search || '',
+        estado: filters.estado || '',
+        asesor_id: filters.asesor_id || '',
+        fecha_inicio: filters.fecha_inicio || '',
+        fecha_fin: filters.fecha_fin || '',
+        fecha_desembolso_inicio: filters.fecha_desembolso_inicio || '',
+        fecha_desembolso_fin: filters.fecha_desembolso_fin || '',
+        cliente: filters.cliente || '',
+    });
+    const response = await fetchWithAuth(`${BASE_URL}/export?${params.toString()}`, { method: 'GET' });
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        const error = new Error(data?.message || 'No se pudo exportar los préstamos.');
+        error.details = data?.error;
+        error.status = response.status;
+        throw error;
+    }
+
+    return response.blob();
+};

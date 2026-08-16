@@ -1,8 +1,10 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useIndex } from 'hooks/Pago/useIndex';
+import { exportar as exportarPagos } from 'services/pagoService';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
+import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
@@ -17,7 +19,8 @@ const Index = () => {
         handleViewPdf, pdfLoading, isPdfModalOpen, setIsPdfModalOpen, pdfTitle, pdfBase64,
         isAnularModalOpen, setIsAnularModalOpen, openAnularModal, handleConfirmAnular, anularLoading,
         pagoToAnular,
-        esCliente, canVerPdf, canAnular,
+        esCliente, canVerPdf, canAnular, mostrarFiltroAsesor,
+        appliedFilters,
     } = useIndex();
 
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -30,70 +33,80 @@ const Index = () => {
         setAsesorKey(Date.now());
     };
 
-    const filterConfig = useMemo(() => [
-        {
-            name: 'search', type: 'text', label: 'Pago',
-            placeholder: 'Comprobante / Op / Observación...',
-            colSpan: 'col-span-12 md:col-span-3'
-        },
-        {
-            name: 'prestamo_id', type: 'text', label: 'N° Préstamo',
-            placeholder: 'Ej: 23',
-            colSpan: 'col-span-12 md:col-span-2'
-        },
-        {
-            name: 'cliente', type: 'text', label: 'Cliente / Grupo',
-            placeholder: 'Nombre, DNI, RUC...',
-            colSpan: 'col-span-12 md:col-span-3'
-        },
-        {
-            name: 'asesor_id', type: 'custom', label: 'Filtrar por Asesor',
-            colSpan: 'col-span-12 md:col-span-3',
-            render: () => (
-                <EmpleadoSearchSelect
-                    key={asesorKey}
-                    rol="asesor"
-                    onSelect={(a) => setFilters(p => ({ ...p, asesor_id: a ? a.id : '' }))}
-                    clearOnSelect={false}
-                />
-            ),
-        },
-        { name: 'fecha_inicio', type: 'date', label: 'Fecha Inicio', colSpan: 'col-span-12 md:col-span-2' },
-        { name: 'fecha_fin',    type: 'date', label: 'Fecha Fin',    colSpan: 'col-span-12 md:col-span-2' },
-        {
-            name: 'tipo', type: 'select', label: 'Tipo',
-            colSpan: 'col-span-12 md:col-span-2',
-            options: [
-                { value: '',                      label: 'TODOS'             },
-                { value: 'NORMAL',                label: 'NORMAL'            },
-                { value: 'EXCEDENTE',             label: 'EXCEDENTE'         },
-                { value: 'DESGLOSE_REFINANCIADO', label: 'DESGLOSE REFINANC.' },
-                { value: 'RENOVACION',            label: 'RENOVACIÓN'        },
-            ]
-        },
-        {
-            name: 'estado', type: 'select', label: 'Estado',
-            colSpan: 'col-span-12 md:col-span-2',
-            options: [
-                { value: '',  label: 'TODOS'     },
-                { value: '0', label: 'ANULADOS'  },
-                { value: '1', label: 'APROBADOS' },
-            ]
-        },
-        {
-            name: 'dia_operativo_fecha', type: 'date', label: 'Fecha Día Operativo',
-            colSpan: 'col-span-12 md:col-span-2'
-        },
-        {
-            name: 'registro_extemporaneo', type: 'select', label: 'Extemporáneo',
-            colSpan: 'col-span-12 md:col-span-2',
-            options: [
-                { value: '',  label: 'TODOS' },
-                { value: '1', label: 'SI'    },
-                { value: '0', label: 'NO'    },
-            ]
-        },
-    ], [asesorKey, setFilters]);
+    const filterConfig = useMemo(() => {
+        const base = [
+            {
+                name: 'search', type: 'text', label: 'Pago',
+                placeholder: 'Comprobante / Op / Observación...',
+                colSpan: 'col-span-12 md:col-span-3'
+            },
+            {
+                name: 'prestamo_id', type: 'text', label: 'N° Préstamo',
+                placeholder: 'Ej: 23',
+                colSpan: 'col-span-12 md:col-span-2'
+            },
+            {
+                name: 'cliente', type: 'text', label: 'Cliente / Grupo',
+                placeholder: 'Nombre, DNI, RUC...',
+                colSpan: 'col-span-12 md:col-span-3'
+            },
+        ];
+
+        if (mostrarFiltroAsesor) {
+            base.push({
+                name: 'asesor_id', type: 'custom', label: 'Filtrar por Asesor',
+                colSpan: 'col-span-12 md:col-span-3',
+                render: () => (
+                    <EmpleadoSearchSelect
+                        key={asesorKey}
+                        rol="asesor"
+                        onSelect={(a) => setFilters(p => ({ ...p, asesor_id: a ? a.id : '' }))}
+                        clearOnSelect={false}
+                    />
+                ),
+            });
+        }
+
+        base.push(
+            { name: 'fecha_inicio', type: 'date', label: 'Fecha Inicio', colSpan: 'col-span-12 md:col-span-2' },
+            { name: 'fecha_fin',    type: 'date', label: 'Fecha Fin',    colSpan: 'col-span-12 md:col-span-2' },
+            {
+                name: 'tipo', type: 'select', label: 'Tipo',
+                colSpan: 'col-span-12 md:col-span-2',
+                options: [
+                    { value: '',                      label: 'TODOS'             },
+                    { value: 'NORMAL',                label: 'NORMAL'            },
+                    { value: 'EXCEDENTE',             label: 'EXCEDENTE'         },
+                    { value: 'DESGLOSE_REFINANCIADO', label: 'DESGLOSE REFINANC.' },
+                    { value: 'RENOVACION',            label: 'RENOVACIÓN'        },
+                ]
+            },
+            {
+                name: 'estado', type: 'select', label: 'Estado',
+                colSpan: 'col-span-12 md:col-span-2',
+                options: [
+                    { value: '',  label: 'TODOS'     },
+                    { value: '0', label: 'ANULADOS'  },
+                    { value: '1', label: 'APROBADOS' },
+                ]
+            },
+            {
+                name: 'dia_operativo_fecha', type: 'date', label: 'Fecha Día Operativo',
+                colSpan: 'col-span-12 md:col-span-2'
+            },
+            {
+                name: 'registro_extemporaneo', type: 'select', label: 'Extemporáneo',
+                colSpan: 'col-span-12 md:col-span-2',
+                options: [
+                    { value: '',  label: 'TODOS' },
+                    { value: '1', label: 'SI'    },
+                    { value: '0', label: 'NO'    },
+                ]
+            },
+        );
+
+        return base;
+    }, [asesorKey, setFilters, mostrarFiltroAsesor]);
 
     const columns = useMemo(() => [
         {
@@ -262,6 +275,15 @@ const Index = () => {
         <div className="container mx-auto p-6 transition-colors">
             <PageHeader title="Control de Pagos" icon={BanknotesIcon} />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
+
+            <div className="flex justify-end mt-6 mb-3">
+                <ExcelExportButton
+                    exportService={exportarPagos}
+                    filters={appliedFilters}
+                    filename="reporte_pagos"
+                    label="Excel"
+                />
+            </div>
 
             <Table
                 columns={columns} data={pagos} loading={loading}

@@ -13,6 +13,7 @@ const FILTERS_INITIAL = {
     fecha_fin:              '',
     dia_operativo_fecha:    '',
     registro_extemporaneo:  '',
+    asesor_id:              '',
 };
 
 // Un pago es accionable (PDF / anular) si está aprobado y NO es renovación
@@ -26,6 +27,7 @@ export const useIndex = () => {
     const [pagos,          setPagos]          = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
     const [filters,        setFilters]        = useState(FILTERS_INITIAL);
+    const [appliedFilters, setAppliedFilters] = useState(FILTERS_INITIAL);
     const filtersRef = useRef(FILTERS_INITIAL);
 
     const [alert,          setAlert]          = useState(null);
@@ -73,10 +75,16 @@ export const useIndex = () => {
         }
     };
 
-    const handleFilterSubmit = () => { filtersRef.current = filters; fetchPagos(1); };
-    const handleFilterClear  = () => {
+    const handleFilterSubmit = () => {
+        filtersRef.current = filters;
+        setAppliedFilters(filters);
+        fetchPagos(1);
+    };
+
+    const handleFilterClear = () => {
         setFilters(FILTERS_INITIAL);
         filtersRef.current = FILTERS_INITIAL;
+        setAppliedFilters(FILTERS_INITIAL);
         fetchPagos(1);
     };
 
@@ -106,6 +114,10 @@ export const useIndex = () => {
     const canVerPdf      = (pago) => esAccionable(pago) && canPdf;
     const canAnular      = (pago) => esAccionable(pago) && !pago.pago_origen_id && canDelete;
 
+    // El filtro por asesor no aplica para clientes: no les compete filtrar por asesor,
+    // solo ven sus propios pagos.
+    const mostrarFiltroAsesor = !esCliente;
+
     return {
         loading, pagos, paginationInfo, filters, setFilters, alert, setAlert,
         fetchPagos, handleFilterSubmit, handleFilterClear,
@@ -116,5 +128,8 @@ export const useIndex = () => {
         esCliente,
         canVerPdf,
         canAnular,
+        mostrarFiltroAsesor,
+        // filtros aplicados (para exportar)
+        appliedFilters,
     };
 };

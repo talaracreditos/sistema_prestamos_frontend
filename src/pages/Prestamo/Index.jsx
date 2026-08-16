@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useIndex } from 'hooks/Prestamo/useIndex';
+import { exportar as exportarPrestamos } from 'services/prestamoService';
 import { useAuth } from 'context/AuthContext';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
+import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
@@ -22,7 +24,8 @@ const Index = () => {
         handleView, isViewOpen, setIsViewOpen, viewData, viewLoading,
         handleRefreshView,
         handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
-        isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading
+        isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading,
+        appliedFilters,
     } = useIndex();
 
     const { role, can } = useAuth();
@@ -197,7 +200,16 @@ const Index = () => {
         <div className="container mx-auto p-4 sm:p-6 transition-colors">
             <PageHeader title="Cartera de Préstamos" icon={BanknotesIcon} />
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
-            
+
+            <div className="flex justify-end mb-3">
+                <ExcelExportButton
+                    exportService={exportarPrestamos}
+                    filters={appliedFilters}
+                    filename="reporte_prestamos"
+                    label="Excel"
+                />
+            </div>
+
             <Table 
                 columns={columns} data={prestamos} loading={loading} 
                 pagination={{ ...paginationInfo, onPageChange: fetchPrestamos }} 
