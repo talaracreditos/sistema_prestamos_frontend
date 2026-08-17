@@ -1,60 +1,74 @@
 import { useEffect, useState } from 'react';
 import { reducirMora } from 'services/prestamoService';
 
+const PORCENTAJES_RAPIDOS = [10, 25, 50, 75, 100];
+
 export function useReducirMoraModal({ onSuccess, isOpen }) {
     const [loading, setLoading]   = useState(false);
     const [alert, setAlert]       = useState(null);
-    const [porcentaje, setPorcentaje] = useState('');
+    const [monto, setMonto]       = useState('');
     const [motivo, setMotivo]     = useState('');
-    const [preview, setPreview]   = useState(null); // preview del cálculo
+    const [preview, setPreview]   = useState(null); // { saldoPendiente, reduccion, restante }
 
     useEffect(() => {
         if (isOpen) {
-            setPorcentaje('');
+            setMonto('');
             setMotivo('');
             setPreview(null);
             setAlert(null);
         }
     }, [isOpen]);
 
-    const calcularPreview = (moraCargo, porc) => {
-        const p = parseFloat(porc);
-        if (!moraCargo || isNaN(p) || p < 1 || p > 100) {
+    const calcularPreview = (saldoPendiente, montoStr) => {
+        const m = parseFloat(montoStr);
+        if (!saldoPendiente || isNaN(m) || m <= 0) {
             setPreview(null);
             return;
         }
-        const reduccion = Math.round(moraCargo * (p / 100) * 100) / 100;
-        const nueva     = Math.round((moraCargo - reduccion) * 100) / 100;
-        setPreview({ reduccion, nueva, moraCargo });
+        const reduccion = Math.min(Math.round(m * 100) / 100, saldoPendiente);
+        const restante   = Math.round((saldoPendiente - reduccion) * 100) / 100;
+        setPreview({ saldoPendiente, reduccion, restante });
     };
 
-    const handlePorcentajeChange = (val, moraCargo) => {
-        // solo números 1-100
-        const sanitized = val.replace(/[^0-9]/g, '').slice(0, 3);
-        const num = parseInt(sanitized, 10);
-        if (sanitized === '' || (num >= 1 && num <= 100)) {
-            setPorcentaje(sanitized);
-            calcularPreview(moraCargo, sanitized);
+    // Permite números con hasta 2 decimales (S/ 17.10, etc.)
+    const handleMontoChange = (val, saldoPendiente) => {
+        const sanitized = val.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+        const parts = sanitized.split('.');
+        const limitado = parts.length > 1 ? `${parts[0]}.${parts[1].slice(0, 2)}` : sanitized;
+
+        setMonto(limitado);
+        calcularPreview(saldoPendiente, limitado);
+    };
+
+    // Botones rápidos: % sobre el SALDO PENDIENTE REAL, no sobre el bruto
+    const handlePorcentajeRapido = (pct, saldoPendiente) => {
+        const m = Math.min(Math.round(saldoPendiente * (pct / 100) * 100) / 100, saldoPendiente);
+        const montoStr = m.toFixed(2);
+        setMonto(montoStr);
+        calcularPreview(saldoPendiente, montoStr);
+    };
+
+    const handleSubmit = async (cuotaId, saldoPendiente) => {
+        const m = parseFloat(monto);
+        if (!monto || isNaN(m) || m <= 0) {
+            setAlert({ type: 'error', message: 'Ingresa un monto válido mayor a 0.' });
+            return;
         }
-    };
-
-    const handleSubmit = async (cuotaId, moraCargo) => {
-        const porc = parseFloat(porcentaje);
-        if (!porcentaje || isNaN(porc) || porc < 1 || porc > 100) {
-            setAlert({ type: 'error', message: 'Ingresa un porcentaje válido entre 1 y 100.' });
+        if (m > saldoPendiente) {
+            setAlert({ type: 'error', message: `El monto no puede ser mayor al saldo pendiente (S/ ${saldoPendiente.toFixed(2)}).` });
             return;
         }
 
         setLoading(true);
         setAlert(null);
         try {
-            const res = await reducirMora({ cuota_id: cuotaId, porcentaje: porc, motivo });
+            const res = await reducirMora({ cuota_id: cuotaId, monto: m, motivo });
             const result = res.data ?? res;
             setAlert({
                 type: 'success',
-                message: `Mora reducida en ${porc}%. Antes: S/ ${result.mora_anterior?.toFixed(2)} → Ahora: S/ ${result.mora_nueva?.toFixed(2)}`,
+                message: `Mora reducida en S/ ${m.toFixed(2)}. Antes: S/ ${result.saldo_anterior?.toFixed(2)} → Ahora: S/ ${result.saldo_nuevo?.toFixed(2)}`,
             });
-            setPorcentaje('');
+            setMonto('');
             setMotivo('');
             setPreview(null);
             if (onSuccess) onSuccess(result);
@@ -66,14 +80,14 @@ export function useReducirMoraModal({ onSuccess, isOpen }) {
     };
 
     const reset = () => {
-        setPorcentaje('');
+        setMonto('');
         setMotivo('');
         setPreview(null);
         setAlert(null);
     };
 
     return {
-        loading, alert, porcentaje, motivo, preview,
-        setMotivo, handlePorcentajeChange, handleSubmit, reset,
+        loading, alert, monto, motivo, preview, PORCENTAJES_RAPIDOS,
+        setMotivo, handleMontoChange, handlePorcentajeRapido, handleSubmit, reset,
     };
 }
