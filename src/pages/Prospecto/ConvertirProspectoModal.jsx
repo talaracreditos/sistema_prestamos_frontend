@@ -154,7 +154,7 @@ const ConvertirProspectoModal = ({ isOpen, onClose, prospectoId, onSuccess }) =>
                                     <UsuarioForm
                                         form={formData}
                                         handleNestedChange={handleNestedChange}
-                                        isEditing={false}
+                                        isEditing={true}
                                     />
                                 </div>
 
