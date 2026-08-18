@@ -6,7 +6,7 @@ import { ResumenPago, DistribucionGrupal, AlertasPago } from './Components/PagoC
 import {
     BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon,
     UserGroupIcon, DocumentCheckIcon, XMarkIcon,
-    ReceiptPercentIcon, ShieldExclamationIcon, KeyIcon,
+    ReceiptPercentIcon, ShieldExclamationIcon, KeyIcon, InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 
 const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
@@ -43,6 +43,15 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             excedenteIndividual={computed.excedenteIndividual} esGrupal={computed.esGrupal}
                             integrantesPendientes={computed.integrantesPendientes}
                         />
+
+                        <div className="flex items-start gap-2.5 p-3.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-2xl transition-colors">
+                            <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-[11px] font-bold text-blue-700 dark:text-blue-400 leading-relaxed">
+                                Orden de aplicación del pago:{' '}
+                                <span className="font-black uppercase">Mora → Seguro → Interés → Capital</span>.
+                                El monto se descuenta primero de la mora pendiente, luego del seguro, después del interés y por último del capital.
+                            </p>
+                        </div>
 
                         {/* ── PIN de autorización (inline, siempre visible si hace falta) ── */}
                         {pinRequerido && (
