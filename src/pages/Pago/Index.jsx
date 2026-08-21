@@ -144,7 +144,7 @@ const Index = () => {
             render: (row) => (
                 <div className="flex flex-col">
                     {row.numero_comprobante ? (
-                        <span className="font-mono text-[11px] font-black text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-brand-gold/10 px-2 py-0.5 rounded border border-brand-red/20 dark:border-brand-gold/20 w-fit">
+                        <span className="font-mono text-[10px] font-black text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-brand-gold/10 px-2 py-0.5 rounded border border-brand-red/20 dark:border-brand-gold/20 w-fit">
                             {row.numero_comprobante}
                         </span>
                     ) : (
@@ -162,7 +162,7 @@ const Index = () => {
             header: 'Titular y Detalle',
             render: (row) => (
                 <div className="flex flex-col uppercase">
-                    <span className="font-black text-[11px] text-slate-800 dark:text-dark-text leading-tight">
+                    <span className="font-black text-[10px] text-slate-800 dark:text-dark-text leading-tight">
                         <span className="text-slate-400 dark:text-dark-text-muted mr-1.5">{row.numero_prestamo}</span>
                         {row.prestamo}
                     </span>

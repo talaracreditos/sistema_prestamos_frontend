@@ -51,8 +51,8 @@ const GruposAsesorCard = () => {
                         <UserGroupIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                     </div>
                     <div>
-                        <h2 className="text-sm font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Grupos por Asesor</h2>
-                        <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">Seguimiento por asesor — grupos inicial vs actual</p>
+                        <h2 className="text-sm font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Grupos y Clientes por Asesor</h2>
+                        <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">Seguimiento por asesor — inicial vs actual</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
@@ -126,13 +126,20 @@ const GruposAsesorCard = () => {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[480px]">
+                                <table className="w-full text-left border-collapse min-w-[820px]">
                                     <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
                                         <tr>
-                                            <th className="px-4 py-3">Asesor</th>
-                                            <th className="px-4 py-3 text-right">Saldo Inicial</th>
-                                            <th className="px-4 py-3 text-right">Saldo Actual</th>
-                                            <th className="px-4 py-3 text-right">Variación</th>
+                                            <th rowSpan={2} className="px-4 py-3 align-bottom">Asesor</th>
+                                            <th colSpan={3} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Grupos</th>
+                                            <th colSpan={3} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Clientes</th>
+                                        </tr>
+                                        <tr>
+                                            <th className="px-4 py-2 text-right border-l border-slate-200 dark:border-dark-border">Inicial</th>
+                                            <th className="px-4 py-2 text-right">Actual</th>
+                                            <th className="px-4 py-2 text-right">Variación</th>
+                                            <th className="px-4 py-2 text-right border-l border-slate-200 dark:border-dark-border">Inicial</th>
+                                            <th className="px-4 py-2 text-right">Actual</th>
+                                            <th className="px-4 py-2 text-right">Variación</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50 dark:divide-dark-border">
@@ -146,11 +153,22 @@ const GruposAsesorCard = () => {
                                                         <span className="text-xs font-black text-slate-700 dark:text-dark-text uppercase">{f.nombre}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.saldo_inicial)}</span></td>
+
+                                                {/* Grupos */}
+                                                <td className="px-4 py-3 text-right border-l border-slate-100 dark:border-dark-border"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.saldo_inicial)}</span></td>
                                                 <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-900 dark:text-dark-text">{fmtN(f.saldo_actual)}</span></td>
                                                 <td className="px-4 py-3 text-right">
                                                     <span className={`text-sm font-black ${f.variacion > 0 ? 'text-green-600 dark:text-green-400' : f.variacion < 0 ? 'text-brand-red dark:text-red-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
                                                         {f.variacion > 0 ? '+' : ''}{fmtN(f.variacion)}
+                                                    </span>
+                                                </td>
+
+                                                {/* Clientes */}
+                                                <td className="px-4 py-3 text-right border-l border-slate-100 dark:border-dark-border"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.clientes_inicial)}</span></td>
+                                                <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-900 dark:text-dark-text">{fmtN(f.clientes_actual)}</span></td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <span className={`text-sm font-black ${f.clientes_variacion > 0 ? 'text-green-600 dark:text-green-400' : f.clientes_variacion < 0 ? 'text-brand-red dark:text-red-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
+                                                        {f.clientes_variacion > 0 ? '+' : ''}{fmtN(f.clientes_variacion)}
                                                     </span>
                                                 </td>
                                             </tr>
@@ -159,10 +177,15 @@ const GruposAsesorCard = () => {
                                     <tfoot className="bg-slate-900 dark:bg-black text-white">
                                         <tr>
                                             <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest">TOTAL</td>
-                                            <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.saldo_inicial)}</td>
+                                            <td className="px-4 py-3 text-right text-sm font-black border-l border-slate-700">{fmtN(totales.saldo_inicial)}</td>
                                             <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.saldo_actual)}</td>
                                             <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
                                                 {totales.variacion > 0 ? '+' : ''}{fmtN(totales.variacion)}
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-sm font-black border-l border-slate-700">{fmtN(totales.clientes_inicial)}</td>
+                                            <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.clientes_actual)}</td>
+                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
+                                                {totales.clientes_variacion > 0 ? '+' : ''}{fmtN(totales.clientes_variacion)}
                                             </td>
                                         </tr>
                                     </tfoot>
