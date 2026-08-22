@@ -5,9 +5,16 @@ import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSel
 
 import SectionRenovacion   from './SectionRenovacion';
 import SectionClienteGrupo from './SectionClienteGrupo';
+import SectionTasacion     from './SectionTasacion';
 import SectionCondiciones  from './SectionCondiciones';
 import SectionAval         from './SectionAval';
 import SectionNotas        from './SectionNotas';
+
+const TIPOS = [
+    { key: 'individual', label: 'Individual', es_grupal: false, es_prendario: false },
+    { key: 'grupal',     label: 'Grupal',      es_grupal: true,  es_prendario: false },
+    { key: 'prendario',  label: 'Prendario',   es_grupal: false, es_prendario: true  },
+];
 
 const SolicitudForm = ({
     data,
@@ -54,6 +61,8 @@ const SolicitudForm = ({
         isBlocked,
         isMainBlocked,
         hasBlockedIntegrante,
+        cuotasPrendarioInvalidas,
+        tasacionFaltante,
         avalConfig,
     } = useSolicitudForm(data, handleChange, {
         esRenovacion:        esRenovacionEfectiva,
@@ -64,11 +73,16 @@ const SolicitudForm = ({
         onLimpiarOrigen,
     });
 
+    // El submit se bloquea por riesgo/DNI (isBlocked) o por datos incompletos de prendario
+    const bloqueaEnvio = isBlocked || cuotasPrendarioInvalidas || tasacionFaltante;
+
     useEffect(() => {
-        onBlockedChange?.(isBlocked);
-    }, [isBlocked, onBlockedChange]);
+        onBlockedChange?.(bloqueaEnvio);
+    }, [bloqueaEnvio, onBlockedChange]);
 
     const mostrarSeccionRenovacion = onToggleRenovacion !== null || !!data.prestamo_origen_id;
+
+    const tipoActivo = data.es_prendario ? 'prendario' : (data.es_grupal ? 'grupal' : 'individual');
 
     return (
         <div className={`space-y-6 transition-all duration-300 ${isBlocked ? 'opacity-90' : ''}`}>
@@ -112,28 +126,30 @@ const SolicitudForm = ({
                         </div>
                     )}
 
-                    {/* ── Switch individual/grupal ── */}
+                    {/* ── Switch Individual / Grupal / Prendario ── */}
                     <div className="flex bg-slate-100 dark:bg-dark-surface-alt p-1 rounded-xl w-fit mx-auto border border-slate-200 dark:border-dark-border shadow-inner transition-colors">
-                        <button
-                            type="button"
-                            onClick={() => !isUpdate && !bloqueado && handleChange('es_grupal', false)}
-                            disabled={isUpdate || esRenovacionActiva || bloqueado}
-                            className={`px-8 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
-                                !data.es_grupal ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20' : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                            Individual
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => !isUpdate && !bloqueado && handleChange('es_grupal', true)}
-                            disabled={isUpdate || esRenovacionActiva || bloqueado}
-                            className={`px-8 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
-                                data.es_grupal ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20' : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                            Grupal
-                        </button>
+                        {TIPOS.map(opt => {
+                            const activo = tipoActivo === opt.key;
+                            return (
+                                <button
+                                    key={opt.key}
+                                    type="button"
+                                    onClick={() => {
+                                        if (isUpdate || esRenovacionActiva || bloqueado) return;
+                                        handleChange('es_grupal', opt.es_grupal);
+                                        handleChange('es_prendario', opt.es_prendario);
+                                    }}
+                                    disabled={isUpdate || esRenovacionActiva || bloqueado}
+                                    className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
+                                        activo
+                                            ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20'
+                                            : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
+                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {opt.label}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* ── Asesor ── */}
@@ -170,10 +186,19 @@ const SolicitudForm = ({
                         idsOrigenRenovacion={prestamoOrigenEfectivo?.integrantes?.map(i => i.id) ?? []}
                     />
 
+                    {data.es_prendario && (
+                        <SectionTasacion
+                            data={data}
+                            handleChange={handleChange}
+                            isBlocked={bloqueado}
+                        />
+                    )}
+
                     <SectionCondiciones
                         data={data}
                         handleChange={handleChange}
                         isBlocked={bloqueado}
+                        esPrendario={data.es_prendario}
                     />
 
                     <SectionAval

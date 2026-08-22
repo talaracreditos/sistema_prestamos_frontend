@@ -48,12 +48,19 @@ export const marcarContratoConforme = async (id) => {
     return handleResponse(response);
 };
 
-
 export const asignarCodigoRecaudo = async (id, codigo) => {
     const response = await fetchWithAuth(`${BASE_URL}/${id}/codigo-recaudo`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ codigo_recaudo: codigo }),
     });
+    return handleResponse(response);
+};
+
+export const listarTasacionesCliente = async (clienteId, solicitudId = null) => {
+    if (!clienteId) return { data: [] };
+    const params = new URLSearchParams({ cliente_id: clienteId });
+    if (solicitudId) params.append('solicitud_id', solicitudId);
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/tasacion/buscar?${params.toString()}`, { method: 'GET' });
     return handleResponse(response);
 };

@@ -86,7 +86,7 @@ const ContratoSelectorModal = ({ isOpen, onClose, data, onSelectContrato }) => {
 
                 {/* Body (Scrollable) */}
                 <div className="p-4 space-y-2 overflow-y-auto flex-1 transition-colors">
-                    {/* Contrato grupal */}
+                    {/* Contrato*/}
                     <button
                         type="button"
                         onClick={() =>
@@ -101,8 +101,8 @@ const ContratoSelectorModal = ({ isOpen, onClose, data, onSelectContrato }) => {
                             <DocumentArrowDownIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-800 dark:text-dark-text transition-colors">Contrato Grupal</p>
-                            <p className="text-[11px] text-slate-500 dark:text-dark-text-muted transition-colors">Documento completo del grupo</p>
+                            <p className="text-sm font-bold text-slate-800 dark:text-dark-text transition-colors">Contrato</p>
+                            <p className="text-[11px] text-slate-500 dark:text-dark-text-muted transition-colors">Documento</p>
                         </div>
                     </button>
 

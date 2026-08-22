@@ -11,7 +11,7 @@ import {
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import { useAuth } from 'context/AuthContext';
 import logo from 'assets/img/logo.png'; 
-import { Calendar1Icon, ChartBarIcon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, PcCaseIcon, SettingsIcon, ShieldCheckIcon, ShoppingBagIcon, TagIcon, UserCheck2Icon, UserPlusIcon } from 'lucide-react';
+import { Calendar1Icon, ChartBarIcon, ChevronDownIcon, ChevronLeftIcon, ClockIcon, CreditCardIcon, Lock, MapIcon, PcCaseIcon, ScaleIcon, SettingsIcon, ShieldCheckIcon, ShoppingBagIcon, SparklesIcon, TagIcon, UserCheck2Icon, UserPlusIcon } from 'lucide-react';
 
 // ── Reloj en tiempo real ──────────────────────────────────────────────────────
 const LiveClock = ({ collapsed = false }) => {
@@ -116,6 +116,32 @@ export const MENU_GROUPS = [
                 subs: [
                     { name: 'Historial Traslados',   link: '/traslado/listar',    requiredPermission: 'traslado.index' },
                     { name: 'Registrar Traslado',    link: '/traslado/registrar', requiredPermission: 'traslado.store' },
+                ],
+            },
+        ]
+    },
+    {
+        groupName: 'Prendario',
+        items: [
+            {
+                section: 'Tipos de Joyas', icon: SparklesIcon,
+                subs: [
+                    { name: 'Listar Tipos', link: '/tipo-joya/listar',  requiredPermission: 'tipoJoya.index' },
+                    { name: 'Nuevo Tipo',   link: '/tipo-joya/agregar', requiredPermission: 'tipoJoya.store' },
+                ],
+            },
+            {
+                section: 'Subtipos de Joyas', icon: TagIcon,
+                subs: [
+                    { name: 'Listar Subtipos', link: '/subtipo-joya/listar',  requiredPermission: 'subtipoJoya.index' },
+                    { name: 'Nuevo Subtipo',   link: '/subtipo-joya/agregar', requiredPermission: 'subtipoJoya.store' },
+                ],
+            },
+            {
+                section: 'Tasaciones', icon: ScaleIcon,
+                subs: [
+                    { name: 'Listar Tasaciones', link: '/tasacion/listar',  requiredPermission: 'tasacion.index' },
+                    { name: 'Nueva Tasación',    link: '/tasacion/agregar', requiredPermission: 'tasacion.store' },
                 ],
             },
         ]

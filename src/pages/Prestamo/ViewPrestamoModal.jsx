@@ -9,9 +9,9 @@ import CambiarPresidenteModal from './CambiarPresidenteModal';
 import ReprogramacionModal from './ReprogramacionModal';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
 import CronogramaCliente from 'components/Shared/Tables/CronogramaCliente';
-import { 
-    CalendarIcon, UserIcon, UserGroupIcon, 
-    InformationCircleIcon, UsersIcon, 
+import {
+    CalendarIcon, UserIcon, UserGroupIcon,
+    InformationCircleIcon, UsersIcon,
     ArrowPathIcon, ArrowDownTrayIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowPathRoundedSquareIcon, StarIcon } from '@heroicons/react/24/outline';
@@ -20,20 +20,18 @@ import { useAuth } from 'context/AuthContext';
 
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
-    const [reducirMoraOpen, setReducirMoraOpen]                         = useState(false);
-    const [cuotaParaReducir, setCuotaParaReducir]                       = useState(null);
-    const [cambiarPresidenteOpen, setCambiarPresidenteOpen]     = useState(false);
-    const [reprogramarOpen, setReprogramarOpen]                         = useState(false);
-    const [historialReprogOpen, setHistorialReprogOpen]         = useState(false);
-    const [refreshing, setRefreshing]                                   = useState(false);
+    const [reducirMoraOpen, setReducirMoraOpen]             = useState(false);
+    const [cuotaParaReducir, setCuotaParaReducir]           = useState(null);
+    const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
+    const [reprogramarOpen, setReprogramarOpen]             = useState(false);
+    const [historialReprogOpen, setHistorialReprogOpen]     = useState(false);
+    const [refreshing, setRefreshing]                       = useState(false);
 
-    const { user, role } = useAuth();
-    const esCliente = role === 'cliente';
-
+    const { user } = useAuth();
     const userId = user?.id ?? null;
 
     const {
-        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canReprogramar,
+        esCliente,
         canCastigar, loadingCastigo, handleCastigar, integranteSeleccionado,
         loadingIntegrante,
         pdfOpen, pdfBase64, pdfTitle, loadingPdf,
@@ -47,6 +45,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         prestamoCancelado,
         tieneIntegrantes,
         eco,
+        cuotasPendientesCount,
+        puedeVerReprogramar, puedeVerRefinanciar, puedeVerCambiarPresidente,
+        puedeVerDescargarPdf, puedeVerReducirMora,
         handleSelectIntegrante,
         handleDescargarCronograma,
         handleCerrarPdf,
@@ -72,10 +73,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         handleSelectIntegrante(integranteSeleccionado);
     };
 
-    const integranteTienePendientes = esVistaIntegrante
-        ? (cronogramaActivo ?? []).some(c => ![2, 6, 0].includes(c.estado))
-        : false;
-
     const handleRefresh = async () => {
         if (!onRefresh) return;
         setRefreshing(true);
@@ -97,12 +94,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         setReprogramarOpen(false);
         if (onRefresh) onRefresh();
     };
-
-    const puedeVerReprogramar = !esCliente && canReprogramar && !data?.es_grupal
-        && data?.estado === 1 && !prestamoCancelado && data?.datos_economicos?.desembolsado;
-
-    const cuotasPendientesCount = (cronogramaActivo ?? [])
-        .filter(c => ![0, 2, 6].includes(c.estado)).length;
 
     const handleAbrirReprogramar = () => setReprogramarOpen(true);
 
@@ -322,7 +313,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </button>
                                 )}
 
-                                {!esCliente && canRefinanciar && data.estado === 1 && !prestamoCancelado && (!data.es_grupal || esVistaIntegrante) && !integranteYaRefinanciado && (!esVistaIntegrante || integranteTienePendientes) && data.datos_economicos?.desembolsado && (
+                                {puedeVerRefinanciar && (
                                     <button
                                         onClick={() => handleAbrirRefinanciamiento(cronogramaActivo, esVistaIntegrante, integranteNombre)}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold hover:bg-brand-gold-dark text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-gold/20"
@@ -332,7 +323,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </button>
                                 )}
 
-                                {!esCliente && canCambiarPresidente && data.es_grupal && !esVistaIntegrante && data.estado === 1 && !prestamoCancelado && data.integrantes?.length > 1 && (
+                                {puedeVerCambiarPresidente && (
                                     <button
                                         onClick={() => setCambiarPresidenteOpen(true)}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md"
@@ -358,7 +349,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     {refreshing ? 'Actualizando...' : 'Actualizar'}
                                 </button>
 
-                                {!prestamoCancelado && canGeneratePdf && (
+                                {puedeVerDescargarPdf && (
                                     <button onClick={handleDescargarCronograma} disabled={loadingPdf || refreshing}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-red dark:bg-brand-red-glow hover:bg-brand-red-dark dark:hover:brightness-110 text-white dark:text-black text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-brand-red/20 disabled:opacity-40 disabled:cursor-not-allowed">
                                         {loadingPdf
@@ -395,7 +386,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                 cronograma={cronogramaActivo}
                                 esVistaIntegrante={esVistaIntegrante}
                                 onHistorialModal={setHistorialModal}
-                                onReducirMora={canReducirMora && !prestamoCancelado && data.estado === 1 ? handleAbrirReducirMora : undefined}
+                                onReducirMora={puedeVerReducirMora ? handleAbrirReducirMora : undefined}
                                 eco={eco}
                                 estadoPrestamo={data.estado}
                                 loadingEco={loadingIntegrante}
@@ -438,9 +429,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         onClose={() => setReprogramarOpen(false)}
                         data={reprogramarOpen ? {
                             prestamoId:            data?.id,
-                            frecuenciaActual:        data?.datos_economicos?.frecuencia,
-                            cuotasPendientes:        cuotasPendientesCount,
-                            totalReprogramaciones:  data?.total_reprogramaciones ?? 0,
+                            frecuenciaActual:      data?.datos_economicos?.frecuencia,
+                            cuotasPendientes:      cuotasPendientesCount,
+                            totalReprogramaciones: data?.total_reprogramaciones ?? 0,
                         } : null}
                         onSuccess={handleSuccessReprogramacion}
                     />

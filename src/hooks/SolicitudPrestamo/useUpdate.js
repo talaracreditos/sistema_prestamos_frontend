@@ -16,6 +16,11 @@ export const useUpdate = () => {
             try {
                 const res  = await show(id);
                 const data = res.data || res;
+
+                const tasacionNombre = data.tasacion?.detalles?.length
+                    ? data.tasacion.detalles.map(d => d.descripcion_detallada).filter(Boolean).join(', ')
+                    : (data.tasacion_id ? `Tasación #${data.tasacion_id}` : '');
+
                 setFormData({
                     ...data,
                     seguro:             data.seguro || '',
@@ -23,7 +28,10 @@ export const useUpdate = () => {
                     asesor_id:          data.asesor_id     || '',
                     asesor_nombre:      data.asesor_nombre  || '',
                     prestamo_origen_id: data.prestamo_origen_id || '',
-                    // ── Fecha de inicio personalizada ──
+                    es_prendario:       !!data.es_prendario,
+                    tasacion_id:            data.tasacion_id || '',
+                    tasacion_nombre:        tasacionNombre,
+                    tasacion_monto_maximo:  data.tasacion?.total_maximo_prestar || '',
                     fecha_inicio_personalizada: data.fecha_inicio_personalizada || '',
                     usar_fecha_personalizada:   !!data.fecha_inicio_personalizada,
                     integrantes: data.integrantes.map(i => ({
@@ -34,7 +42,6 @@ export const useUpdate = () => {
                         cargo:               i.cargo || 'INTEGRANTE',
                         puede_excluirse:     i.puede_excluirse ?? true,
                         saldo_pendiente:     i.saldo_pendiente ?? 0,
-                        // tasa individual guardada en BD (null = usa global)
                         tasa_interes:        i.tasa_interes ?? null,
                         usa_tasa_individual: i.tasa_interes != null,
                     })),
@@ -48,10 +55,8 @@ export const useUpdate = () => {
         load();
     }, [id]);
 
-    // ── Derivados ─────────────────────────────────────────────────────────────
     const esRenovacionActiva = !!formData?.prestamo_origen_id;
 
-    // ── handleChange ─────────────────────────────────────────────────────────
     const handleChange = (field, value) => {
         if (field.includes('.')) {
             const [obj, key] = field.split('.');
@@ -61,7 +66,6 @@ export const useUpdate = () => {
         }
     };
 
-    // ── Monto grupal = suma integrantes ───────────────────────────────────────
     useEffect(() => {
         if (formData?.es_grupal) {
             const total = formData.integrantes.reduce((acc, i) => acc + parseFloat(i.monto || 0), 0);
@@ -71,7 +75,6 @@ export const useUpdate = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formData?.integrantes, formData?.es_grupal]);
 
-    // ── Integrantes ───────────────────────────────────────────────────────────
     const addIntegrante = (cliente) => {
         if (!cliente || formData.integrantes.find(i => i.id === cliente.usuario_id)) return;
         setFormData(prev => {
@@ -127,13 +130,23 @@ export const useUpdate = () => {
         }));
     };
 
-    // ── Submit ────────────────────────────────────────────────────────────────
     const handleSubmit = async (e, isBlocked) => {
         e.preventDefault();
         if (isBlocked) return;
         if (!formData.asesor_id) {
             setAlert({ type: 'error', message: 'Debes seleccionar un asesor.' });
             return;
+        }
+        if (formData.es_prendario) {
+            const cuotas = parseInt(formData.cuotas_solicitadas);
+            if (!cuotas || cuotas < 1 || cuotas > 2) {
+                setAlert({ type: 'error', message: 'Un préstamo prendario admite máximo 2 cuotas.' });
+                return;
+            }
+            if (!formData.tasacion_id) {
+                setAlert({ type: 'error', message: 'Debes seleccionar la tasación de la garantía.' });
+                return;
+            }
         }
 
         setSaving(true);
@@ -142,10 +155,16 @@ export const useUpdate = () => {
             delete payload.asesor_nombre;
             delete payload.fechaVencimientoDni;
             delete payload.dni_status;
+            delete payload.tasacion_nombre;
+            delete payload.tasacion_monto_maximo;
+            delete payload.tasacion;
 
             payload.seguro = payload.seguro || 0;
 
-            // ── Fecha de inicio personalizada ──
+            if (!payload.es_prendario) {
+                delete payload.tasacion_id;
+            }
+
             if (!payload.usar_fecha_personalizada) {
                 payload.fecha_inicio_personalizada = null;
             }
@@ -153,6 +172,9 @@ export const useUpdate = () => {
 
             if (payload.prestamo_origen_id) {
                 payload.modalidad = 'RSS';
+            } else if (payload.es_prendario) {
+                payload.modalidad  = 'PRENDARIO';
+                payload.frecuencia = 'MENSUAL';
             } else if (payload.es_grupal) {
                 payload.modalidad = 'GRUPAL';
             } else if (payload.modalidad?.includes('VIGENTE') || payload.modalidad?.includes('RCS')) {
@@ -163,7 +185,6 @@ export const useUpdate = () => {
                 payload.modalidad = 'NUEVO';
             }
 
-            // Limpiar campos UI de integrantes
             if (payload.es_grupal && Array.isArray(payload.integrantes)) {
                 payload.integrantes = payload.integrantes.map(i => ({
                     id:           i.id,
@@ -171,6 +192,8 @@ export const useUpdate = () => {
                     cargo:        i.cargo,
                     tasa_interes: i.usa_tasa_individual ? (parseFloat(i.tasa_interes) || null) : null,
                 }));
+            } else {
+                delete payload.integrantes;
             }
 
             await update(id, payload);

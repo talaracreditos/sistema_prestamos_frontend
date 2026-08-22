@@ -13,16 +13,16 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
     } = opciones;
 
     const esRenovacionActiva     = esRenovacion && !!prestamoOrigen;
-    // Bloquear TODO el form si marcó renovación pero aún no eligió préstamo
     const formBloqueadoPorRenovacion = esRenovacion && !prestamoOrigen;
 
     // ── Bloqueos riesgo/DNI ───────────────────────────────────────────────────
     const dniPrincipalVencido      = data.dni_status?.estado === 'VENCIDO';
     const dniIntegranteVencido     = data.es_grupal && data.integrantes?.some(i => i.dni_status?.estado === 'VENCIDO');
+    // La restricción de "solo 1 grupal vigente" SOLO aplica cuando es_grupal — prendario/individual
+    // pueden coexistir en cualquier cantidad, por eso este bloque no evalúa data.es_prendario.
     const principalBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
         data.modalidad?.includes('GRUPAL') &&
         (data.modalidad?.includes('VIGENTE') || data.modalidad?.includes('RCS'));
-    // Solo bloquea VIGENTE GRUPAL y RCS — VIGENTE INDIVIDUAL es advertencia (amarillo) no bloqueo
     const integranteBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
         data.integrantes?.some(i => {
             const esGrupalVigente = i.modalidad === 'VIGENTE GRUPAL' ||
@@ -35,7 +35,11 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
     const hasBlockedIntegrante = dniIntegranteVencido || integranteBloqueadoPorRiesgo;
     const isBlocked           = isMainBlocked || hasBlockedIntegrante;
 
-    // Bloqueo efectivo para deshabilitar campos del form
+    // ── Reglas propias de PRENDARIO (no bloquean el form, solo invalidan submit) ──
+    const cuotasPrendarioInvalidas = data.es_prendario &&
+        (parseInt(data.cuotas_solicitadas) < 1 || parseInt(data.cuotas_solicitadas) > 2 || !data.cuotas_solicitadas);
+    const tasacionFaltante = data.es_prendario && !data.tasacion_id;
+
     const bloqueado = isBlocked || formBloqueadoPorRenovacion;
 
     // ── Descuento informativo ─────────────────────────────────────────────────
@@ -94,10 +98,13 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
         onSelectPrestamo,
         onLimpiarOrigen,
         // bloqueos
-        bloqueado,      // para deshabilitar campos (riesgo + renovación sin préstamo)
-        isBlocked,      // solo riesgo/DNI (para el banner de error)
+        bloqueado,
+        isBlocked,
         isMainBlocked,
         hasBlockedIntegrante,
+        // prendario
+        cuotasPrendarioInvalidas,
+        tasacionFaltante,
         // aval
         avalConfig: { tieneAval, handleToggleAval, handleAvalInputChange, provincias, distritos },
     };

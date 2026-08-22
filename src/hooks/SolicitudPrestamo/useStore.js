@@ -8,13 +8,13 @@ export const useStore = () => {
     const [loading, setLoading] = useState(false);
     const [alert,   setAlert]   = useState(null);
 
-    // ── Estado renovación ─────────────────────────────────────────────────────
     const [esRenovacion,   setEsRenovacion]   = useState(false);
     const [prestamoOrigen, setPrestamoOrigen] = useState(null);
     const [comboKey,       setComboKey]       = useState(Date.now());
 
     const [formData, setFormData] = useState({
         es_grupal:          false,
+        es_prendario:       false,
         cliente_id:         '',
         cliente_nombre:     '',
         fechaVencimientoDni:'',
@@ -26,24 +26,25 @@ export const useStore = () => {
         producto_id:        '',
         producto_nombre:    '',
         grupo_nombre:       '',
+        tasacion_id:            '',
+        tasacion_nombre:        '',
+        tasacion_monto_maximo:  '',
         monto_solicitado:   0,
         tasa_interes:       '',
         cuotas_solicitadas: '',
         frecuencia:         'SEMANAL',
         seguro:             '',
-        seguro_financiado:  true, // ← default: financiado en cuotas (lo más usado)
+        seguro_financiado:  true,
         modalidad:          '',
         observaciones:      '',
         aval:               null,
         prestamo_origen_id: '',
-        // ── Fecha de inicio personalizada ──
         usar_fecha_personalizada:   false,
         fecha_inicio_personalizada: '',
     });
 
     const esRenovacionActiva = !!formData.prestamo_origen_id;
 
-    // ── handleChange ─────────────────────────────────────────────────────────
     const handleChange = (field, value) => {
         if (field.includes('.')) {
             const [obj, key] = field.split('.');
@@ -51,25 +52,57 @@ export const useStore = () => {
         } else {
             setFormData(prev => {
                 const newData = { ...prev, [field]: value };
+
                 if (field === 'es_grupal') {
                     if (value === true) {
-                        newData.modalidad           = 'GRUPAL';
-                        newData.cliente_id          = '';
-                        newData.cliente_nombre      = '';
-                        newData.fechaVencimientoDni = '';
-                        newData.dni_status          = null;
+                        newData.es_prendario           = false;
+                        newData.modalidad               = 'GRUPAL';
+                        newData.cliente_id              = '';
+                        newData.cliente_nombre          = '';
+                        newData.fechaVencimientoDni     = '';
+                        newData.dni_status              = null;
+                        newData.tasacion_id             = '';
+                        newData.tasacion_nombre         = '';
+                        newData.tasacion_monto_maximo   = '';
                     } else {
                         newData.modalidad   = '';
                         newData.grupo_id    = '';
                         newData.integrantes = [];
                     }
                 }
+
+                if (field === 'es_prendario') {
+                    if (value === true) {
+                        newData.es_grupal           = false;
+                        newData.grupo_id            = '';
+                        newData.grupo_nombre        = '';
+                        newData.integrantes         = [];
+                        newData.modalidad           = 'PRENDARIO';
+                        newData.frecuencia          = 'MENSUAL';
+                        newData.usar_fecha_personalizada   = false;
+                        newData.fecha_inicio_personalizada = '';
+                        if (!newData.cuotas_solicitadas || parseInt(newData.cuotas_solicitadas) > 2) {
+                            newData.cuotas_solicitadas = '1';
+                        }
+                    } else {
+                        newData.tasacion_id            = '';
+                        newData.tasacion_nombre        = '';
+                        newData.tasacion_monto_maximo  = '';
+                        newData.modalidad              = '';
+                    }
+                }
+
+                if (field === 'cliente_id' && prev.es_prendario) {
+                    newData.tasacion_id           = '';
+                    newData.tasacion_nombre       = '';
+                    newData.tasacion_monto_maximo = '';
+                }
+
                 return newData;
             });
         }
     };
 
-    // ── Monto grupal = suma integrantes ───────────────────────────────────────
     useEffect(() => {
         if (formData.es_grupal) {
             const total = formData.integrantes.reduce((acc, i) => acc + parseFloat(i.monto || 0), 0);
@@ -77,7 +110,6 @@ export const useStore = () => {
         }
     }, [formData.integrantes, formData.es_grupal]);
 
-    // ── Integrantes ───────────────────────────────────────────────────────────
     const addIntegrante = (cliente) => {
         const id = cliente?.usuario_id ?? cliente?.id;
         if (!id || formData.integrantes.find(i => i.id === id)) return;
@@ -95,7 +127,6 @@ export const useStore = () => {
                     dni_status:          cliente.dni_status ?? null,
                     puede_excluirse:     cliente.puede_excluirse ?? true,
                     saldo_pendiente:     cliente.saldo_pendiente ?? 0,
-                    // tasa individual: null = usa la tasa global
                     tasa_interes:        null,
                     usa_tasa_individual: false,
                 }],
@@ -107,10 +138,6 @@ export const useStore = () => {
     const updateMontoIntegrante = (id, monto) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.map(i => i.id === id ? { ...i, monto } : i) }));
     const updateCargoIntegrante = (id, cargo) => setFormData(prev => ({ ...prev, integrantes: prev.integrantes.map(i => i.id === id ? { ...i, cargo } : i) }));
 
-    /**
-     * Activa/desactiva la tasa individual de un integrante.
-     * Al desactivar, limpia la tasa para que use la global.
-     */
     const toggleTasaIndividual = (id, activo) => {
         setFormData(prev => ({
             ...prev,
@@ -139,7 +166,6 @@ export const useStore = () => {
         removeIntegrante(id);
     };
 
-    // ── Lógica renovación ─────────────────────────────────────────────────────
     const resetRenovacion = () => {
         setPrestamoOrigen(null);
         setComboKey(Date.now());
@@ -148,6 +174,7 @@ export const useStore = () => {
             prestamo_origen_id: '',
             modalidad:          '',
             es_grupal:          false,
+            es_prendario:       false,
             grupo_id:           '',
             grupo_nombre:       '',
             cliente_id:         '',
@@ -157,6 +184,9 @@ export const useStore = () => {
             producto_nombre:    '',
             asesor_id:          '',
             asesor_nombre:      '',
+            tasacion_id:            '',
+            tasacion_nombre:        '',
+            tasacion_monto_maximo:  '',
         }));
     };
 
@@ -173,6 +203,7 @@ export const useStore = () => {
         const updates = {
             prestamo_origen_id: prestamo.id,
             modalidad:          'RSS',
+            es_prendario:       false,
             asesor_id:          prestamo.asesor_id       ?? '',
             asesor_nombre:      prestamo.asesor_nombre   ?? '',
             producto_id:        prestamo.producto_id     ?? '',
@@ -214,7 +245,6 @@ export const useStore = () => {
         }
     };
 
-    // ── Submit ────────────────────────────────────────────────────────────────
     const handleSubmit = async (e, isBlocked) => {
         e.preventDefault();
         if (isBlocked) {
@@ -229,6 +259,17 @@ export const useStore = () => {
             setAlert({ type: 'error', message: 'Debes seleccionar el préstamo a renovar.' });
             return;
         }
+        if (formData.es_prendario) {
+            const cuotas = parseInt(formData.cuotas_solicitadas);
+            if (!cuotas || cuotas < 1 || cuotas > 2) {
+                setAlert({ type: 'error', message: 'Un préstamo prendario admite máximo 2 cuotas.' });
+                return;
+            }
+            if (!formData.tasacion_id) {
+                setAlert({ type: 'error', message: 'Debes seleccionar la tasación de la garantía.' });
+                return;
+            }
+        }
 
         setLoading(true);
         try {
@@ -239,11 +280,16 @@ export const useStore = () => {
             delete payload.dni_status;
             delete payload.producto_nombre;
             delete payload.grupo_nombre;
+            delete payload.tasacion_nombre;
+            delete payload.tasacion_monto_maximo;
 
             payload.seguro = payload.seguro || 0;
             if (!payload.prestamo_origen_id) delete payload.prestamo_origen_id;
 
-            // ── Fecha de inicio personalizada ──
+            if (!payload.es_prendario) {
+                delete payload.tasacion_id;
+            }
+
             if (!payload.usar_fecha_personalizada) {
                 payload.fecha_inicio_personalizada = null;
             }
@@ -251,6 +297,9 @@ export const useStore = () => {
 
             if (payload.prestamo_origen_id) {
                 payload.modalidad = 'RSS';
+            } else if (payload.es_prendario) {
+                payload.modalidad  = 'PRENDARIO';
+                payload.frecuencia = 'MENSUAL';
             } else if (payload.es_grupal) {
                 payload.modalidad = 'GRUPAL';
             } else if (payload.modalidad?.includes('VIGENTE') || payload.modalidad?.includes('RCS')) {
@@ -261,15 +310,15 @@ export const useStore = () => {
                 payload.modalidad = 'NUEVO';
             }
 
-            // Limpiar campos UI de integrantes antes de enviar
             if (payload.es_grupal && Array.isArray(payload.integrantes)) {
                 payload.integrantes = payload.integrantes.map(i => ({
-                    id:              i.id,
-                    monto:           i.monto,
-                    cargo:           i.cargo,
-                    // null si usa tasa global; valor numérico si tiene tasa propia
-                    tasa_interes:    i.usa_tasa_individual ? (parseFloat(i.tasa_interes) || null) : null,
+                    id:           i.id,
+                    monto:        i.monto,
+                    cargo:        i.cargo,
+                    tasa_interes: i.usa_tasa_individual ? (parseFloat(i.tasa_interes) || null) : null,
                 }));
+            } else {
+                delete payload.integrantes;
             }
 
             await store(payload);

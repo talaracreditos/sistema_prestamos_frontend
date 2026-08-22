@@ -131,6 +131,21 @@ import ListarHorarioAsistencia  from 'pages/HorarioAsistencia/Index';
 import AgregarHorarioAsistencia from 'pages/HorarioAsistencia/Store';
 import EditarHorarioAsistencia  from 'pages/HorarioAsistencia/Update';
 
+// UI PRENDARIO (TIPOS DE JOYAS)
+import ListarTiposJoyas from 'pages/TipoJoya/Index';
+import AgregarTipoJoya from 'pages/TipoJoya/Store';
+import EditarTipoJoya from 'pages/TipoJoya/Update';
+
+// UI PRENDARIO (SUBTIPOS DE JOYAS)
+import ListarSubtiposJoyas from 'pages/SubTipoJoya/Index';
+import AgregarSubtipoJoya from 'pages/SubTipoJoya/Store';
+import EditarSubtipoJoya from 'pages/SubTipoJoya/Update';
+
+// UI TASACION
+import ListarTasaciones from 'pages/Tasacion/Index';
+import AgregarTasacion from 'pages/Tasacion/Store';
+import EditarTasacion from 'pages/Tasacion/Update';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -262,6 +277,21 @@ function AppContent() {
         <Route path="/horario-asistencia/listar"     element={<ProtectedRoute requiredPermission="horarioAsistencia.index"  element={<SecureRoute element={<ListarHorarioAsistencia />} />} />} />
         <Route path="/horario-asistencia/agregar"    element={<ProtectedRoute requiredPermission="horarioAsistencia.store"   element={<SecureRoute element={<AgregarHorarioAsistencia />} />} />} />
         <Route path="/horario-asistencia/editar/:id" element={<ProtectedRoute requiredPermission="horarioAsistencia.update"  element={<SecureRoute element={<EditarHorarioAsistencia />} />} />} />
+
+        {/* PRENDARIO: TIPOS DE JOYAS */}
+        <Route path="/tipo-joya/listar" element={<ProtectedRoute requiredPermission="tipoJoya.index" element={<ListarTiposJoyas />} />} />
+        <Route path="/tipo-joya/agregar" element={<ProtectedRoute requiredPermission="tipoJoya.store" element={<AgregarTipoJoya />} />} />
+        <Route path="/tipo-joya/editar/:id" element={<ProtectedRoute requiredPermission="tipoJoya.update" element={<EditarTipoJoya />} />} />
+
+        {/* PRENDARIO: SUBTIPOS DE JOYAS */}
+        <Route path="/subtipo-joya/listar" element={<ProtectedRoute requiredPermission="subtipoJoya.index" element={<ListarSubtiposJoyas />} />} />
+        <Route path="/subtipo-joya/agregar" element={<ProtectedRoute requiredPermission="subtipoJoya.store" element={<AgregarSubtipoJoya />} />} />
+        <Route path="/subtipo-joya/editar/:id" element={<ProtectedRoute requiredPermission="subtipoJoya.update" element={<EditarSubtipoJoya />} />} />
+
+        {/* TASACION */}
+        <Route path="/tasacion/listar" element={<ProtectedRoute requiredPermission="tasacion.index" element={<ListarTasaciones />} />} />
+        <Route path="/tasacion/agregar" element={<ProtectedRoute requiredPermission="tasacion.store" element={<AgregarTasacion />} />} />
+        <Route path="/tasacion/editar/:id" element={<ProtectedRoute requiredPermission="tasacion.update" element={<EditarTasacion />} />} />
 
         {/* SETTINGS */}
         <Route path="/parametro/listar" element={<ProtectedRoute requiredPermission="parametro.index" element={<SecureRoute element={<ListarParametros />} />} />} />   

@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { descargarCronograma, showIntegrante , castigarDetalle } from 'services/prestamoService';
+import { descargarCronograma, showIntegrante, castigarDetalle } from 'services/prestamoService';
 import { useAuth } from 'context/AuthContext';
 
 export function useViewPrestamoModal({ data, onClose, onRefresh }) {
 
-    const { can } = useAuth();
+    const { can, role } = useAuth();
+    const esCliente = role === 'cliente';
 
-    // ── Permisos ──────────────────────────────────────────────────────────────
+    // ── Permisos base ─────────────────────────────────────────────────────────
     const canRefinanciar       = can('prestamo.refinanciar');
     const canGeneratePdf       = can('prestamo.generatePDF');
     const canReducirMora       = can('prestamo.reducirMora');
@@ -24,7 +25,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     const [historialModal, setHistorialModal]                 = useState(null);
     const [refModalOpen, setRefModalOpen]                     = useState(false);
     const [refData, setRefData]                               = useState(null);
-    const [loadingCastigo, setLoadingCastigo] = useState(false);
+    const [loadingCastigo, setLoadingCastigo]                 = useState(false);
 
     // ── Selección de integrante ───────────────────────────────────────────────
     const handleSelectIntegrante = async (clienteId) => {
@@ -149,7 +150,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         if (onRefresh) onRefresh();
     };
 
-    // ── Derivados ─────────────────────────────────────────────────────────────
+    // ── Derivados de datos ────────────────────────────────────────────────────
     const esVistaIntegrante        = !!integranteSeleccionado && !loadingIntegrante && !!integranteData;
     const cronogramaActivo         = integranteData?.cronograma ?? data?.cronograma;
     const integranteActivo         = data?.integrantes?.find(i => i.id === integranteSeleccionado) ?? null;
@@ -158,6 +159,14 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     const integranteNombre         = integranteActivo?.nombre ?? integranteRefinanciado?.nombre;
     const prestamoCancelado        = data?.estado === 2;
     const tieneIntegrantes         = data?.integrantes?.length > 0 || data?.integrantes_refinanciados?.length > 0;
+    const esPrendario              = !!data?.es_prendario;
+
+    const integranteTienePendientes = esVistaIntegrante
+        ? (cronogramaActivo ?? []).some(c => ![2, 6, 0].includes(c.estado))
+        : false;
+
+    const cuotasPendientesCount = (cronogramaActivo ?? [])
+        .filter(c => ![0, 2, 6].includes(c.estado)).length;
 
     const eco = loadingIntegrante
         ? null
@@ -165,17 +174,64 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
             ? integranteData.datos_economicos
             : data?.datos_economicos;
 
+    // ── Derivados de PERMISO (regla de negocio: quién puede ver qué botón) ────
+    // Prendario nunca admite refinanciamiento ni reprogramación — no tiene
+    // sentido reprogramar/refinanciar una garantía que se remata en 1-2 cuotas.
+    const puedeVerReprogramar =
+        !esCliente &&
+        canReprogramar &&
+        !data?.es_grupal &&
+        !esPrendario &&
+        data?.estado === 1 &&
+        !prestamoCancelado &&
+        !!data?.datos_economicos?.desembolsado;
+
+    const puedeVerRefinanciar =
+        !esCliente &&
+        canRefinanciar &&
+        !esPrendario &&
+        data?.estado === 1 &&
+        !prestamoCancelado &&
+        (!data?.es_grupal || esVistaIntegrante) &&
+        !integranteYaRefinanciado &&
+        (!esVistaIntegrante || integranteTienePendientes) &&
+        !!data?.datos_economicos?.desembolsado;
+
+    const puedeVerCambiarPresidente =
+        !esCliente &&
+        canCambiarPresidente &&
+        !!data?.es_grupal &&
+        !esVistaIntegrante &&
+        data?.estado === 1 &&
+        !prestamoCancelado &&
+        (data?.integrantes?.length ?? 0) > 1;
+
+    const puedeVerDescargarPdf =
+        !prestamoCancelado &&
+        canGeneratePdf;
+
+    const puedeVerReducirMora =
+        canReducirMora &&
+        !prestamoCancelado &&
+        data?.estado === 1;
+
     return {
-        // permisos
+        // rol / auth
+        esCliente,
+        // permisos base (por si algún componente hijo los necesita crudos)
         canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canCastigar, canReprogramar,
         // estado
         integranteSeleccionado, integranteData, loadingIntegrante, loadingCastigo,
         pdfOpen, pdfBase64, pdfTitle, loadingPdf,
         historialModal, refModalOpen, refData,
-        // derivados
+        // derivados de datos
         esVistaIntegrante, cronogramaActivo,
         integranteActivo, integranteRefinanciado, integranteYaRefinanciado,
-        integranteNombre, prestamoCancelado, tieneIntegrantes, eco,
+        integranteNombre, prestamoCancelado, tieneIntegrantes, esPrendario, eco,
+        integranteTienePendientes, cuotasPendientesCount,
+        // derivados de permiso — listos para usar directo en el JSX
+        puedeVerReprogramar, puedeVerRefinanciar, puedeVerCambiarPresidente,
+        puedeVerDescargarPdf, puedeVerReducirMora,
         // handlers
         handleSelectIntegrante, handleDescargarCronograma,
         handleCerrarPdf, handleClose,

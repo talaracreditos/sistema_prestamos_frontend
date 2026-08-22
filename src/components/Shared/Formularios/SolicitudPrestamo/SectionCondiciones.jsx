@@ -27,14 +27,15 @@ const calcularPrimerPago = (fechaInicio, frecuencia) => {
     return fecha.toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
 };
 
-const SectionCondiciones = ({ data, handleChange, isBlocked }) => {
+const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false }) => {
 
     const numIntegrantes = data.es_grupal ? Math.max(1, data.integrantes?.length || 1) : 1;
 
     const primerPago = useMemo(() => {
+        if (esPrendario) return null; // prendario no usa fecha personalizada
         if (!data.usar_fecha_personalizada || !data.fecha_inicio_personalizada) return null;
         return calcularPrimerPago(data.fecha_inicio_personalizada, data.frecuencia);
-    }, [data.usar_fecha_personalizada, data.fecha_inicio_personalizada, data.frecuencia]);
+    }, [esPrendario, data.usar_fecha_personalizada, data.fecha_inicio_personalizada, data.frecuencia]);
 
     return (
         <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 relative overflow-hidden transition-colors">
@@ -64,22 +65,50 @@ const SectionCondiciones = ({ data, handleChange, isBlocked }) => {
                         className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed transition-colors"
                     />
                 </div>
+
+                {/* ── N° Cuotas: combobox 1/2 en prendario, input libre en los demás ── */}
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">N° Cuotas</label>
-                    <input
-                        disabled={isBlocked} type="text" value={data.cuotas_solicitadas}
-                        onChange={e => handleChange('cuotas_solicitadas', onlyNumbers(e.target.value))}
-                        className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed transition-colors"
-                    />
+                    <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">
+                        N° Cuotas
+                        {esPrendario && (
+                            <span className="ml-1 text-amber-500 dark:text-amber-400 normal-case font-bold">(máx. 2)</span>
+                        )}
+                    </label>
+                    {esPrendario ? (
+                        <select
+                            disabled={isBlocked}
+                            value={data.cuotas_solicitadas || '1'}
+                            onChange={e => handleChange('cuotas_solicitadas', e.target.value)}
+                            className="w-full p-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <option value="1">1 cuota</option>
+                            <option value="2">2 cuotas</option>
+                        </select>
+                    ) : (
+                        <input
+                            disabled={isBlocked} type="text" value={data.cuotas_solicitadas}
+                            onChange={e => handleChange('cuotas_solicitadas', onlyNumbers(e.target.value))}
+                            className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed transition-colors"
+                        />
+                    )}
                 </div>
+
+                {/* ── Frecuencia: fija en 30 días para prendario, select normal para el resto ── */}
                 <div className="col-span-2 md:col-span-1">
                     <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">Frecuencia</label>
-                    <select disabled={isBlocked} value={data.frecuencia} onChange={e => handleChange('frecuencia', e.target.value)} className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed transition-colors">
-                        <option value="SEMANAL">SEMANAL</option>
-                        <option value="CATORCENAL">CATORCENAL</option>
-                        <option value="MENSUAL">MENSUAL</option>
-                    </select>
+                    {esPrendario ? (
+                        <div className="w-full p-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg text-sm font-black text-amber-700 dark:text-amber-400 flex items-center justify-between">
+                            <span>MENSUAL</span>
+                        </div>
+                    ) : (
+                        <select disabled={isBlocked} value={data.frecuencia} onChange={e => handleChange('frecuencia', e.target.value)} className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed transition-colors">
+                            <option value="SEMANAL">SEMANAL</option>
+                            <option value="CATORCENAL">CATORCENAL</option>
+                            <option value="MENSUAL">MENSUAL</option>
+                        </select>
+                    )}
                 </div>
+
                 <div>
                     <label className="block text-[10px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mb-1 transition-colors">
                         Seguro x Cliente (S/)
@@ -105,53 +134,65 @@ const SectionCondiciones = ({ data, handleChange, isBlocked }) => {
                     </select>
                 </div>
 
-                {/* ── Fecha de Inicio Personalizada ── */}
-                <div className="col-span-2 md:col-span-3">
-                    <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 cursor-pointer select-none w-fit transition-colors">
+                {/* ── Fecha de Inicio Personalizada — NO aplica a Prendario (siempre 30 días desde hoy) ── */}
+                {!esPrendario && (
+                    <div className="col-span-2 md:col-span-3">
+                        <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 cursor-pointer select-none w-fit transition-colors">
+                            <input
+                                type="checkbox"
+                                disabled={isBlocked}
+                                checked={!!data.usar_fecha_personalizada}
+                                onChange={e => {
+                                    const checked = e.target.checked;
+                                    handleChange('usar_fecha_personalizada', checked);
+                                    if (!checked) handleChange('fecha_inicio_personalizada', '');
+                                }}
+                                className="w-3.5 h-3.5 accent-brand-red dark:accent-brand-gold disabled:cursor-not-allowed"
+                            />
+                            <CalendarDaysIcon className="w-3.5 h-3.5 text-slate-400 dark:text-dark-text-muted" />
+                            Fecha de Inicio Personalizada
+                        </label>
                         <input
-                            type="checkbox"
-                            disabled={isBlocked}
-                            checked={!!data.usar_fecha_personalizada}
-                            onChange={e => {
-                                const checked = e.target.checked;
-                                handleChange('usar_fecha_personalizada', checked);
-                                if (!checked) handleChange('fecha_inicio_personalizada', '');
-                            }}
-                            className="w-3.5 h-3.5 accent-brand-red dark:accent-brand-gold disabled:cursor-not-allowed"
+                            type="date"
+                            disabled={isBlocked || !data.usar_fecha_personalizada}
+                            value={data.fecha_inicio_personalizada || ''}
+                            onChange={e => handleChange('fecha_inicio_personalizada', e.target.value)}
+                            className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-dark-surface disabled:text-slate-400 dark:disabled:text-dark-text-muted/60 transition-colors"
                         />
-                        <CalendarDaysIcon className="w-3.5 h-3.5 text-slate-400 dark:text-dark-text-muted" />
-                        Fecha de Inicio Personalizada
-                    </label>
-                    <input
-                        type="date"
-                        disabled={isBlocked || !data.usar_fecha_personalizada}
-                        value={data.fecha_inicio_personalizada || ''}
-                        onChange={e => handleChange('fecha_inicio_personalizada', e.target.value)}
-                        className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-dark-surface disabled:text-slate-400 dark:disabled:text-dark-text-muted/60 transition-colors"
-                    />
 
-                    {!data.usar_fecha_personalizada && (
-                        <p className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold uppercase mt-1 transition-colors">
-                            Sin marcar: se calculará automáticamente desde hoy según la frecuencia.
-                        </p>
-                    )}
-
-                    {data.usar_fecha_personalizada && primerPago && (
-                        <div className="mt-2 flex items-center gap-2 bg-brand-red-light/30 dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 rounded-lg px-3 py-2 transition-colors">
-                            <ArrowRightIcon className="w-3.5 h-3.5 text-brand-red dark:text-brand-gold flex-shrink-0" />
-                            <p className="text-[10px] font-black text-brand-red dark:text-brand-gold uppercase transition-colors">
-                                1er pago: <span className="normal-case font-bold">{primerPago}</span>
-                                <span className="ml-1 text-slate-400 dark:text-dark-text-muted font-bold normal-case">({data.frecuencia.toLowerCase()})</span>
+                        {!data.usar_fecha_personalizada && (
+                            <p className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold uppercase mt-1 transition-colors">
+                                Sin marcar: se calculará automáticamente desde hoy según la frecuencia.
                             </p>
-                        </div>
-                    )}
+                        )}
 
-                    {data.usar_fecha_personalizada && !data.fecha_inicio_personalizada && (
-                        <p className="text-[9px] text-amber-500 dark:text-amber-400 font-bold uppercase mt-1">
-                            Selecciona una fecha para ver cuándo cae el primer pago.
+                        {data.usar_fecha_personalizada && primerPago && (
+                            <div className="mt-2 flex items-center gap-2 bg-brand-red-light/30 dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 rounded-lg px-3 py-2 transition-colors">
+                                <ArrowRightIcon className="w-3.5 h-3.5 text-brand-red dark:text-brand-gold flex-shrink-0" />
+                                <p className="text-[10px] font-black text-brand-red dark:text-brand-gold uppercase transition-colors">
+                                    1er pago: <span className="normal-case font-bold">{primerPago}</span>
+                                    <span className="ml-1 text-slate-400 dark:text-dark-text-muted font-bold normal-case">({data.frecuencia.toLowerCase()})</span>
+                                </p>
+                            </div>
+                        )}
+
+                        {data.usar_fecha_personalizada && !data.fecha_inicio_personalizada && (
+                            <p className="text-[9px] text-amber-500 dark:text-amber-400 font-bold uppercase mt-1">
+                                Selecciona una fecha para ver cuándo cae el primer pago.
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Aviso informativo que reemplaza el bloque de fecha en Prendario ── */}
+                {esPrendario && (
+                    <div className="col-span-2 md:col-span-3 flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg px-3 py-2.5 transition-colors">
+                        <CalendarDaysIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                        <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">
+                            El préstamo prendario no admite fecha de inicio personalizada: siempre inicia 30 días después de la generación.
                         </p>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             {data.es_grupal && data.integrantes?.length > 0 ? (
