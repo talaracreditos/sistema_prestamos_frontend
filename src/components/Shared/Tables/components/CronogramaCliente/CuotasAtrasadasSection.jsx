@@ -6,12 +6,13 @@ import CuotaPendienteItem from './CuotaPendienteItem';
  * CUOTAS ATRASADAS (sección de alerta, siempre arriba de todo)
  * Agrupa lo más urgente: vencidas completas + parciales con atraso.
  *
- * El texto "ponte al día" es personal — solo aplica en vista
- * individual ("mi saldo"), donde el atraso es tuyo. En vista grupal
+ * El texto "ponte al día" es personal — aplica tanto en préstamo
+ * individual como en vista de un integrante específico dentro de
+ * un grupo (esVistaPersonal cubre ambos casos). En vista grupal
  * global no todos están atrasados (algunos ya pagaron), así que el
  * título solo indica que hay atraso en el grupo, sin imperativo.
  * ───────────────────────────────────────────────────────────── */
-const CuotasAtrasadasSection = ({ atrasadas, esVistaIntegrante }) => {
+const CuotasAtrasadasSection = ({ atrasadas, esVistaPersonal, esVistaIntegrante }) => {
     if (!atrasadas.length) return null;
     return (
         <div
@@ -20,7 +21,7 @@ const CuotasAtrasadasSection = ({ atrasadas, esVistaIntegrante }) => {
         >
             <p className="flex items-center gap-1.5 text-[10px] font-black text-brand-red dark:text-red-400 uppercase tracking-widest px-1">
                 <ExclamationTriangleIcon className="w-4 h-4" />
-                {esVistaIntegrante
+                {esVistaPersonal
                     ? `Cuotas atrasadas — ponte al día (${atrasadas.length})`
                     : `Cuotas atrasadas del grupo (${atrasadas.length})`}
             </p>

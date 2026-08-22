@@ -112,7 +112,11 @@ const CronogramaCliente = ({
 
             {/* 1º: cuotas atrasadas, siempre arriba de todo */}
             {!prestamoCancelado && (
-                <CuotasAtrasadasSection atrasadas={atrasadas} esVistaIntegrante={esVistaIntegrante} />
+                <CuotasAtrasadasSection
+                    atrasadas={atrasadas}
+                    esVistaPersonal={esVistaPersonal}
+                    esVistaIntegrante={esVistaIntegrante}
+                />
             )}
 
             {/* 2º: próxima cuota destacada — nunca atrasada, nunca parcial */}
