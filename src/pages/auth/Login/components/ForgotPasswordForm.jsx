@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { IdentificationIcon } from '@heroicons/react/24/outline';
 import { onlyNumbers } from 'utilities/Validations/validations'; 
 
 const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, onCancel }) => {
@@ -47,13 +48,14 @@ const ForgotPasswordForm = ({ dni, setDni, handleForgotPassword, onCancel }) => 
           </button>
         </div>
 
-        <div>
+        <div className="relative">
+          <IdentificationIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
           <input
             type="text"
             id="dni"
             value={dni}
             onChange={(e) => setDni(onlyNumbers(e.target.value, tipo === 'DNI' ? 8 : 11))}
-            className="block w-full px-5 py-4 bg-slate-50 border border-transparent text-slate-900 rounded-2xl placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 text-lg text-center tracking-[0.25em] font-bold"
+            className="block w-full pl-12 pr-5 py-4 bg-slate-50 border border-transparent text-slate-900 rounded-2xl placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 text-lg text-center tracking-[0.25em] font-bold"
             placeholder={tipo === 'DNI' ? "N° DE DNI" : "N° DE RUC"}
             minLength={tipo === 'DNI' ? 8 : 11}
             pattern={tipo === 'DNI' ? "\\d{8}" : "\\d{11}"}
