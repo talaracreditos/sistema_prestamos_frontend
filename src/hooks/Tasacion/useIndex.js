@@ -1,8 +1,18 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { index, show, destroy } from 'services/tasacionService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
+import { useAuth } from 'context/AuthContext';
 
 export const useIndex = () => {
+    const { can } = useAuth();
+
+    // ── Permisos ──────────────────────────────────────────────────────────────
+    const canShow = can('tasacion.show');
+    const canUpdate = can('tasacion.update');
+    const canDelete = can('tasacion.delete');
+    const canStore = can('tasacion.store');
+    const canDoAnyAction = canShow || canUpdate || canDelete;
+
     const [loading, setLoading] = useState(true);
     const [tasaciones, setTasaciones] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, total: 0 });
@@ -35,11 +45,9 @@ export const useIndex = () => {
 
     useEffect(() => { fetchTasaciones(1); }, [fetchTasaciones]);
 
-    // El estado (pendiente/abandonado/expirado/convertida) ya NO se cambia
-    // manualmente desde acá — se actualiza solo cuando se aprueba o rechaza
-    // la solicitud de préstamo asociada. El tasador solo lo visualiza.
 
     const handleView = async (id) => {
+        if (!canShow) return;
         setIsViewOpen(true);
         setViewLoading(true);
         try {
@@ -53,8 +61,12 @@ export const useIndex = () => {
         }
     };
 
-    const handleAskDelete = (id) => { setSelectedId(id); setShowDelete(true); };
+    const handleAskDelete = (id) => {
+        if (!canDelete) return;
+        setSelectedId(id); setShowDelete(true);
+    };
     const handleConfirmDelete = async () => {
+        if (!canDelete) return;
         setShowDelete(false);
         setLoading(true);
         try {
@@ -78,6 +90,9 @@ export const useIndex = () => {
         showDelete, setShowDelete,
         isViewOpen, setIsViewOpen, viewData, viewLoading, handleView,
         fetchTasaciones, handleAskDelete, handleConfirmDelete,
-        handleFilterChange, handleFilterSubmit, handleFilterClear
+        handleFilterChange, handleFilterSubmit, handleFilterClear,
+
+        // permisos
+        canShow, canUpdate, canDelete, canStore, canDoAnyAction,
     };
 };
