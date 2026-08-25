@@ -127,19 +127,29 @@ const SectionClienteGrupo = ({
                                     
                                     return (
                                         <tr key={int.id} className={isRed ? 'bg-red-50/50 dark:bg-red-500/10' : (isYellow ? 'bg-yellow-50/50 dark:bg-yellow-500/10' : 'hover:bg-slate-50 dark:hover:bg-dark-surface-alt')}>
-                                            {/* Socio */}
+                                          
+                                           {/* Socio */}
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2 flex-wrap">
                                                     <span className={`font-bold uppercase text-[11px] ${isRed ? 'text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-dark-text'}`}>{int.nombre}</span>
                                                     <span className={`px-2 py-0.5 rounded text-[11px] font-black border transition-colors ${
                                                         isRed    ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30' : 
                                                         isYellow ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/30' : 
-                                                                   'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20'
+                                                                'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20'
                                                     }`}>
                                                         {dniVencido
                                                             ? `DNI VENCIDO (${int.dni_status.fecha_texto})` 
                                                             : int.modalidad}
                                                     </span>
+                                                    {int.dni_status?.estado && !dniVencido && (
+                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+                                                            dniPorVencer
+                                                                ? 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20'
+                                                                : 'bg-slate-50 dark:bg-dark-surface-alt text-slate-400 dark:text-dark-text-muted border-slate-200 dark:border-dark-border'
+                                                        }`}>
+                                                            DNI {int.dni_status.estado.replace('_', ' ')}{int.dni_status.fecha_texto ? ` (${int.dni_status.fecha_texto})` : ''}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </td>
 
@@ -213,11 +223,13 @@ const SectionClienteGrupo = ({
                                                 </div>
                                             </td>
 
-                                            {/* Eliminar */}
+                                           {/* Eliminar */}
                                             <td className="px-4 py-3">
-                                                <button type="button" onClick={() => removeIntegrante(int.id)} className="text-slate-400 dark:text-dark-text-muted hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                                    <TrashIcon className="w-4 h-4" />
-                                                </button>
+                                                {int.puede_excluirse !== false && (
+                                                    <button type="button" onClick={() => removeIntegrante(int.id)} className="text-slate-400 dark:text-dark-text-muted hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                                                        <TrashIcon className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     );
