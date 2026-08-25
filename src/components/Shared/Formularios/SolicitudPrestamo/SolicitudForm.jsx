@@ -126,31 +126,51 @@ const SolicitudForm = ({
                         </div>
                     )}
 
-                    {/* ── Switch Individual / Grupal / Prendario ── */}
-                    <div className="flex bg-slate-100 dark:bg-dark-surface-alt p-1 rounded-xl w-fit mx-auto border border-slate-200 dark:border-dark-border shadow-inner transition-colors">
-                        {TIPOS.map(opt => {
-                            const activo = tipoActivo === opt.key;
-                            return (
-                                <button
-                                    key={opt.key}
-                                    type="button"
-                                    onClick={() => {
-                                        if (isUpdate || esRenovacionActiva || bloqueado) return;
-                                        handleChange('es_grupal', opt.es_grupal);
-                                        handleChange('es_prendario', opt.es_prendario);
-                                    }}
-                                    disabled={isUpdate || esRenovacionActiva || bloqueado}
-                                    className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
-                                        activo
-                                            ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20'
-                                            : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
-                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                >
-                                    {opt.label}
-                                </button>
-                            );
-                        })}
-                    </div>
+                  {/* ── Switch Individual / Grupal / Prendario ── */}
+                    {(isUpdate || esRenovacionActiva) ? (
+                        <div className="flex justify-center">
+                            <span className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-colors ${
+                                tipoActivo === 'grupal'
+                                    ? 'bg-brand-gold-light/20 dark:bg-brand-gold/10 text-brand-gold-dark dark:text-brand-gold border-brand-gold/30 dark:border-brand-gold/20'
+                                    : tipoActivo === 'prendario'
+                                        ? 'bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text border-slate-200 dark:border-dark-border'
+                                        : 'bg-brand-red-light/20 dark:bg-brand-red/10 text-brand-red dark:text-brand-gold border-brand-red/30 dark:border-brand-red/20'
+                            }`}>
+                                {esRenovacionActiva && (
+                                    <>
+                                        Renovación
+                                        <span className="opacity-40">·</span>
+                                    </>
+                                )}
+                                {TIPOS.find(t => t.key === tipoActivo)?.label}
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="flex bg-slate-100 dark:bg-dark-surface-alt p-1 rounded-xl w-fit mx-auto border border-slate-200 dark:border-dark-border shadow-inner transition-colors">
+                            {TIPOS.map(opt => {
+                                const activo = tipoActivo === opt.key;
+                                return (
+                                    <button
+                                        key={opt.key}
+                                        type="button"
+                                        onClick={() => {
+                                            if (bloqueado) return;
+                                            handleChange('es_grupal', opt.es_grupal);
+                                            handleChange('es_prendario', opt.es_prendario);
+                                        }}
+                                        disabled={bloqueado}
+                                        className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
+                                            activo
+                                                ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-sm ring-1 ring-brand-red/20 dark:ring-brand-gold/20'
+                                                : 'text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
 
                     {/* ── Asesor ── */}
                     <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/25 p-5 space-y-3 transition-colors">
