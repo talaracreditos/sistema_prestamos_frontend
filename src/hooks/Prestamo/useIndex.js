@@ -3,7 +3,7 @@ import { index, show, deletePrestamo } from 'services/prestamoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
 const FILTERS_INITIAL = {
-    search: '', cliente: '', estado: '1', asesor_id: '',
+    search: '', cliente: '', estado: '1', frecuencia: '', asesor_id: '',
     fecha_inicio: '', fecha_fin: '',
     fecha_desembolso_inicio: '', fecha_desembolso_fin: ''
 };
@@ -124,7 +124,6 @@ export const useIndex = () => {
         handleRefreshView,
         handleOpenAbono, isAbonoModalOpen, setIsAbonoModalOpen, selectedAbonoUrl,
         isDeleteModalOpen, setIsDeleteModalOpen, openDeleteModal, handleConfirmDelete, deleteLoading,
-        // filtros aplicados (para exportar)
         appliedFilters,
     };
 };

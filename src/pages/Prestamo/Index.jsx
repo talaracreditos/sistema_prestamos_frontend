@@ -88,13 +88,23 @@ const Index = () => {
         }
         config.push({ 
             name: 'estado', type: 'select', label: 'Estado Préstamo', 
-            colSpan: role !== 'cliente' ? 'col-span-12 md:col-span-3' : 'col-span-12',
+            colSpan: role !== 'cliente' ? 'col-span-12 md:col-span-2' : 'col-span-6',
             options: [
                 { value: '1',   label: 'VIGENTES' },
                 { value: '2',   label: 'CANCELADOS' },
                 { value: '3',   label: 'LIQUIDADOS' },
                 { value: '4',   label: 'REFINANCIADOS' },
                 { value: 'all', label: 'TODOS' }
+            ]
+        });
+        config.push({
+            name: 'frecuencia', type: 'select', label: 'Frecuencia',
+            colSpan: role !== 'cliente' ? 'col-span-12 md:col-span-2' : 'col-span-6',
+            options: [
+                { value: '',            label: 'TODAS' },
+                { value: 'semanal',     label: 'SEMANAL' },
+                { value: 'catorcenal',  label: 'CATORCENAL' },
+                { value: 'mensual',     label: 'MENSUAL' },
             ]
         });
         return config;

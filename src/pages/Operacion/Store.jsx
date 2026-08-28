@@ -5,8 +5,8 @@ import PrestamoSearchSelect from 'components/Shared/Comboboxes/PrestamoSearchSel
 import OperacionForm from 'components/Shared/Formularios/Operacion/OperacionForm';
 import PagoCuotaModal from './PagoCuotaModal';
 import DesembolsoModal from './DesembolsoModal';
-import AbrirSesionModal from 'components/Shared/Modals/AbrirSesionModal';
-import CerrarSesionModal from 'components/Shared/Modals/CerrarSesionModal';
+import AbrirSesionModal from 'components/Shared/Modals/Operacion/AbrirSesionModal';
+import CerrarSesionModal from 'components/Shared/Modals/Operacion/CerrarSesionModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
 import HistorialMoraModal from 'pages/Prestamo/HistorialMoraModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';

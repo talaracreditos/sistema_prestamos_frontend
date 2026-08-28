@@ -154,3 +154,14 @@ export const exportClientesMoraMayor8Dashboard = async (filters = {}) => {
     if (!response.ok) throw new Error('Error al exportar clientes mora mayor a 8 días');
     return response.blob();
 };
+
+// ── Estructura de cartera ─────────────────────────────────────────────────────
+export const getEstructuraCarteraDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/estructura-cartera${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
+export const exportEstructuraCarteraDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/estructura-cartera/export${buildQs(filters)}`, { method: 'GET' });
+    if (!response.ok) throw new Error('Error al exportar estructura de cartera');
+    return response.blob();
+};

@@ -147,9 +147,6 @@ const GruposAsesorCard = () => {
                                             <tr key={f.asesor_id} className={`hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-dark-surface-alt/30'}`}>
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-7 h-7 rounded-lg bg-brand-red-light dark:bg-dark-surface-alt flex items-center justify-center flex-shrink-0">
-                                                            <span className="text-[9px] font-black text-brand-red dark:text-brand-gold">{f.abrev}</span>
-                                                        </div>
                                                         <span className="text-xs font-black text-slate-700 dark:text-dark-text uppercase">{f.nombre}</span>
                                                     </div>
                                                 </td>

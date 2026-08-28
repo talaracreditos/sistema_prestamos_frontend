@@ -99,21 +99,17 @@ export const useUpdate = () => {
     };
 
     // ── Cálculo automático de la joya en edición ────────────────────────────
+    // El precio ingresado (S/ por gramo) YA corresponde al kilataje seleccionado.
+    // El kilataje NO debe volver a aplicar ninguna conversión sobre ese precio.
     const pesoBrutoNum      = parseFloat(detalleActual.peso_bruto) || 0;
     const pesoIncrustNum    = parseFloat(detalleActual.peso_incrustacion) || 0;
     const pesoNeto           = Math.max(0, round(pesoBrutoNum - pesoIncrustNum));
-    const kilatesNum          = parseFloat(detalleActual.kilates) || 0;
     const porcentajeNum       = parseFloat(porcentajePrestamo) || 0;
     const precioOroGramoNum   = parseFloat(precioOroGramo) || 0;
 
-    const precioEfectivoGramo = useMemo(
-        () => round(precioOroGramoNum * (kilatesNum / 24)),
-        [precioOroGramoNum, kilatesNum]
-    );
-
     const valorTasadoNum = useMemo(
-        () => round(pesoNeto * precioEfectivoGramo),
-        [pesoNeto, precioEfectivoGramo]
+        () => round(pesoNeto * precioOroGramoNum),
+        [pesoNeto, precioOroGramoNum]
     );
 
     const maximoSugerido = useMemo(
@@ -268,7 +264,7 @@ export const useUpdate = () => {
         handleAgregarDetalle, handleEditarDetalle, handleCancelarEdicion, handleEliminarDetalle,
 
         porcentajePrestamo, setPorcentajePrestamo,
-        precioOroGramo, setPrecioOroGramo, precioEfectivoGramo,
+        precioOroGramo, setPrecioOroGramo,
 
         camposLimitados,
         kilatesOpciones: KILATES_OPCIONES,

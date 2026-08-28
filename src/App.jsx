@@ -146,6 +146,15 @@ import ListarTasaciones from 'pages/Tasacion/Index';
 import AgregarTasacion from 'pages/Tasacion/Store';
 import EditarTasacion from 'pages/Tasacion/Update';
 
+// UI CAJA CHICA GASTO
+import ListarCajaChicaGastos from 'pages/CajaChicaGasto/Index';
+import AgregarCajaChicaGasto from 'pages/CajaChicaGasto/Store';
+import EditarCajaChicaGasto from 'pages/CajaChicaGasto/Update';
+
+// UI CAJA CHICA MOVIMIENTO
+import ListarCajaChicaMovimientos from 'pages/CajaChicaMovimiento/Index';
+import RegistrarCajaChicaMovimiento from 'pages/CajaChicaMovimiento/Store';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -292,6 +301,15 @@ function AppContent() {
         <Route path="/tasacion/listar" element={<ProtectedRoute requiredPermission="tasacion.index" element={<ListarTasaciones />} />} />
         <Route path="/tasacion/agregar" element={<ProtectedRoute requiredPermission="tasacion.store" element={<AgregarTasacion />} />} />
         <Route path="/tasacion/editar/:id" element={<ProtectedRoute requiredPermission="tasacion.update" element={<EditarTasacion />} />} />
+
+        {/* CAJA CHICA GASTO */}
+        <Route path="/caja-chica-gasto/listar" element={<ProtectedRoute requiredPermission="cajaChicaGasto.index" element={<ListarCajaChicaGastos />} />} />
+        <Route path="/caja-chica-gasto/agregar" element={<ProtectedRoute requiredPermission="cajaChicaGasto.store" element={<AgregarCajaChicaGasto />} />} />
+        <Route path="/caja-chica-gasto/editar/:id" element={<ProtectedRoute requiredPermission="cajaChicaGasto.update" element={<EditarCajaChicaGasto />} />} />
+
+        {/* CAJA CHICA MOVIMIENTOS */}
+        <Route path="/caja-chica-movimiento/listar" element={<ProtectedRoute requiredPermission="cajaChicaMovimiento.index" element={<ListarCajaChicaMovimientos />} />} />
+        <Route path="/caja-chica-movimiento/registrar" element={<ProtectedRoute requiredPermission="cajaChicaMovimiento.store" element={<RegistrarCajaChicaMovimiento />} />} />
 
         {/* SETTINGS */}
         <Route path="/parametro/listar" element={<ProtectedRoute requiredPermission="parametro.index" element={<SecureRoute element={<ListarParametros />} />} />} />   

@@ -6,7 +6,8 @@ import {
     WalletIcon, Bars3Icon,
     ArrowRightOnRectangleIcon, CubeIcon,
     ClipboardDocumentListIcon,
-    ArrowsRightLeftIcon
+    ArrowsRightLeftIcon,
+    ReceiptPercentIcon
 } from '@heroicons/react/24/outline';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import { useAuth } from 'context/AuthContext';
@@ -165,6 +166,25 @@ export const MENU_GROUPS = [
                     { name: 'Nueva Caja',                 link: '/caja/agregar',  requiredPermission: 'caja.store' },
                 ],
             }
+        ]
+    },
+    {
+        groupName: 'Caja Chica',
+        items: [
+            {
+                section: 'Movimientos', icon: BanknotesIcon,
+                subs: [
+                    { name: 'Listar Movimientos',   link: '/caja-chica-movimiento/listar',    requiredPermission: 'cajaChicaMovimiento.index' },
+                    { name: 'Registrar Movimiento', link: '/caja-chica-movimiento/registrar', requiredPermission: 'cajaChicaMovimiento.store' },
+                ],
+            },
+            {
+                section: 'Gastos Administrativos', icon: ReceiptPercentIcon,
+                subs: [
+                    { name: 'Listar Gastos', link: '/caja-chica-gasto/listar',  requiredPermission: 'cajaChicaGasto.index' },
+                    { name: 'Nuevo Gasto',   link: '/caja-chica-gasto/agregar', requiredPermission: 'cajaChicaGasto.store' },
+                ],
+            },
         ]
     },
     {

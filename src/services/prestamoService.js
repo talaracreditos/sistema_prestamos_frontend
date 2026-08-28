@@ -9,6 +9,7 @@ export const index = async (page = 1, filters = {}) => {
         page: page,
         search: filters.search || '',
         estado: filters.estado || '',
+        frecuencia: filters.frecuencia || '',
         tipo_operacion: filters.tipo_operacion || '',
         asesor_id: filters.asesor_id || '',
         fecha_inicio: filters.fecha_inicio || '',
@@ -102,6 +103,7 @@ export const exportar = async (filters = {}) => {
     const params = new URLSearchParams({
         search: filters.search || '',
         estado: filters.estado || '',
+        frecuencia: filters.frecuencia || '',
         asesor_id: filters.asesor_id || '',
         fecha_inicio: filters.fecha_inicio || '',
         fecha_fin: filters.fecha_fin || '',
