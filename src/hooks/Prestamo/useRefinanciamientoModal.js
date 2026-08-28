@@ -12,7 +12,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         cuotas_solicitadas:  '',
         frecuencia:          'SEMANAL',
         codigo_recaudo:      '',
-        incluir_mora:        true,
+        incluir_mora:        false,
         mora_incluida:       '',
         interes_incluido:    '',
         observaciones:       '',
@@ -48,7 +48,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
                 cuotas_solicitadas:  '',
                 frecuencia:          'SEMANAL',
                 codigo_recaudo:      '',
-                incluir_mora:        true,
+                incluir_mora:        false,
                 // Por defecto, si hay mora, se precarga completa — el usuario
                 // puede reducirla (o subirla, se recorta al real en backend).
                 mora_incluida:       (data.mora || 0) > 0 ? data.mora.toFixed(2) : '',
@@ -152,7 +152,7 @@ export const useRefinanciamientoModal = ({ isOpen, data, integrantesGrupo, onSuc
         || !formData.codigo_recaudo?.trim()
         || formData.interes_incluido === ''
         || (formData.tiene_seguro && (!formData.seguro || parseFloat(formData.seguro) <= 0))
-        || (formData.incluir_mora && (!formData.mora_incluida || parseFloat(formData.mora_incluida) <= 0));
+        || (formData.incluir_mora && moraDisponible > 0 && (!formData.mora_incluida || parseFloat(formData.mora_incluida) <= 0));
 
     return {
         formData, setFormData,
