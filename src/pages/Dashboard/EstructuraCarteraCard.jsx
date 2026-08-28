@@ -75,7 +75,7 @@ const EstructuraCarteraCard = () => {
                     <div>
                         <h2 className="text-sm font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Estructura de Cartera</h2>
                         <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">
-                            Créditos y saldo capital vigente por asesor — semanal vs. catorcenal
+                            Clientes y saldo capital vigente por asesor — semanal vs. catorcenal
                         </p>
                     </div>
                 </div>
@@ -154,11 +154,11 @@ const EstructuraCarteraCard = () => {
                     {/* ── KPIs resumen ──────────────────────────────────────── */}
                     {!loading && totales.total_saldo_capital_cartera !== undefined && (
                         <div className="px-6 pt-4 pb-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <KpiChip label="Créditos Semanal"    value={totales.creditos_semanales}                 color="slate" />
+                            <KpiChip label="Clientes Semanal"    value={totales.creditos_semanales}                 color="slate" />
                             <KpiChip label="Saldo Semanal"       value={fmtS(totales.saldo_capital_semanal)}        color="slate" />
-                            <KpiChip label="Créditos Catorcenal" value={totales.creditos_catorcenales}               color="slate" />
+                            <KpiChip label="Clientes Catorcenal" value={totales.creditos_catorcenales}               color="slate" />
                             <KpiChip label="Saldo Catorcenal"    value={fmtS(totales.saldo_capital_catorcenal)}     color="slate" />
-                            <KpiChip label="Total Créditos"      value={totales.total_creditos_cartera}              color="slate" bold />
+                            <KpiChip label="Total Clientes"      value={totales.total_creditos_cartera}              color="slate" bold />
                             <KpiChip label="Total Saldo Capital" value={fmtS(totales.total_saldo_capital_cartera)}  color="slate" bold />
                             <KpiChip
                                 label="% Catorcenal / Cartera"
@@ -180,11 +180,11 @@ const EstructuraCarteraCard = () => {
                                     <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
                                         <tr>
                                             <th className="px-4 py-3">Asesor</th>
-                                            <th className="px-4 py-3 text-right">N° Créd. Semanal</th>
+                                            <th className="px-4 py-3 text-right">N° Clientes Semanal</th>
                                             <th className="px-4 py-3 text-right">Saldo Capital Semanal</th>
-                                            <th className="px-4 py-3 text-right">N° Créd. Catorcenal</th>
+                                            <th className="px-4 py-3 text-right">N° Clientes Catorcenal</th>
                                             <th className="px-4 py-3 text-right">Saldo Capital Catorcenal</th>
-                                            <th className="px-4 py-3 text-right">Total Créditos</th>
+                                            <th className="px-4 py-3 text-right">Total Clientes</th>
                                             <th className="px-4 py-3 text-right">Total Saldo Capital</th>
                                             <th className="px-4 py-3 text-right">% Catorcenal</th>
                                         </tr>
@@ -206,7 +206,7 @@ const EstructuraCarteraCard = () => {
                                                         </div>
                                                     </td>
 
-                                                    {/* Créditos semanal */}
+                                                    {/* Clientes semanal */}
                                                     <td className="px-4 py-3 text-right">
                                                         <span className="text-xs font-bold text-slate-600 dark:text-dark-text-muted tabular-nums">{a.creditos_semanales}</span>
                                                     </td>
@@ -216,7 +216,7 @@ const EstructuraCarteraCard = () => {
                                                         <span className="text-xs font-bold text-slate-500 dark:text-dark-text-muted tabular-nums">{fmtS(a.saldo_capital_semanal)}</span>
                                                     </td>
 
-                                                    {/* Créditos catorcenal */}
+                                                    {/* Clientes catorcenal */}
                                                     <td className="px-4 py-3 text-right">
                                                         <span className="text-xs font-bold text-slate-600 dark:text-dark-text-muted tabular-nums">{a.creditos_catorcenales}</span>
                                                     </td>
@@ -226,7 +226,7 @@ const EstructuraCarteraCard = () => {
                                                         <span className="text-xs font-bold text-slate-500 dark:text-dark-text-muted tabular-nums">{fmtS(a.saldo_capital_catorcenal)}</span>
                                                     </td>
 
-                                                    {/* Total créditos */}
+                                                    {/* Total clientes */}
                                                     <td className="px-4 py-3 text-right">
                                                         <span className="text-xs font-black text-slate-700 dark:text-dark-text tabular-nums">{a.total_creditos_cartera}</span>
                                                     </td>
@@ -269,13 +269,13 @@ const EstructuraCarteraCard = () => {
                     <div className="px-6 pb-4 space-y-1">
                         <p className="text-[11px] text-slate-500 dark:text-dark-text-muted font-black uppercase tracking-widest mb-1">Glosario</p>
                         <p className="text-[11px] text-slate-400 dark:text-dark-text-muted/80">
-                            <span className="font-black text-slate-600 dark:text-dark-text">N° Créditos:</span> Cantidad de préstamos vigentes del asesor en esa frecuencia de pago (semanal / catorcenal).
+                            <span className="font-black text-slate-600 dark:text-dark-text">N° Clientes:</span> Cantidad de clientes con crédito vigente del asesor en esa frecuencia de pago (semanal / catorcenal). En préstamos grupales cuenta cada integrante activo (no refinanciado), no el préstamo como una unidad.
                         </p>
                         <p className="text-[11px] text-slate-400 dark:text-dark-text-muted/80">
                             <span className="font-black text-slate-600 dark:text-dark-text">Saldo Capital:</span> Capital pendiente de cobro a la fecha de corte, solo de préstamos vigentes en esa frecuencia.
                         </p>
                         <p className="text-[11px] text-slate-400 dark:text-dark-text-muted/80">
-                            <span className="font-black text-slate-600 dark:text-dark-text">Total Cartera:</span> Suma de TODAS las frecuencias (semanal, catorcenal, mensual, etc.), no solo las dos mostradas.
+                            <span className="font-black text-slate-600 dark:text-dark-text">Total Cartera:</span> Suma de TODAS las frecuencias (semanal, catorcenal, mensual, etc.), no solo las dos mostradas. Si un cliente tiene crédito en más de una frecuencia con el mismo asesor, se cuenta una sola vez.
                         </p>
                         <p className="text-[11px] text-slate-400 dark:text-dark-text-muted/80">
                             <span className="font-black text-slate-600 dark:text-dark-text">% Catorcenal:</span> Saldo Capital Catorcenal ÷ Total Saldo Capital de la cartera del asesor.
