@@ -145,7 +145,7 @@ const AsesorCard = () => {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[640px]">
+                                <table className="w-full text-left border-collapse min-w-[860px]">
                                     <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
                                         <tr>
                                             <th className="px-4 py-3">Asesor</th>
@@ -155,6 +155,8 @@ const AsesorCard = () => {
                                             <th className="px-4 py-3 text-right">Grupos</th>
                                             <th className="px-4 py-3 text-right">Total Personas</th>
                                             <th className="px-4 py-3 text-right">Ticket Prom.</th>
+                                            <th className="px-4 py-3 text-right">Monto Refinanciado</th>
+                                            <th className="px-4 py-3 text-right">Clientes Refin.</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50 dark:divide-dark-border">
@@ -170,7 +172,9 @@ const AsesorCard = () => {
                                                 <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.integrantes)}</span></td>
                                                 <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.grupos)}</span></td>
                                                 <td className="px-4 py-3 text-right"><span className="text-sm font-black text-brand-red dark:text-brand-gold">{fmtN(f.total_pers)}</span></td>
-                                                <td className="px-4 py-3 text-right"><span className="text-sm font-black text-brand-gold-dark dark:text-brand-gold">S/ {fmt(f.ticket)}</span></td>
+                                                <td className="px-4 py-3 text-right whitespace-nowrap"><span className="text-xs font-black text-brand-gold-dark dark:text-brand-gold">S/ {fmt(f.ticket)}</span></td>
+                                                <td className="px-4 py-3 text-right whitespace-nowrap"><span className="text-xs font-black text-amber-600 dark:text-amber-400">S/ {fmt(f.monto_refinanciado)}</span></td>
+                                                <td className="px-4 py-3 text-right"><span className="text-sm font-black text-amber-600 dark:text-amber-400">{fmtN(f.clientes_refinanciados)}</span></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -182,7 +186,9 @@ const AsesorCard = () => {
                                             <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.integrantes)}</td>
                                             <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.grupos)}</td>
                                             <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">{fmtN(totales.total_pers)}</td>
-                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">S/ {fmt(totales.ticket)}</td>
+                                            <td className="px-4 py-3 text-right whitespace-nowrap text-xs font-black text-brand-gold">S/ {fmt(totales.ticket)}</td>
+                                            <td className="px-4 py-3 text-right whitespace-nowrap text-xs font-black text-amber-400">S/ {fmt(totales.monto_refinanciado)}</td>
+                                            <td className="px-4 py-3 text-right text-sm font-black text-amber-400">{fmtN(totales.clientes_refinanciados)}</td>
                                         </tr>
                                     </tfoot>
                                 </table>

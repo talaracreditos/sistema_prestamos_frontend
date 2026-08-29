@@ -379,6 +379,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                 esGrupal={!!data.es_grupal}
                                 esVistaIntegrante={esVistaIntegrante}
                                 integrantes={data.es_grupal ? data.integrantes : []}
+                                integrantesRefinanciados={data.es_grupal ? data.integrantes_refinanciados : []}
                                 miIntegranteId={miIntegrante?.id ?? null}
                             />
                         ) : (

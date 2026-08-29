@@ -15,6 +15,12 @@ const Chevron = ({ collapsed }) => (
     </div>
 );
 
+const Variacion = ({ value }) => (
+    <span className={`text-sm font-black ${value > 0 ? 'text-green-600 dark:text-green-400' : value < 0 ? 'text-brand-red dark:text-red-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
+        {value > 0 ? '+' : ''}{fmtN(value)}
+    </span>
+);
+
 const GruposAsesorCard = () => {
     const {
         loading, data,
@@ -126,20 +132,29 @@ const GruposAsesorCard = () => {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[820px]">
+                                <table className="w-full text-left border-collapse min-w-[1180px]">
                                     <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
                                         <tr>
                                             <th rowSpan={2} className="px-4 py-3 align-bottom">Asesor</th>
                                             <th colSpan={3} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Grupos</th>
-                                            <th colSpan={3} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Clientes</th>
+                                            <th colSpan={6} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Clientes</th>
                                         </tr>
                                         <tr>
                                             <th className="px-4 py-2 text-right border-l border-slate-200 dark:border-dark-border">Inicial</th>
                                             <th className="px-4 py-2 text-right">Actual</th>
                                             <th className="px-4 py-2 text-right">Variación</th>
-                                            <th className="px-4 py-2 text-right border-l border-slate-200 dark:border-dark-border">Inicial</th>
-                                            <th className="px-4 py-2 text-right">Actual</th>
-                                            <th className="px-4 py-2 text-right">Variación</th>
+                                            <th colSpan={3} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Vigentes</th>
+                                            <th colSpan={3} className="px-4 py-2 text-center border-l border-slate-200 dark:border-dark-border">Refinanciados</th>
+                                        </tr>
+                                        <tr>
+                                            <th></th>
+                                            <th colSpan={3} className="border-l border-slate-200 dark:border-dark-border"></th>
+                                            <th className="px-4 py-1.5 text-right border-l border-slate-200 dark:border-dark-border">Inicial</th>
+                                            <th className="px-4 py-1.5 text-right">Actual</th>
+                                            <th className="px-4 py-1.5 text-right">Variación</th>
+                                            <th className="px-4 py-1.5 text-right border-l border-slate-200 dark:border-dark-border">Inicial</th>
+                                            <th className="px-4 py-1.5 text-right">Actual</th>
+                                            <th className="px-4 py-1.5 text-right">Variación</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50 dark:divide-dark-border">
@@ -154,20 +169,17 @@ const GruposAsesorCard = () => {
                                                 {/* Grupos */}
                                                 <td className="px-4 py-3 text-right border-l border-slate-100 dark:border-dark-border"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.saldo_inicial)}</span></td>
                                                 <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-900 dark:text-dark-text">{fmtN(f.saldo_actual)}</span></td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <span className={`text-sm font-black ${f.variacion > 0 ? 'text-green-600 dark:text-green-400' : f.variacion < 0 ? 'text-brand-red dark:text-red-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
-                                                        {f.variacion > 0 ? '+' : ''}{fmtN(f.variacion)}
-                                                    </span>
-                                                </td>
+                                                <td className="px-4 py-3 text-right"><Variacion value={f.variacion} /></td>
 
-                                                {/* Clientes */}
+                                                {/* Clientes vigentes */}
                                                 <td className="px-4 py-3 text-right border-l border-slate-100 dark:border-dark-border"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.clientes_inicial)}</span></td>
                                                 <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-900 dark:text-dark-text">{fmtN(f.clientes_actual)}</span></td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <span className={`text-sm font-black ${f.clientes_variacion > 0 ? 'text-green-600 dark:text-green-400' : f.clientes_variacion < 0 ? 'text-brand-red dark:text-red-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
-                                                        {f.clientes_variacion > 0 ? '+' : ''}{fmtN(f.clientes_variacion)}
-                                                    </span>
-                                                </td>
+                                                <td className="px-4 py-3 text-right"><Variacion value={f.clientes_variacion} /></td>
+
+                                                {/* Clientes refinanciados */}
+                                                <td className="px-4 py-3 text-right border-l border-slate-100 dark:border-dark-border"><span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">{fmtN(f.clientes_ref_inicial)}</span></td>
+                                                <td className="px-4 py-3 text-right"><span className="text-sm font-black text-slate-900 dark:text-dark-text">{fmtN(f.clientes_ref_actual)}</span></td>
+                                                <td className="px-4 py-3 text-right"><Variacion value={f.clientes_ref_variacion} /></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -176,14 +188,15 @@ const GruposAsesorCard = () => {
                                             <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest">TOTAL</td>
                                             <td className="px-4 py-3 text-right text-sm font-black border-l border-slate-700">{fmtN(totales.saldo_inicial)}</td>
                                             <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.saldo_actual)}</td>
-                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
-                                                {totales.variacion > 0 ? '+' : ''}{fmtN(totales.variacion)}
-                                            </td>
+                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">{totales.variacion > 0 ? '+' : ''}{fmtN(totales.variacion)}</td>
+
                                             <td className="px-4 py-3 text-right text-sm font-black border-l border-slate-700">{fmtN(totales.clientes_inicial)}</td>
                                             <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.clientes_actual)}</td>
-                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
-                                                {totales.clientes_variacion > 0 ? '+' : ''}{fmtN(totales.clientes_variacion)}
-                                            </td>
+                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">{totales.clientes_variacion > 0 ? '+' : ''}{fmtN(totales.clientes_variacion)}</td>
+
+                                            <td className="px-4 py-3 text-right text-sm font-black border-l border-slate-700">{fmtN(totales.clientes_ref_inicial)}</td>
+                                            <td className="px-4 py-3 text-right text-sm font-black">{fmtN(totales.clientes_ref_actual)}</td>
+                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">{totales.clientes_ref_variacion > 0 ? '+' : ''}{fmtN(totales.clientes_ref_variacion)}</td>
                                         </tr>
                                     </tfoot>
                                 </table>

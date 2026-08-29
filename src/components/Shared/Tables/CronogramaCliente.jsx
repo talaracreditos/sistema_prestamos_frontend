@@ -16,6 +16,7 @@ import ProximaCuota from './components/CronogramaCliente/ProximaCuota';
 import CuotaPendienteItem from './components/CronogramaCliente/CuotaPendienteItem';
 import CuotasAtrasadasSection from './components/CronogramaCliente/CuotasAtrasadasSection';
 import CuotaPagadaItem from './components/CronogramaCliente/CuotaPagadaItem';
+import CuotasRefinanciadasSection from './components/CronogramaCliente/CuotasRefinanciadasSection';
 
 /* ─────────────────────────────────────────────────────────────
  * COMPONENTE PRINCIPAL
@@ -28,6 +29,7 @@ const CronogramaCliente = ({
     esGrupal = false,
     esVistaIntegrante = false,
     integrantes = [],
+    integrantesRefinanciados = [],
     miIntegranteId = null,
 }) => {
 
@@ -36,7 +38,7 @@ const CronogramaCliente = ({
 
     const esVistaPersonal = !esGrupal || esVistaIntegrante;
 
-    const { atrasadas, proxima, siguientes, pagadas, totalExigibles, prestamoTerminado } =
+    const { atrasadas, proxima, siguientes, pagadas, refinanciadas, totalExigibles, prestamoTerminado } =
         useCronogramaCliente(cronograma, estadoPrestamo);
 
     return (
@@ -81,9 +83,13 @@ const CronogramaCliente = ({
                 </div>
             )}
 
-            {/* Integrantes — SOLO grupal en vista global */}
+            {/* Integrantes — SOLO grupal en vista global (incluye a los ya refinanciados) */}
             {esGrupal && !esVistaIntegrante && (
-                <ListaIntegrantes integrantes={integrantes} miIntegranteId={miIntegranteId} />
+                <ListaIntegrantes
+                    integrantes={integrantes}
+                    miIntegranteId={miIntegranteId}
+                    integrantesRefinanciados={integrantesRefinanciados}
+                />
             )}
 
             {/* Barra de progreso */}
@@ -173,8 +179,11 @@ const CronogramaCliente = ({
                 </div>
             )}
 
+            {/* 5º: cuotas refinanciadas — su deuda ya pasó a otro préstamo */}
+            <CuotasRefinanciadasSection refinanciadas={refinanciadas} />
+
             {/* Sin cuotas */}
-            {!proxima && atrasadas.length === 0 && siguientes.length === 0 && pagadas.length === 0 && (
+            {!proxima && atrasadas.length === 0 && siguientes.length === 0 && pagadas.length === 0 && refinanciadas.length === 0 && (
                 <div className="p-8 text-center">
                     <p className="text-xs font-bold text-slate-400 dark:text-dark-text-muted uppercase">
                         Aún no hay cuotas registradas en el cronograma
