@@ -1,50 +1,93 @@
-// hooks/CajaChicaMovimiento/useStore.js
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { store } from 'services/cajaChicaMovimientoService';
+import { useState, useEffect, useCallback } from 'react';
+import { getMiSesion, abrirCaja, cerrarCaja } from 'services/cajaChicaSesionService';
+import { store as storeMovimiento } from 'services/cajaChicaMovimientoService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 
-const hoy = () => new Date().toISOString().slice(0, 10);
-
 export const useStore = () => {
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [sesionActiva, setSesionActiva] = useState(undefined);
     const [alert, setAlert] = useState(null);
 
-    const [formData, setFormData] = useState({
-        fecha: hoy(),
+    const [isAbrirModalOpen, setIsAbrirModalOpen] = useState(false);
+    const [isCerrarModalOpen, setIsCerrarModalOpen] = useState(false);
+
+    const initialForm = {
+        fecha: new Date().toISOString().slice(0, 10),
         tipo: 'egreso',
         caja_chica_gasto_id: '',
         concepto: '',
         medio_pago: 'efectivo',
         monto: '',
-        numero_comprobante: '',
-    });
+        numero_operacion: '',
+    };
+    const [formData, setFormData] = useState(initialForm);
+
+    const verifySesion = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await getMiSesion();
+            setSesionActiva(res?.data?.id ? res.data : null);
+        } catch (err) {
+            setSesionActiva(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => { verifySesion(); }, [verifySesion]);
+
+    const handleAbrirSesion = async (data) => {
+        setLoading(true);
+        try {
+            await abrirCaja(data);
+            setAlert({ type: 'success', message: '¡Caja chica aperturada exitosamente!' });
+            setIsAbrirModalOpen(false);
+            verifySesion();
+        } catch (err) {
+            setIsAbrirModalOpen(false);
+            setAlert(handleApiError(err));
+            setLoading(false);
+        }
+    };
+
+    const handleCerrarSesion = async (data) => {
+        setLoading(true);
+        try {
+            await cerrarCaja(sesionActiva.id, data);
+            setAlert({ type: 'success', message: 'Caja chica cerrada correctamente.' });
+            setIsCerrarModalOpen(false);
+            verifySesion();
+        } catch (err) {
+            setAlert(handleApiError(err));
+            setLoading(false);
+        }
+    };
 
     const handleChange = (field, value) => {
-        setFormData(prev => {
-            const next = { ...prev, [field]: value };
-            if (field === 'tipo' && value === 'ingreso') {
-                next.caja_chica_gasto_id = '';
-            }
-            return next;
-        });
+        setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setAlert(null);
         try {
-            await store(formData);
-            setAlert({ type: 'success', message: 'Movimiento registrado exitosamente.' });
-            setTimeout(() => navigate('/caja-chica-movimiento/listar'), 1200);
+            await storeMovimiento(formData);
+            setAlert({ type: 'success', message: 'Movimiento registrado correctamente.' });
+            setFormData(initialForm);
+            verifySesion();
         } catch (err) {
-            setAlert(handleApiError(err, 'Error al registrar el movimiento'));
+            setAlert(handleApiError(err));
         } finally {
             setLoading(false);
         }
     };
 
-    return { formData, loading, alert, setAlert, handleChange, handleSubmit };
+    return {
+        loading, sesionActiva, alert, setAlert,
+        isAbrirModalOpen, setIsAbrirModalOpen,
+        isCerrarModalOpen, setIsCerrarModalOpen,
+        handleAbrirSesion, handleCerrarSesion,
+        formData, handleChange, handleSubmit,
+        verifySesion,
+    };
 };

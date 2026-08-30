@@ -179,6 +179,12 @@ export const MENU_GROUPS = [
                 ],
             },
             {
+                section: 'Sesiones', icon: ClockIcon,
+                subs: [
+                    { name: 'Historial de Sesiones', link: '/caja-chica/sesiones', requiredPermission: 'cajaChicaSesion.index' },
+                ],
+            },
+            {
                 section: 'Gastos Administrativos', icon: ReceiptPercentIcon,
                 subs: [
                     { name: 'Listar Gastos', link: '/caja-chica-gasto/listar',  requiredPermission: 'cajaChicaGasto.index' },

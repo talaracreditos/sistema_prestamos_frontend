@@ -103,7 +103,7 @@ const CajaSearchSelect = ({ onSelect, disabled, initialName = '' }) => {
                                             <InboxStackIcon className="w-4 h-4 text-slate-500 dark:text-dark-text-muted" /> {caja.nombre}
                                         </span>
                                         {caja.descripcion && (
-                                            <span className="text-[10px] text-slate-500 dark:text-dark-text-muted font-bold flex items-center gap-1.5 truncate max-w-[200px]">
+                                            <span className="text-[10px] text-slate-500 dark:text-dark-text-muted font-bold flex items-center gap-1.5">
                                                 {caja.descripcion}
                                             </span>
                                         )}

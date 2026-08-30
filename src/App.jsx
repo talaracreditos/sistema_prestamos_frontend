@@ -155,6 +155,9 @@ import EditarCajaChicaGasto from 'pages/CajaChicaGasto/Update';
 import ListarCajaChicaMovimientos from 'pages/CajaChicaMovimiento/Index';
 import RegistrarCajaChicaMovimiento from 'pages/CajaChicaMovimiento/Store';
 
+// UI SESIONES DE CAJA CHICA (TURNOS)
+import ListarSesionesCajaChica from 'pages/CajaChicaSesion/Index';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -311,6 +314,9 @@ function AppContent() {
         <Route path="/caja-chica-movimiento/listar" element={<ProtectedRoute requiredPermission="cajaChicaMovimiento.index" element={<ListarCajaChicaMovimientos />} />} />
         <Route path="/caja-chica-movimiento/registrar" element={<ProtectedRoute requiredPermission="cajaChicaMovimiento.store" element={<RegistrarCajaChicaMovimiento />} />} />
 
+        {/* CAJA CHICA SESIONES (TURNOS) */}
+        <Route path="/caja-chica/sesiones" element={<ProtectedRoute requiredPermission="cajaChicaSesion.index" element={<ListarSesionesCajaChica />} />} />
+                
         {/* SETTINGS */}
         <Route path="/parametro/listar" element={<ProtectedRoute requiredPermission="parametro.index" element={<SecureRoute element={<ListarParametros />} />} />} />   
         <Route path="/parametro/editar/:id" element={<ProtectedRoute requiredPermission="parametro.update" element={<SecureRoute element={<EditarParametro />} />} />} />   
