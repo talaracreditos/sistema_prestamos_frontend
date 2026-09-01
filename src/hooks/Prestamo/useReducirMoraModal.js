@@ -8,7 +8,7 @@ export function useReducirMoraModal({ onSuccess, isOpen }) {
     const [alert, setAlert]       = useState(null);
     const [monto, setMonto]       = useState('');
     const [motivo, setMotivo]     = useState('');
-    const [preview, setPreview]   = useState(null); // { saldoPendiente, reduccion, restante }
+    const [preview, setPreview]   = useState(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -48,7 +48,10 @@ export function useReducirMoraModal({ onSuccess, isOpen }) {
         calcularPreview(saldoPendiente, montoStr);
     };
 
-    const handleSubmit = async (cuotaId, saldoPendiente) => {
+    // cuotaDetalleId: opcional — si viene, el backend reduce SOLO la mora
+    // de ese integrante (dentro de un préstamo grupal). Si es null/undefined,
+    // mantiene el comportamiento original (cuota completa).
+    const handleSubmit = async (cuotaId, saldoPendiente, cuotaDetalleId = null) => {
         const m = parseFloat(monto);
         if (!monto || isNaN(m) || m <= 0) {
             setAlert({ type: 'error', message: 'Ingresa un monto válido mayor a 0.' });
@@ -62,7 +65,10 @@ export function useReducirMoraModal({ onSuccess, isOpen }) {
         setLoading(true);
         setAlert(null);
         try {
-            const res = await reducirMora({ cuota_id: cuotaId, monto: m, motivo });
+            const payload = { cuota_id: cuotaId, monto: m, motivo };
+            if (cuotaDetalleId) payload.cuota_detalle_id = cuotaDetalleId;
+
+            const res = await reducirMora(payload);
             const result = res.data ?? res;
             setAlert({
                 type: 'success',

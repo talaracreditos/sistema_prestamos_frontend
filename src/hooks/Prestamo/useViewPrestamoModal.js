@@ -26,6 +26,8 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     const [refModalOpen, setRefModalOpen]                     = useState(false);
     const [refData, setRefData]                               = useState(null);
     const [loadingCastigo, setLoadingCastigo]                 = useState(false);
+    const [moraModalOpen, setMoraModalOpen]                   = useState(false);
+    const [moraData, setMoraData]                             = useState(null);
 
     // ── Selección de integrante ───────────────────────────────────────────────
     const handleSelectIntegrante = async (clienteId) => {
@@ -69,6 +71,50 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         setIntegranteSeleccionado(null);
         setIntegranteData(null);
         onClose();
+    };
+
+    // ── Reducir mora ──────────────────────────────────────────────────────────
+    // Abre el modal de reducción de mora para la cuota indicada. Si el
+    // préstamo es grupal y se está viendo un integrante específico, pasa
+    // también cuota_detalle_id + su nombre, para que el backend reduzca
+    // SOLO la mora de ese integrante en vez de la cuota completa.
+    //
+    // OJO: asume que cada entrada de `cronogramaActivo`, cuando se está
+    // viendo un integrante (esVistaIntegrante), trae su propio
+    // `cuota_detalle_id` — ajustar el nombre del campo aquí si el backend
+    // lo expone distinto.
+    const handleAbrirReducirMora = (cuota) => {
+        const esVista = esVistaIntegrante;
+
+        setMoraData({
+            cuota,
+            cuotaDetalleId: esVista ? (cuota?.cuota_detalle_id ?? null) : null,
+            esIntegrante:   esVista,
+            integranteNombre: esVista ? integranteNombre : null,
+        });
+        setMoraModalOpen(true);
+    };
+
+    const handleCerrarReducirMora = () => {
+        setMoraModalOpen(false);
+        setMoraData(null);
+    };
+
+    const handleSuccessReducirMora = async () => {
+        setMoraModalOpen(false);
+        setMoraData(null);
+        // Refresca la vista del integrante actual (si aplica) y el préstamo
+        // completo, para que el cronograma muestre el nuevo saldo de mora.
+        if (esVistaIntegrante && integranteSeleccionado) {
+            setLoadingIntegrante(true);
+            try {
+                const res = await showIntegrante(data.id, integranteSeleccionado);
+                setIntegranteData(res.data || res);
+            } finally {
+                setLoadingIntegrante(false);
+            }
+        }
+        if (onRefresh) await onRefresh();
     };
 
     // ── Refinanciamiento ──────────────────────────────────────────────────────
@@ -210,10 +256,16 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         !prestamoCancelado &&
         canGeneratePdf;
 
-    const puedeVerReducirMora =
-        canReducirMora &&
-        !prestamoCancelado &&
-        data?.estado === 1;
+    // Reducir mora:
+    //  - Individual: se ve siempre que las condiciones base se cumplan
+    //    (comportamiento original — la cuota tiene un solo integrante,
+    //    así que "cuota completa" y "el integrante" son lo mismo).
+    //  - Grupal: SOLO se ve viendo a un integrante específico. Reducir
+    //    mora sobre el grupo completo desde la vista de grupo queda
+    //    deshabilitado en UI a propósito — evita que se prorratee mora
+    //    entre integrantes sin que quede claro a cuál se le está
+    //    perdonando qué, que era la ambigüedad que motivó este cambio.
+    const puedeVerReducirMora = canReducirMora && !prestamoCancelado && data?.estado === 1;
 
     return {
         // rol / auth
@@ -224,6 +276,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         integranteSeleccionado, integranteData, loadingIntegrante, loadingCastigo,
         pdfOpen, pdfBase64, pdfTitle, loadingPdf,
         historialModal, refModalOpen, refData,
+        moraModalOpen, moraData,
         // derivados de datos
         esVistaIntegrante, cronogramaActivo,
         integranteActivo, integranteRefinanciado, integranteYaRefinanciado,
@@ -236,6 +289,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         handleSelectIntegrante, handleDescargarCronograma,
         handleCerrarPdf, handleClose,
         handleAbrirRefinanciamiento, handleSuccessRefinanciamiento,
+        handleAbrirReducirMora, handleCerrarReducirMora, handleSuccessReducirMora,
         setHistorialModal, setRefModalOpen, handleCastigar,
     };
 }

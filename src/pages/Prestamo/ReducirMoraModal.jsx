@@ -4,8 +4,10 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { ScissorsIcon } from '@heroicons/react/24/outline';
 import { useReducirMoraModal } from 'hooks/Prestamo/useReducirMoraModal';
 
-const ReducirMoraModal = ({ isOpen, onClose, cuota, onSuccess }) => {
+const ReducirMoraModal = ({ isOpen, onClose, cuota, cuotaDetalleId = null, integranteNombre = null, onSuccess }) => {
     const saldoPendiente = parseFloat(cuota?.mora_pendiente ?? cuota?.mora ?? cuota?.mora_total ?? 0);
+
+    const cuotaId = cuota?.id ?? cuota?.cuota_id ?? null;
 
     const {
         loading, alert, monto, motivo, preview, PORCENTAJES_RAPIDOS,
@@ -15,10 +17,14 @@ const ReducirMoraModal = ({ isOpen, onClose, cuota, onSuccess }) => {
     });
 
     const handleClose = () => { if (!loading) { reset(); onClose(); } };
-    const puedeSubmit = monto && parseFloat(monto) > 0 && parseFloat(monto) <= saldoPendiente;
+    const puedeSubmit = !!cuotaId && monto && parseFloat(monto) > 0 && parseFloat(monto) <= saldoPendiente;
+
+    const titulo = integranteNombre
+        ? `Reducir Mora — ${integranteNombre} (Cuota N° ${cuota?.nro})`
+        : `Reducir Mora — Cuota N° ${cuota?.nro}`;
 
     return (
-        <ViewModal isOpen={isOpen} onClose={handleClose} title={`Reducir Mora — Cuota N° ${cuota?.nro}`} size="sm" hideFooter>
+        <ViewModal isOpen={isOpen} onClose={handleClose} title={titulo} size="sm" hideFooter>
             <div className="relative space-y-5 p-1 transition-colors">
 
                 {loading && (
@@ -29,6 +35,11 @@ const ReducirMoraModal = ({ isOpen, onClose, cuota, onSuccess }) => {
                 )}
 
                 <div className="bg-slate-900 dark:bg-black rounded-[24px] p-5 text-white dark:text-dark-text border border-transparent dark:border-dark-border transition-colors">
+                    {integranteNombre && (
+                        <p className="text-[9px] font-black uppercase text-brand-gold/80 tracking-[0.15em] mb-2">
+                            Integrante: {integranteNombre}
+                        </p>
+                    )}
                     <p className="text-[9px] font-black uppercase text-slate-400 dark:text-dark-text-muted tracking-[0.2em] mb-1">Mora Pendiente</p>
                     <p className="text-3xl font-black text-brand-red dark:text-brand-gold italic">S/ {saldoPendiente.toFixed(2)}</p>
                     {parseFloat(cuota?.mora_reducida ?? 0) > 0 && (
@@ -93,7 +104,7 @@ const ReducirMoraModal = ({ isOpen, onClose, cuota, onSuccess }) => {
 
                 {alert && <AlertMessage type={alert.type} message={alert.message} onClose={() => {}} />}
 
-                <button onClick={() => handleSubmit(cuota?.id, saldoPendiente)} disabled={loading || !puedeSubmit}
+                <button onClick={() => handleSubmit(cuotaId, saldoPendiente, cuotaDetalleId)} disabled={loading || !puedeSubmit}
                     className="w-full bg-brand-red dark:bg-brand-red-glow text-white dark:text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-brand-red/30 dark:shadow-black/30 hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95">
                     {loading ? <div className="w-4 h-4 border-2 border-white/20 dark:border-black/20 border-t-white dark:border-t-black rounded-full animate-spin" /> : <ScissorsIcon className="w-4 h-4" />}
                     {loading ? 'Aplicando...' : 'Aplicar Reducción de Mora'}

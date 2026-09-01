@@ -16,7 +16,7 @@ const CronogramaTable = ({
         cronograma,
         esVistaIntegrante,
         onHistorialModal,
-        onReducirMora: esVistaIntegrante ? undefined : onReducirMora,
+        onReducirMora,
         extraColumns,
     };
 

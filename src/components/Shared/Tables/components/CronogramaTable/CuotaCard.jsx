@@ -52,11 +52,7 @@ export const CuotaCard = ({
     /* ─────────────────────────────────────────────
      * Mostrar botón reducir mora
      * ───────────────────────────────────────────── */
-    const mostrarBotonReducir =
-        !esVistaIntegrante &&
-        d.moraPend > 0 &&
-        !!onReducirMora &&
-        !d.esInactiva;
+    const mostrarBotonReducir = d.moraPend > 0 && !!onReducirMora && !d.esInactiva;
 
     /* ─────────────────────────────────────────────
      * Color lateral

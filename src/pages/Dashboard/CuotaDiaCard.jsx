@@ -94,7 +94,7 @@ const CuotaDiaCard = () => {
                             >
                                 <option value="">Todos los asesores</option>
                                 {asesoresDisp.map(a => (
-                                    <option key={a.id} value={a.id}>{a.nombre}</option>
+                                    <option key={a.id} value={a.id}>{a.username}</option>
                                 ))}
                             </select>
                         </div>
@@ -154,7 +154,7 @@ const CuotaDiaCard = () => {
                                                             {j === 0 ? (
                                                                 <td className="px-4 py-3 align-top" rowSpan={asesor.filas.length}>
                                                                     <div className="flex items-center gap-2">
-                                                                        <span className="text-xs font-black text-slate-800 dark:text-dark-text uppercase">{asesor.nombre}</span>
+                                                                        <span className="text-xs font-black text-slate-800 dark:text-dark-text uppercase">{asesor.username}</span>
                                                                     </div>
                                                                 </td>
                                                             ) : null}
@@ -188,7 +188,7 @@ const CuotaDiaCard = () => {
                                                 {/* Subtotal asesor */}
                                                 <tr className="bg-brand-red-light/30 dark:bg-dark-surface-alt/60 border-t border-brand-red/20 dark:border-brand-gold/20">
                                                     <td colSpan={7} className="px-4 py-2 text-[10px] font-black text-brand-red dark:text-brand-gold uppercase tracking-widest text-right">
-                                                        Subtotal {asesor.nombre}
+                                                        Subtotal {asesor.username}
                                                     </td>
                                                     <td className="px-4 py-2 text-right text-xs font-black text-brand-red dark:text-brand-gold">
                                                         S/ {fmt(asesor.total_cuota)}

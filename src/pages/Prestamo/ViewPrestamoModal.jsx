@@ -20,8 +20,6 @@ import { useAuth } from 'context/AuthContext';
 
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
-    const [reducirMoraOpen, setReducirMoraOpen]             = useState(false);
-    const [cuotaParaReducir, setCuotaParaReducir]           = useState(null);
     const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
     const [reprogramarOpen, setReprogramarOpen]             = useState(false);
     const [historialReprogOpen, setHistorialReprogOpen]     = useState(false);
@@ -48,12 +46,16 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         cuotasPendientesCount,
         puedeVerReprogramar, puedeVerRefinanciar, puedeVerCambiarPresidente,
         puedeVerDescargarPdf, puedeVerReducirMora,
+        moraModalOpen, moraData,
         handleSelectIntegrante,
         handleDescargarCronograma,
         handleCerrarPdf,
         handleClose,
         handleAbrirRefinanciamiento,
         handleSuccessRefinanciamiento,
+        handleAbrirReducirMora,
+        handleCerrarReducirMora,
+        handleSuccessReducirMora,
         setHistorialModal,
         setRefModalOpen,
     } = useViewPrestamoModal({ data, onClose, onRefresh });
@@ -77,17 +79,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         if (!onRefresh) return;
         setRefreshing(true);
         try { await onRefresh(); } finally { setRefreshing(false); }
-    };
-
-    const handleAbrirReducirMora = (cuota) => {
-        setCuotaParaReducir(cuota);
-        setReducirMoraOpen(true);
-    };
-
-    const handleSuccessReducirMora = () => {
-        setReducirMoraOpen(false);
-        setCuotaParaReducir(null);
-        if (onRefresh) onRefresh();
     };
 
     const handleSuccessReprogramacion = () => {
@@ -414,9 +405,11 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         onSuccess={handleSuccessRefinanciamiento}
                     />
                     <ReducirMoraModal
-                        isOpen={reducirMoraOpen}
-                        onClose={() => { setReducirMoraOpen(false); setCuotaParaReducir(null); }}
-                        cuota={cuotaParaReducir}
+                        isOpen={moraModalOpen}
+                        onClose={handleCerrarReducirMora}
+                        cuota={moraData?.cuota}
+                        cuotaDetalleId={moraData?.cuotaDetalleId}
+                        integranteNombre={moraData?.integranteNombre}
                         onSuccess={handleSuccessReducirMora}
                     />
                     <CambiarPresidenteModal
