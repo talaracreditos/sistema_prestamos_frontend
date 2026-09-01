@@ -3,7 +3,7 @@ import {
     BanknotesIcon, CheckCircleIcon, CalendarDaysIcon,
     DocumentTextIcon, ChartBarIcon, ClockIcon,
     ExclamationTriangleIcon, MagnifyingGlassIcon, XMarkIcon,
-    BriefcaseIcon
+    BriefcaseIcon, ArrowPathIcon, UserGroupIcon
 } from '@heroicons/react/24/outline';
 import {
     AreaChart, Area, BarChart, Bar,
@@ -23,6 +23,8 @@ const ICONS = {
     'warning':      ExclamationTriangleIcon,
     'exclamation':  ExclamationTriangleIcon,
     'briefcase':    BriefcaseIcon,
+    'arrow-path':   ArrowPathIcon,
+    'user-group':   UserGroupIcon,
 };
 
 const CustomTooltip = ({ active, payload, label, moneyKey = 'total' }) => {
@@ -382,4 +384,4 @@ const DashboardCard = ({
 };
 
 export { StatRow, GraficaArea, GraficaBarra, CustomTooltip, TablaLista };
-export default DashboardCard;
+export default DashboardCard; 
