@@ -292,6 +292,7 @@ const MasterCard = () => {
                                         <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-200 dark:border-dark-border sticky top-0 z-10 shadow-sm">
                                             <tr>
                                                 <th className="px-3 py-3">Cliente</th>
+                                                <th className="px-3 py-3">DNI / RUC</th>
                                                 <th className="px-3 py-3">Cod. Recaudo</th>
                                                 <th className="px-3 py-3">F. Desemb.</th>
                                                 <th className="px-3 py-3">Tipo Desemb.</th>
@@ -328,6 +329,9 @@ const MasterCard = () => {
                                                                 ? `${f.apellido_paterno} ${f.apellido_materno}, ${f.nombres}`
                                                                 : f.nombres}
                                                         </span>
+                                                    </td>
+                                                    <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted whitespace-nowrap">
+                                                        {f.dni}
                                                     </td>
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted whitespace-nowrap">{f.cod_recaudo}</td>
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted whitespace-nowrap">{f.fecha_desembolso}</td>
