@@ -165,3 +165,14 @@ export const exportEstructuraCarteraDashboard = async (filters = {}) => {
     if (!response.ok) throw new Error('Error al exportar estructura de cartera');
     return response.blob();
 };
+
+// ── Interés por grupo ─────────────────────────────────────────────────────────
+export const getInteresGrupoDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/interes-grupo${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
+export const exportInteresGrupoDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/interes-grupo/export${buildQs(filters)}`, { method: 'GET' });
+    if (!response.ok) throw new Error('Error al exportar interés por grupo');
+    return response.blob();
+};

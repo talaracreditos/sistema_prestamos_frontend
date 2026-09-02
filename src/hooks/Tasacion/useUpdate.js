@@ -57,7 +57,7 @@ export const useUpdate = () => {
                 setPrecioOroGramo(data.precio_oro_gramo_aplicado ?? '');
 
                 setCliente(data.cliente ? {
-                    id: data.cliente.id,
+                    id: data.cliente.usuario_id,
                     nombre_completo: data.cliente.nombre_completo,
                     documento: data.cliente.documento,
                 } : null);
@@ -222,7 +222,7 @@ export const useUpdate = () => {
         }
 
         const payload = {
-            cliente_id: cliente.id,
+            cliente_id: cliente.usuario_id,
             fecha_tasacion: fechaTasacion,
             porcentaje_prestamo_aplicado: porcentajeNum,
             precio_oro_gramo_aplicado: precioOroGramoNum,

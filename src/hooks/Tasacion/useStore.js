@@ -177,7 +177,7 @@ export const useStore = () => {
         }
 
         const payload = {
-            cliente_id: cliente.id,
+            cliente_id: cliente.usuario_id,
             fecha_tasacion: new Date().toISOString().split('T')[0],
             porcentaje_prestamo_aplicado: porcentajeNum,
             precio_oro_gramo_aplicado: precioOroGramoNum,
