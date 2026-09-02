@@ -117,7 +117,7 @@ const InteresGrupoCard = () => {
                                         <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
                                             <tr>
                                                 <th className="px-4 py-3">F. Desembolso</th>
-                                                <th className="px-4 py-3">Grupo</th>
+                                                <th className="px-4 py-3">Grupo / Cliente</th>
                                                 <th className="px-4 py-3">Cód. Recaudo</th>
                                                 <th className="px-4 py-3">Presidenta</th>
                                                 <th className="px-4 py-3">DNI</th>
@@ -129,9 +129,9 @@ const InteresGrupoCard = () => {
                                             {filas.map((f, i) => (
                                                 <tr key={f.prestamo_id} className={`hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-dark-surface-alt/30'}`}>
                                                     <td className="px-4 py-3 text-xs font-bold text-slate-600 dark:text-dark-text-muted">{f.fecha_desembolso}</td>
-                                                    <td className="px-4 py-3 text-xs font-black text-slate-800 dark:text-dark-text uppercase">{f.grupo_nombre}</td>
+                                                    <td className="px-4 py-3 text-[11px] font-black text-slate-800 dark:text-dark-text uppercase">{f.grupo_nombre}</td>
                                                     <td className="px-4 py-3 text-xs font-bold text-slate-600 dark:text-dark-text-muted">{f.codigo_recaudo}</td>
-                                                    <td className="px-4 py-3 text-xs font-bold text-slate-700 dark:text-dark-text uppercase">{f.presidenta_nombre}</td>
+                                                    <td className="px-4 py-3 text-[11px] font-bold text-slate-700 dark:text-dark-text uppercase">{f.presidenta_nombre}</td>
                                                     <td className="px-4 py-3 text-xs font-bold text-slate-600 dark:text-dark-text-muted">{f.presidenta_dni}</td>
                                                     <td className="px-4 py-3 text-[9px] font-bold text-slate-600 dark:text-dark-text-muted">{f.presidenta_correo}</td>
                                                     <td className="px-4 py-3 text-right text-sm font-black text-slate-900 dark:text-dark-text">S/ {fmtMonto(f.interes_percibido)}</td>
