@@ -29,18 +29,22 @@ const SITUACION_STYLES = {
     'CASTIGADO': 'text-red-600 dark:text-red-400',
 };
 
+// 🔥 Solo 2 estados reales ahora: ACTIVO (vigente) y CANCELADO (liquidado/refinanciado/integrante salido)
 const ESTADO_LABELS = {
-    'ACTIVO':       'ACTIVO',
-    'CANCELADO':    'EXTORNADO',
-    'LIQUIDADO':    'CANCELADO',
-    'REFINANCIADO': 'REFINANCIADO',
+    'ACTIVO':    'ACTIVO',
+    'CANCELADO': 'CANCELADO',
 };
 
 const ESTADO_STYLES = {
-    'ACTIVO':       'text-green-600 dark:text-green-400',
-    'CANCELADO':    'text-red-600 dark:text-red-400',
-    'LIQUIDADO':    'text-slate-500 dark:text-slate-400',
-    'REFINANCIADO': 'text-amber-600 dark:text-amber-400',
+    'ACTIVO':    'text-green-600 dark:text-green-400',
+    'CANCELADO': 'text-red-600 dark:text-red-400',
+};
+
+// 🔥 Nuevo: estilos para el tipo de desembolso (NUEVO / RECURRENTE / REFINANCIADO)
+const TIPO_DESEMBOLSO_STYLES = {
+    'NUEVO':        'bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30',
+    'RECURRENTE':   'bg-slate-50 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text-muted border-slate-200 dark:border-dark-border',
+    'REFINANCIADO': 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30',
 };
 
 const Chevron = ({ collapsed }) => (
@@ -66,6 +70,7 @@ const MasterCard = () => {
         codRecaudo,      setCodRecaudo,
         estadoCredito,   setEstadoCredito,
         situacion,       setSituacion,
+        tipoDesembolso,  setTipoDesembolso, // 🔥 nuevo — agregar en useDashboardMaster (ver nota abajo)
         calificacionSbs, setCalificacionSbs,
     } = useDashboardMaster();
 
@@ -83,6 +88,7 @@ const MasterCard = () => {
         ...(codRecaudo        ? { cod_recaudo:       codRecaudo }                                   : {}),
         ...(estadoCredito     ? { estado_credito:    estadoCredito }                                : {}),
         ...(situacion         ? { situacion }                                                       : {}),
+        ...(tipoDesembolso    ? { tipo_desembolso:   tipoDesembolso }                                : {}),
         ...(calificacionSbs   ? { calificacion_sbs:  calificacionSbs }                              : {}),
         ...(asesoresSeleccionados.length > 0
             ? { asesor_ids: asesoresSeleccionados.map(a => a.id).join(',') }
@@ -173,14 +179,13 @@ const MasterCard = () => {
                                 placeholder="Cód. recaudo..." className={`${inputCls} w-32`} />
                         </div>
 
-                        {/* Estado */}
+                        {/* Estado — 🔥 Activo, Cancelado y Refinanciado */}
                         <div>
                             <label className={labelCls}>Estado</label>
                             <select value={estadoCredito} onChange={e => setEstadoCredito(e.target.value)} className={inputCls}>
                                 <option value="">Todos</option>
                                 <option value="VIGENTE">Activo</option>
                                 <option value="LIQUIDADO">Cancelado</option>
-                                <option value="CANCELADO">Extornado</option>
                                 <option value="REFINANCIADO">Refinanciado</option>
                             </select>
                         </div>
@@ -193,6 +198,17 @@ const MasterCard = () => {
                                 <option value="VIGENTE">Vigente</option>
                                 <option value="VENCIDO">Vencido</option>
                                 <option value="CASTIGADO">Castigado</option>
+                            </select>
+                        </div>
+
+                        {/* 🔥 Nuevo: Tipo Desembolso */}
+                        <div>
+                            <label className={labelCls}>Tipo Desemb.</label>
+                            <select value={tipoDesembolso} onChange={e => setTipoDesembolso(e.target.value)} className={inputCls}>
+                                <option value="">Todos</option>
+                                <option value="NUEVO">Nuevo</option>
+                                <option value="RECURRENTE">Recurrente</option>
+                                <option value="REFINANCIADO">Refinanciado</option>
                             </select>
                         </div>
 
@@ -285,7 +301,6 @@ const MasterCard = () => {
                                                 <th className="px-3 py-3">Grupo</th>
                                                 <th className="px-3 py-3">Cargo</th>
                                                 <th className="px-3 py-3 text-right">Cuota Grupo</th>
-                                                <th className="px-3 py-3">Celular</th>
                                                 <th className="px-3 py-3">Zona</th>
                                                 <th className="px-3 py-3">Asesor</th>
                                                 <th className="px-3 py-3 text-right">Monto Desemb.</th>
@@ -316,7 +331,11 @@ const MasterCard = () => {
                                                     </td>
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted whitespace-nowrap">{f.cod_recaudo}</td>
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted whitespace-nowrap">{f.fecha_desembolso}</td>
-                                                    <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted uppercase whitespace-nowrap">{f.tipo_desembolso}</td>
+                                                    <td className="px-3 py-2.5">
+                                                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black border whitespace-nowrap ${TIPO_DESEMBOLSO_STYLES[f.tipo_desembolso] ?? 'bg-slate-50 dark:bg-dark-surface-alt text-slate-500 dark:text-dark-text-muted border-slate-200 dark:border-dark-border'}`}>
+                                                            {f.tipo_desembolso}
+                                                        </span>
+                                                    </td>
                                                     <td className={`px-3 py-2.5 text-[10px] font-black uppercase ${ESTADO_STYLES[f.estado_credito] ?? 'text-slate-600 dark:text-dark-text-muted'}`}>
                                                         {ESTADO_LABELS[f.estado_credito] ?? f.estado_credito}
                                                     </td>
@@ -327,7 +346,6 @@ const MasterCard = () => {
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted uppercase whitespace-nowrap">{f.nombre_grupo}</td>
                                                     <td className="px-3 py-2.5 text-[10px] font-black text-brand-gold-dark dark:text-brand-gold uppercase whitespace-nowrap">{f.cargo}</td>
                                                     <td className="px-3 py-2.5 text-right text-[11px] font-bold text-slate-600 dark:text-dark-text-muted whitespace-nowrap">S/ {fmt(f.cuota_grupo)}</td>
-                                                    <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted whitespace-nowrap">{f.celular}</td>
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted uppercase whitespace-nowrap">{f.zona}</td>
                                                     <td className="px-3 py-2.5 text-[10px] font-bold text-slate-500 dark:text-dark-text-muted uppercase whitespace-nowrap">{f.usuario}</td>
                                                     <td className="px-3 py-2.5 text-right text-[11px] font-black text-slate-800 dark:text-dark-text whitespace-nowrap">S/ {fmt(f.monto_individual)}</td>

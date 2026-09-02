@@ -13,6 +13,7 @@ export const useDashboardMaster = () => {
     const [codRecaudo,      setCodRecaudo]      = useState('');
     const [estadoCredito,   setEstadoCredito]   = useState('');
     const [situacion,       setSituacion]       = useState('');
+    const [tipoDesembolso,  setTipoDesembolso]  = useState(''); // 🔥 nuevo
     const [calificacionSbs, setCalificacionSbs] = useState('');
 
     const buildFilters = useCallback((fi, ff, asesorIds, page, extra = {}) => {
@@ -24,6 +25,7 @@ export const useDashboardMaster = () => {
         if (extra.codRecaudo)    filters.cod_recaudo       = extra.codRecaudo;
         if (extra.estadoCredito) filters.estado_credito    = extra.estadoCredito;
         if (extra.situacion)     filters.situacion         = extra.situacion;
+        if (extra.tipoDesembolso) filters.tipo_desembolso  = extra.tipoDesembolso; // 🔥 nuevo
         if (extra.calificacionSbs) filters.calificacion_sbs = extra.calificacionSbs;
         return filters;
     }, []);
@@ -43,7 +45,7 @@ export const useDashboardMaster = () => {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    const getExtra = () => ({ documento, codRecaudo, estadoCredito, situacion, calificacionSbs });
+    const getExtra = () => ({ documento, codRecaudo, estadoCredito, situacion, tipoDesembolso, calificacionSbs });
 
     const handleFiltrar = () =>
         fetchData(fechaInicio, fechaFin, asesoresSeleccionados.map(a => a.id), 1, getExtra());
@@ -55,7 +57,7 @@ export const useDashboardMaster = () => {
         setFechaInicio(''); setFechaFin('');
         setAsesoresSeleccionados([]);
         setDocumento(''); setCodRecaudo('');
-        setEstadoCredito(''); setSituacion(''); setCalificacionSbs('');
+        setEstadoCredito(''); setSituacion(''); setTipoDesembolso(''); setCalificacionSbs('');
         fetchData('', '', [], 1, {});
     };
 
@@ -84,6 +86,7 @@ export const useDashboardMaster = () => {
         codRecaudo,      setCodRecaudo,
         estadoCredito,   setEstadoCredito,
         situacion,       setSituacion,
+        tipoDesembolso,  setTipoDesembolso, // 🔥 nuevo
         calificacionSbs, setCalificacionSbs,
     };
 };

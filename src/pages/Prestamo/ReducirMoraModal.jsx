@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { ScissorsIcon } from '@heroicons/react/24/outline';
 import { useReducirMoraModal } from 'hooks/Prestamo/useReducirMoraModal';
 
 const ReducirMoraModal = ({ isOpen, onClose, cuota, cuotaDetalleId = null, integranteNombre = null, onSuccess }) => {
-    const saldoPendiente = parseFloat(cuota?.mora_pendiente ?? cuota?.mora ?? cuota?.mora_total ?? 0);
+    
+    const saldoPendiente = useMemo(() => {
+        return parseFloat(cuota?.mora);
+    }, [cuota]);
 
     const cuotaId = cuota?.id ?? cuota?.cuota_id ?? null;
 
