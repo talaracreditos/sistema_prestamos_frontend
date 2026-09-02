@@ -1,28 +1,9 @@
 import { useMemo } from 'react';
 
-/**
- * Hook que lee los datos YA CALCULADOS por el backend.
- * Cero lógica de negocio aquí — el backend manda todo listo.
- *
- * Campos excedente por contexto:
- *  - Vista integrante (esVistaIntegrante=true):
- *      excedente_anterior  → lo que venía de su cuota anterior (individual del integrante)
- *      excedente_aplicado  → cuánto se aplicó a capital
- *      excedente_consumido → cuánto se consumió en esta cuota
- *      excedente_generado  → cuánto generó (pasa a su siguiente cuota)
- *
- *  - Vista global préstamo individual (esVistaIntegrante=false, sin integrantes):
- *      excedente_anterior  → excedente global de la cuota
- *      excedente_consumido → consumido
- *      excedente_generado  → generado
- *
- *  - Vista global préstamo grupal (esVistaIntegrante=false, con integrantes):
- *      Los excedentes se leen de cuota.integrantes[n].excedente_* (por integrante)
- */
 export const useCuotaData = (cuota, i, esVistaIntegrante) =>
     useMemo(() => {
         /* ── Identidad ── */
-        const nro   = cuota.nro ?? i + 1;
+        const nro  = cuota.nro ?? i + 1;
         const monto = parseFloat(cuota.total_cuota ?? cuota.monto ?? 0);
 
         /* ── Componentes de la cuota ── */
@@ -40,10 +21,10 @@ export const useCuotaData = (cuota, i, esVistaIntegrante) =>
         const capPend   = parseFloat(cuota.capital_pendiente ?? Math.max(0, capital - capPagado));
         const intPend   = parseFloat(cuota.interes_pendiente ?? Math.max(0, interes - intPagado));
 
-        /* ── Mora ── */
-        const moraTotal  = parseFloat(cuota.mora_total ?? cuota.mora ?? 0);
+        /* ── Mora (Usamos directamente cuota.mora que mapea al saldo_mora real del backend) ── */
+        const moraTotal  = parseFloat(cuota.mora_total ?? 0);
         const moraPagada = parseFloat(cuota.mora_pagada ?? 0);
-        const moraPend   = Math.max(0, moraTotal - moraPagada);
+        const moraPend   = parseFloat(cuota.mora ?? 0);
 
         /* ── Pagos recibidos ── */
         const abonado = esVistaIntegrante
@@ -57,10 +38,10 @@ export const useCuotaData = (cuota, i, esVistaIntegrante) =>
         const diasAtraso = cuota.dias_atraso || 0;
 
         /* ── Excedentes — backend los manda calculados ── */
-        const excAnterior  = parseFloat(cuota.excedente_anterior  ?? 0); // lo que venía
-        const excAplicado  = parseFloat(cuota.excedente_aplicado  ?? 0); // aplicado a capital
-        const excConsumido = parseFloat(cuota.excedente_consumido ?? 0); // consumido esta cuota
-        const excGenerado  = parseFloat(cuota.excedente_generado  ?? 0); // generó → pasa adelante
+        const excAnterior  = parseFloat(cuota.excedente_anterior  ?? 0);
+        const excAplicado  = parseFloat(cuota.excedente_aplicado  ?? 0);
+        const excConsumido = parseFloat(cuota.excedente_consumido ?? 0);
+        const excGenerado  = parseFloat(cuota.excedente_generado  ?? 0);
 
         /* ── Flags de estado ── */
         const esCancelada    = cuota.estado === 0;
@@ -74,7 +55,6 @@ export const useCuotaData = (cuota, i, esVistaIntegrante) =>
             else if (abonado > 0) estadoGlobal = 5;
         }
 
-        /* ── ¿Tiene algo en sección de abonos? ── */
         const tieneAbonos =
             mostrarRecibido          ||
             acumInd > 0              ||
@@ -85,25 +65,17 @@ export const useCuotaData = (cuota, i, esVistaIntegrante) =>
             excGenerado > 0          ||
             excAplicado > 0;
 
-        /* ── ¿Tiene excedente que mostrar? ── */
         const tieneExcedente = excAnterior > 0 || excConsumido > 0 || excGenerado > 0 || excAplicado > 0;
 
         return {
-            /* identidad */
             nro, monto,
-            /* componentes */
             capital, interes,
             seguro, segPagado, segPend,
             capPagado, intPagado, capPend, intPend,
-            /* mora */
             moraTotal, moraPagada, moraPend,
-            /* pagos */
             abonado, acumInd, pagoAcumGrupo,
-            /* saldo */
             saldo, diasAtraso,
-            /* excedentes (todos del backend) */
             excAnterior, excAplicado, excConsumido, excGenerado,
-            /* flags */
             esCancelada, esRefinanciada, esInactiva,
             mostrarRecibido, estadoGlobal,
             tieneAbonos, tieneExcedente,
