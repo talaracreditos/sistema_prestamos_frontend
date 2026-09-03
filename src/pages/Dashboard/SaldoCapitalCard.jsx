@@ -24,8 +24,8 @@ const MESES = [
     { v: 10, l: 'Octubre' },   { v: 11, l: 'Noviembre' },{ v: 12, l: 'Diciembre' },
 ];
 
-const anioActual = new Date().getFullYear();
-const ANIOS = Array.from({ length: 5 }, (_, i) => anioActual - i);
+const ANIO_INICIO = 2026;
+const ANIOS = Array.from({ length: 5 }, (_, i) => ANIO_INICIO + i);
 
 // Chevron collapse
 const Chevron = ({ collapsed }) => (
