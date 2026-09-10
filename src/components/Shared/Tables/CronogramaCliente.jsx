@@ -63,7 +63,7 @@ const CronogramaCliente = ({
                     <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-lg shadow-brand-red/20 dark:shadow-black/30 transition-colors">
                         <p className="text-[9px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">
                             {prestamoTerminado
-                                ? 'Total pagado'
+                                ? 'Total Adeudado'
                                 : esVistaPersonal ? 'Mi saldo por pagar' : 'Saldo del grupo'}
                         </p>
                         <p className="text-lg font-black text-white dark:text-dark-text">
