@@ -96,6 +96,11 @@ const SectionRenovacion = ({
                                     <LockClosedIcon className="w-3 h-3" />
                                     {prestamoOrigen.es_grupal ? 'Grupal' : 'Individual'}
                                 </span>
+                                {prestamoOrigen.tasa_interes != null && (
+                                    <span className="text-[10px] font-bold text-slate-600 dark:text-dark-text bg-slate-100 dark:bg-dark-surface-alt px-2.5 py-1 rounded-lg transition-colors">
+                                        Tasa: {parseFloat(prestamoOrigen.tasa_interes).toFixed(2)}%
+                                    </span>
+                                )}
                                 {descuento > 0 && (
                                     <span className="text-[10px] font-black text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 px-2.5 py-1 rounded-lg transition-colors">
                                         − S/ {parseFloat(descuento).toFixed(2)} a descontar
