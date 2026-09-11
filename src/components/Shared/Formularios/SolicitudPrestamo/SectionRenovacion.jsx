@@ -98,7 +98,7 @@ const SectionRenovacion = ({
                                 </span>
                                 {prestamoOrigen.tasa_interes != null && (
                                     <span className="text-[10px] font-bold text-slate-600 dark:text-dark-text bg-slate-100 dark:bg-dark-surface-alt px-2.5 py-1 rounded-lg transition-colors">
-                                        Tasa: {parseFloat(prestamoOrigen.tasa_interes).toFixed(2)}%
+                                        Tasa base: {parseFloat(prestamoOrigen.tasa_interes).toFixed(2)}%
                                     </span>
                                 )}
                                 {descuento > 0 && (
@@ -127,6 +127,15 @@ const SectionRenovacion = ({
                                                     <span className="text-[10px] font-bold text-slate-700 dark:text-dark-text truncate transition-colors">
                                                         {i.nombre.split(' ').slice(0, 2).join(' ')}
                                                     </span>
+                                                    {i.tasa_interes != null && (
+                                                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${
+                                                            i.tasa_individual
+                                                                ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'
+                                                                : 'text-slate-400 dark:text-dark-text-muted'
+                                                        }`}>
+                                                            {parseFloat(i.tasa_interes).toFixed(2)}%{i.tasa_individual ? ' (ind.)' : ''}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <span className={`text-[9px] font-black px-2 py-0.5 rounded-md flex-shrink-0 transition-colors ${
                                                     i.puede_excluirse
