@@ -2,10 +2,10 @@ import React from 'react';
 import ClienteSearchSelect from 'components/Shared/Comboboxes/ClienteSearchSelect';
 import ProductoSearchSelect from 'components/Shared/Comboboxes/ProductoSearchSelect';
 import GrupoSearchSelect from 'components/Shared/Comboboxes/GrupoSearchSelect';
-import { UserIcon, UserGroupIcon, ShieldCheckIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { UserIcon, UserGroupIcon, ShieldCheckIcon, TrashIcon, ExclamationTriangleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 const SectionClienteGrupo = ({ 
-    data, handleChange, isBlocked, isMainBlocked, isUpdate, 
+    data, handleChange, isBlocked, isMainBlocked, isUpdate, esRenovacionActiva = false,
     addIntegrante, removeIntegrante, updateMontoIntegrante, updateCargoIntegrante,
     toggleTasaIndividual, updateTasaIntegrante,
     tasaGlobal = '',
@@ -56,6 +56,11 @@ const SectionClienteGrupo = ({
                             initialName={data.cliente_nombre || data.cliente?.nombre_completo}
                             disabled={isUpdate} 
                         />
+                    ) : esRenovacionActiva ? (
+                        <div className="w-full p-2.5 bg-slate-100 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-600 dark:text-dark-text flex items-center gap-2 h-[42px]">
+                            <LockClosedIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted flex-shrink-0" />
+                            {data.grupo_nombre || `Grupo #${data.grupo_id}`}
+                        </div>
                     ) : (
                         <GrupoSearchSelect 
                             onSelect={(g) => handleChange('grupo_id', g?.id)} 
@@ -74,7 +79,14 @@ const SectionClienteGrupo = ({
 
                 <div>
                     <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">Producto Financiero *</label>
-                    <ProductoSearchSelect onSelect={(p) => handleChange('producto_id', p?.id)} initialName={data.producto_nombre || data.producto?.nombre} disabled={isBlocked} />
+                    {esRenovacionActiva ? (
+                        <div className="w-full p-2.5 bg-slate-100 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-600 dark:text-dark-text flex items-center gap-2 h-[42px]">
+                            <LockClosedIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted flex-shrink-0" />
+                            {data.producto_nombre || data.producto?.nombre || `Producto #${data.producto_id}`}
+                        </div>
+                    ) : (
+                        <ProductoSearchSelect onSelect={(p) => handleChange('producto_id', p?.id)} initialName={data.producto_nombre || data.producto?.nombre} disabled={isBlocked} />
+                    )}
                 </div>
             </div>
 

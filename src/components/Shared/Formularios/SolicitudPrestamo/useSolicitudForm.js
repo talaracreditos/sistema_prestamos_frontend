@@ -15,16 +15,19 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
     const esRenovacionActiva     = esRenovacion && !!prestamoOrigen;
     const formBloqueadoPorRenovacion = esRenovacion && !prestamoOrigen;
 
+    const idsOrigenRenovacion = prestamoOrigen?.integrantes?.map(i => i.id) ?? [];
+
     // ── Bloqueos riesgo/DNI ───────────────────────────────────────────────────
     const dniPrincipalVencido      = data.dni_status?.estado === 'VENCIDO';
     const dniIntegranteVencido     = data.es_grupal && data.integrantes?.some(i => i.dni_status?.estado === 'VENCIDO');
-    // La restricción de "solo 1 grupal vigente" SOLO aplica cuando es_grupal — prendario/individual
-    // pueden coexistir en cualquier cantidad, por eso este bloque no evalúa data.es_prendario.
     const principalBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
         data.modalidad?.includes('GRUPAL') &&
         (data.modalidad?.includes('VIGENTE') || data.modalidad?.includes('RCS'));
-    const integranteBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
+    const integranteBloqueadoPorRiesgo = data.es_grupal &&
         data.integrantes?.some(i => {
+            const debeRenovar = esRenovacionActiva && idsOrigenRenovacion.includes(i.id);
+            if (debeRenovar) return false;
+
             const esGrupalVigente = i.modalidad === 'VIGENTE GRUPAL' ||
                 (i.modalidad?.includes('VIGENTE') && i.modalidad?.includes('GRUPAL'));
             const esRCS = i.modalidad === 'RCS';

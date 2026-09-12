@@ -196,6 +196,7 @@ const SolicitudForm = ({
                         isBlocked={bloqueado}
                         isMainBlocked={isMainBlocked}
                         isUpdate={isUpdate || esRenovacionActiva}
+                        esRenovacionActiva={esRenovacionActiva}
                         addIntegrante={addIntegrante}
                         removeIntegrante={removeIntegrante}
                         updateMontoIntegrante={updateMontoIntegrante}
