@@ -5,14 +5,8 @@ import LoginForm from './components/LoginForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import Carrusel from './components/Carrusel';
 import useLogin from 'hooks/Auth/useLogin';
-import background from 'assets/img/carrusel/bg1.jpg';
-import background2 from 'assets/img/carrusel/bg2.jpg';
-import background3 from 'assets/img/carrusel/bg3.jpg';
+import { carruselImages, uploginImg, resetloginImg } from 'utilities/data/loginThemeAssets';
 import logo from 'assets/img/logoblanco.png';
-import uplogin from 'assets/img/uplogin.png';
-import resetlogin from 'assets/img/resetlogin.png';
-
-const carruselImages = [background, background2, background3];
 
 const Login = () => {
   const {
@@ -61,7 +55,7 @@ const Login = () => {
           {!loading && (
             <div className="flex justify-center mb-2 sm:mb-4">
               <img
-                src={showForgotPassword ? resetlogin : uplogin}
+                src={showForgotPassword ? resetloginImg : uploginImg}
                 alt={showForgotPassword ? 'Restablecer contraseña Talara' : 'Equipo Talara Créditos'}
                 loading="lazy"
                 decoding="async"
