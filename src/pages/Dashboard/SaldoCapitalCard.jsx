@@ -438,7 +438,7 @@ const SaldoCapitalCard = () => {
                                 <span className="font-black text-slate-600 dark:text-dark-text">Meta Crecim.:</span> Objetivo de crecimiento para el mes.
                             </p>
                             <p className="text-[11px] text-slate-400 dark:text-dark-text-muted/80">
-                                <span className="font-black text-slate-600 dark:text-dark-text">Avance:</span> (Saldo Actual ÷ Objetivo) × 100.
+                                <span className="font-black text-slate-600 dark:text-dark-text">Avance:</span> (Variación ÷ Meta Crecim.) × 100.
                             </p>
                             <p className="text-[11px] text-slate-400 dark:text-dark-text-muted/80">
                                 <span className="font-black text-slate-600 dark:text-dark-text">Cartera Refinanciada:</span> Capital que proviene de un refinanciamiento.

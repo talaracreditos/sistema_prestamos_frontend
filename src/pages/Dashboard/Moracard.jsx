@@ -16,65 +16,70 @@ const Chevron = ({ collapsed }) => (
     </div>
 );
 
-const TablaAsesor = ({ filas = [], totales = {}, esMonto }) => (
-    <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[480px]">
-            <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
-                <tr>
-                    <th className="px-4 py-3">Asesor</th>
-                    <th className="px-4 py-3 text-right">Saldo Inicial</th>
-                    <th className="px-4 py-3 text-right">Saldo Actual</th>
-                    <th className="px-4 py-3 text-right">Variación</th>
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 dark:divide-dark-border">
-                {filas.map((f, i) => {
-                    const varPositiva = f.variacion > 0;
-                    return (
-                        <tr key={f.asesor_id} className={`hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-dark-surface-alt/30'}`}>
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-black text-slate-700 dark:text-dark-text uppercase">{f.nombre}</span>
-                                </div>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                                <span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">
-                                    {esMonto ? `S/ ${fmt(f.saldo_inicial)}` : fmtN(f.saldo_inicial)}
-                                </span>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                                <span className="text-sm font-black text-slate-900 dark:text-dark-text">
-                                    {esMonto ? `S/ ${fmt(f.saldo_actual)}` : fmtN(f.saldo_actual)}
-                                </span>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                                <span className={`text-sm font-black ${varPositiva ? 'text-brand-red dark:text-red-400' : f.variacion < 0 ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
-                                    {varPositiva ? '+' : ''}
-                                    {esMonto ? `S/ ${fmt(f.variacion)}` : fmtN(f.variacion)}
-                                </span>
-                            </td>
-                        </tr>
-                    );
-                })}
-            </tbody>
-            <tfoot className="bg-slate-900 dark:bg-black text-white">
-                <tr>
-                    <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest">TOTAL</td>
-                    <td className="px-4 py-3 text-right text-sm font-black">
-                        {esMonto ? `S/ ${fmt(totales.saldo_inicial)}` : fmtN(totales.saldo_inicial)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm font-black">
-                        {esMonto ? `S/ ${fmt(totales.saldo_actual)}` : fmtN(totales.saldo_actual)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
-                        {totales.variacion > 0 ? '+' : ''}
-                        {esMonto ? `S/ ${fmt(totales.variacion)}` : fmtN(totales.variacion)}
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-);
+const TablaAsesor = ({ filas = [], totales = {}, esMonto }) => {
+    const labelInicial = esMonto ? 'Capital Inicial' : 'Saldo Inicial';
+    const labelActual  = esMonto ? 'Capital Actual'  : 'Saldo Actual';
+
+    return (
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[480px]">
+                <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
+                    <tr>
+                        <th className="px-4 py-3">Asesor</th>
+                        <th className="px-4 py-3 text-right">{labelInicial}</th>
+                        <th className="px-4 py-3 text-right">{labelActual}</th>
+                        <th className="px-4 py-3 text-right">Variación</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-dark-border">
+                    {filas.map((f, i) => {
+                        const varPositiva = f.variacion > 0;
+                        return (
+                            <tr key={f.asesor_id} className={`hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-dark-surface-alt/30'}`}>
+                                <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-black text-slate-700 dark:text-dark-text uppercase">{f.nombre}</span>
+                                    </div>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                    <span className="text-sm font-black text-slate-600 dark:text-dark-text-muted">
+                                        {esMonto ? `S/ ${fmt(f.saldo_inicial)}` : fmtN(f.saldo_inicial)}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                    <span className="text-sm font-black text-slate-900 dark:text-dark-text">
+                                        {esMonto ? `S/ ${fmt(f.saldo_actual)}` : fmtN(f.saldo_actual)}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                    <span className={`text-sm font-black ${varPositiva ? 'text-brand-red dark:text-red-400' : f.variacion < 0 ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-dark-text-muted/60'}`}>
+                                        {varPositiva ? '+' : ''}
+                                        {esMonto ? `S/ ${fmt(f.variacion)}` : fmtN(f.variacion)}
+                                    </span>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+                <tfoot className="bg-slate-900 dark:bg-black text-white">
+                    <tr>
+                        <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest">TOTAL</td>
+                        <td className="px-4 py-3 text-right text-sm font-black">
+                            {esMonto ? `S/ ${fmt(totales.saldo_inicial)}` : fmtN(totales.saldo_inicial)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm font-black">
+                            {esMonto ? `S/ ${fmt(totales.saldo_actual)}` : fmtN(totales.saldo_actual)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm font-black text-brand-gold">
+                            {totales.variacion > 0 ? '+' : ''}
+                            {esMonto ? `S/ ${fmt(totales.variacion)}` : fmtN(totales.variacion)}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    );
+};
 
 const MoraCard = () => {
     const {
@@ -110,7 +115,7 @@ const MoraCard = () => {
                     </div>
                     <div>
                         <h2 className="text-sm font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Mora Mayor a 8 Días</h2>
-                        <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">Seguimiento por asesor — saldo inicial vs actual</p>
+                        <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">Seguimiento por asesor — capital adeudado inicial vs actual</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
@@ -185,7 +190,7 @@ const MoraCard = () => {
                         ) : (
                             <>
                                 <div>
-                                    <p className="text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest mb-3">Mora Mayor a 8 Días — Saldo (S/)</p>
+                                    <p className="text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest mb-3">Mora Mayor a 8 Días — Capital Adeudado (S/)</p>
                                     <TablaAsesor filas={data?.monto?.filas ?? []} totales={data?.monto?.totales ?? {}} esMonto={true} />
                                 </div>
                                 <div>
