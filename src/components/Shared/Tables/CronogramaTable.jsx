@@ -6,7 +6,9 @@ const CronogramaTable = ({
     cronograma = [],
     esVistaIntegrante = false,
     onHistorialModal,
+    onHistorialInteresModal,
     onReducirMora,
+    onReducirInteres,
     extraColumns = [],
     eco = null,
     estadoPrestamo = 1,
@@ -16,7 +18,9 @@ const CronogramaTable = ({
         cronograma,
         esVistaIntegrante,
         onHistorialModal,
+        onHistorialInteresModal,
         onReducirMora,
+        onReducirInteres,
         extraColumns,
     };
 

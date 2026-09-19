@@ -1,6 +1,8 @@
 import React from 'react';
 import { ClockIcon, ScissorsIcon } from '@heroicons/react/24/outline';
 
+const num = (v) => parseFloat(v ?? 0) || 0;
+
 /* ─────────────────────────────────────────────────────────────
  * CELDA FINANCIERA
  * ───────────────────────────────────────────────────────────── */
@@ -23,6 +25,89 @@ export const CeldaFinanciera = ({ total, pagado, pendiente }) => (
         )}
     </div>
 );
+
+/* ─────────────────────────────────────────────────────────────
+ * INTERÉS
+ *
+ * El front NO calcula nada: muestra interes, interes_pagado,
+ * interes_pendiente, interes_reducido e interes_original tal como
+ * los manda el backend.
+ *
+ * Aquí vive el historial (reloj). Los botones de reducir están en
+ * la cabecera de CuotaCard.
+ * ───────────────────────────────────────────────────────────── */
+export const InteresContent = ({
+    d,
+    cuota,
+    nro,
+    onHistorialInteresModal
+}) => {
+
+    // Solo se muestran valores que manda el backend, sin operaciones.
+    const interes   = num(cuota?.interes);
+    const pagado    = num(cuota?.interes_pagado);
+    const reducido  = num(cuota?.interes_reducido);
+    const original  = cuota?.interes_original;   // opcional, lo manda el backend
+    const historial = cuota?.historial_interes_reducido ?? [];
+
+    const pendiente = d.esInactiva ? 0 : num(cuota?.interes_pendiente);
+
+    if (interes <= 0 && reducido <= 0) {
+        return (
+            <span className="text-slate-300 dark:text-dark-text-muted/60 font-black text-[11px]">—</span>
+        );
+    }
+
+    return (
+        <div className="flex flex-col min-w-[80px]">
+
+            <CeldaFinanciera
+                total={interes}
+                pagado={pagado}
+                pendiente={pendiente}
+            />
+
+            {(reducido > 0 || historial.length > 0) && (
+                <div className="flex items-center gap-1 mt-0.5">
+
+                    {reducido > 0 && (
+                        <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-green-600 dark:text-green-400 whitespace-nowrap">
+                                -S/ {reducido.toFixed(2)} reducido
+                            </span>
+                            {original != null && (
+                                <span className="text-[8px] font-bold text-slate-400 dark:text-dark-text-muted whitespace-nowrap transition-colors">
+                                    Original: S/ {num(original).toFixed(2)}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Historial */}
+                    {historial.length > 0 && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+
+                                onHistorialInteresModal?.({
+                                    nro,
+                                    historial,
+                                    total: pendiente
+                                });
+                            }}
+                            className="text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold transition-all p-0.5 rounded-full hover:bg-brand-red-light dark:hover:bg-dark-surface-alt shrink-0"
+                            title="Ver historial de reducciones de interés"
+                        >
+                            <ClockIcon className="w-3 h-3" />
+                        </button>
+                    )}
+
+
+                </div>
+            )}
+        </div>
+    );
+};
 
 /* ─────────────────────────────────────────────────────────────
  * ABONOS

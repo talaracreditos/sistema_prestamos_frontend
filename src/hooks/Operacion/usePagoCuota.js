@@ -17,9 +17,9 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     // `cuota.requierePinAnticipado` ya viene decidido desde OperacionForm:
     // - Individual: la cuota anterior está pendiente (adelanto de pago).
     // - Grupal: la cuota en sí todavía no corresponde (estado PENDIENTE).
-    //   Los integrantes bloqueados por deuda de la cuota anterior NUNCA llegan
-    //   hasta acá — ya fueron excluidos antes de abrir el modal, así que el
-    //   PIN solo autoriza el adelanto para los habilitados.
+    //   Los integrantes bloqueados (`int.bloqueado`, decidido por el backend)
+    //   NUNCA llegan hasta acá — ya fueron excluidos antes de abrir el modal,
+    //   así que el PIN solo autoriza el adelanto para los habilitados.
     // pinRequerido puede además activarse en caliente si el backend lo exige
     // al hacer submit (onRequierePin), por ejemplo si el PIN enviado era
     // inválido o el backend detecta algo que el frontend no vio.
@@ -33,12 +33,13 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const soloUnIntegrante       = esGrupal && integrantesPendientes.length === 1;
     const pinAnticipado          = !!cuota?.requierePinAnticipado;
 
-    /* Mora PENDIENTE */
+    /* Mora PENDIENTE — en grupal, OperacionForm ya pasa la de los habilitados */
     const mora = parseFloat(cuota?.mora ?? 0);
 
     const excedenteIndividual = !esGrupal ? parseFloat(cuota?.excedente_anterior ?? 0) : 0;
 
-    /* Total a pagar */
+    /* Total a pagar — en grupal, OperacionForm ya pasa `habilitados_saldo`
+       (calculado por el backend solo para los integrantes habilitados) */
     const totalAPagar = parseFloat(cuota?.saldo_pendiente ?? cuota?.saldo ?? 0).toFixed(2);
 
     // ── Validaciones ──────────────────────────────────────────────────────────
@@ -92,6 +93,9 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         }
     }, [isOpen, totalAPagar, soloUnIntegrante, pinAnticipado]);
 
+    // Total distribuido: si todos van "completo" es el total del backend;
+    // si alguno pone monto parcial, se suma lo digitado + el `saldo` (que ya
+    // trae capital + interés + seguro + mora) de los que van completos.
     const calcularTotalDistribuido = () => {
         if (integrantesPendientes.length === 0) return parseFloat(totalAPagar);
         const todosEnFull = integrantesPendientes.every(int => !distribucion[int.id] || distribucion[int.id] === '');
@@ -99,9 +103,7 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         return integrantesPendientes.reduce((acc, int) => {
             const val        = distribucion[int.id];
             const esCompleto = !val || val === '';
-            const saldoCap   = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
-            const moraPend   = parseFloat(int.mora_pendiente ?? 0);
-            return acc + (esCompleto ? saldoCap + moraPend : parseFloat(val || 0));
+            return acc + (esCompleto ? parseFloat(int.saldo ?? 0) : parseFloat(val || 0));
         }, 0);
     };
 

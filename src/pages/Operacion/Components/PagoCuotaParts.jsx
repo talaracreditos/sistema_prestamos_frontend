@@ -54,11 +54,12 @@ export const DistribucionGrupal = ({ distribucion, handleMontoIntegrante, integr
         </div>
         <div className="divide-y divide-slate-100 dark:divide-dark-border bg-white dark:bg-dark-surface transition-colors">
             {integrantesPendientes.map((int) => {
-                const val         = distribucion[int.id];
+                const val          = distribucion[int.id];
                 const esCompleto   = !val || val === '';
-                const saldoCap     = parseFloat(int.saldo_capital ?? int.saldo ?? 0);
+                const saldoCap     = parseFloat(int.saldo_capital ?? 0);
                 const moraPend     = parseFloat(int.mora_pendiente ?? 0);
-                const saldoTotal   = saldoCap + moraPend;
+                // `saldo` ya viene del backend (capital + interés + seguro + mora)
+                const saldoTotal   = parseFloat(int.saldo ?? 0);
                 const montoPuesto  = parseFloat(val || 0);
                 const pagaMas      = !esCompleto && montoPuesto >= saldoTotal;
                 const excedenteProp= parseFloat(int.excedente_anterior ?? 0);
@@ -76,7 +77,7 @@ export const DistribucionGrupal = ({ distribucion, handleMontoIntegrante, integr
                                     <div className="flex items-center gap-2">
                                         <p className="text-[9px] font-black text-slate-600 dark:text-dark-text transition-colors">Falta: S/ {saldoCap.toFixed(2)}</p>
                                         {moraPend > 0 && <p className="text-[9px] text-red-500 dark:text-red-400 font-bold">+ Mora: S/ {moraPend.toFixed(2)}</p>}
-                                        {moraPend > 0 && <p className="text-[9px] font-black text-slate-800 dark:text-dark-text transition-colors">= S/ {(saldoCap + moraPend).toFixed(2)}</p>}
+                                        {moraPend > 0 && <p className="text-[9px] font-black text-slate-800 dark:text-dark-text transition-colors">= S/ {saldoTotal.toFixed(2)}</p>}
                                     </div>
                                 </div>
                             </div>

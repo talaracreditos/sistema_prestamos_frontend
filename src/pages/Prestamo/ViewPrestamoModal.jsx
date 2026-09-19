@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
 import HistorialMoraModal from './HistorialMoraModal';
+import HistorialInteresModal from './HistorialInteresModal';
 import HistorialReprogramacionesModal from './HistorialReprogramacionesModal';
 import RefinanciamientoModal from './RefinanciamientoModal';
 import ReducirMoraModal from './ReducirMoraModal';
+import ReducirInteresModal from './ReducirInteresModal';
 import CambiarPresidenteModal from './CambiarPresidenteModal';
 import ReprogramacionModal from './ReprogramacionModal';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
@@ -24,6 +26,11 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const [reprogramarOpen, setReprogramarOpen]             = useState(false);
     const [historialReprogOpen, setHistorialReprogOpen]     = useState(false);
     const [refreshing, setRefreshing]                       = useState(false);
+
+    // ── Interés — manejado localmente aquí (paralelo al de mora del hook) ──
+    const [interesModalOpen, setInteresModalOpen]           = useState(false);
+    const [interesData, setInteresData]                     = useState(null);
+    const [historialInteresModal, setHistorialInteresModal] = useState(null);
 
     const { user } = useAuth();
     const userId = user?.id ?? null;
@@ -87,6 +94,27 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     };
 
     const handleAbrirReprogramar = () => setReprogramarOpen(true);
+
+    // ── Reducir interés ──
+    const handleAbrirReducirInteres = (cuota) => {
+        setInteresData({
+            cuota,
+            cuotaDetalleId: esVistaIntegrante ? (cuota?.cuota_detalle_id ?? null) : null,
+            integranteNombre: esVistaIntegrante ? integranteNombre : null,
+        });
+        setInteresModalOpen(true);
+    };
+
+    const handleCerrarReducirInteres = () => {
+        setInteresModalOpen(false);
+        setInteresData(null);
+    };
+
+    const handleSuccessReducirInteres = () => {
+        handleCerrarReducirInteres();
+        handleSuccessReducirMora(); // Reutilizamos la función de éxito de reducir mora para refrescar el cronograma
+        if (onRefresh) onRefresh();
+    };
 
     return (
         <>
@@ -378,7 +406,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                 cronograma={cronogramaActivo}
                                 esVistaIntegrante={esVistaIntegrante}
                                 onHistorialModal={setHistorialModal}
+                                onHistorialInteresModal={setHistorialInteresModal}
                                 onReducirMora={puedeVerReducirMora ? handleAbrirReducirMora : undefined}
+                                onReducirInteres={puedeVerReducirMora ? handleAbrirReducirInteres : undefined}
                                 eco={eco}
                                 estadoPrestamo={data.estado}
                                 loadingEco={loadingIntegrante}
@@ -394,6 +424,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
             </ViewModal>
 
             <HistorialMoraModal isOpen={!!historialModal} onClose={() => setHistorialModal(null)} data={historialModal} />
+            <HistorialInteresModal isOpen={!!historialInteresModal} onClose={() => setHistorialInteresModal(null)} data={historialInteresModal} />
             <PdfModal isOpen={pdfOpen} onClose={handleCerrarPdf} title={pdfTitle} base64={pdfBase64} />
             {!esCliente && (
                 <>
@@ -411,6 +442,14 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         cuotaDetalleId={moraData?.cuotaDetalleId}
                         integranteNombre={moraData?.integranteNombre}
                         onSuccess={handleSuccessReducirMora}
+                    />
+                    <ReducirInteresModal
+                        isOpen={interesModalOpen}
+                        onClose={handleCerrarReducirInteres}
+                        cuota={interesData?.cuota}
+                        cuotaDetalleId={interesData?.cuotaDetalleId}
+                        integranteNombre={interesData?.integranteNombre}
+                        onSuccess={handleSuccessReducirInteres}
                     />
                     <CambiarPresidenteModal
                         isOpen={cambiarPresidenteOpen}

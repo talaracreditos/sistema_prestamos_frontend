@@ -12,6 +12,7 @@ import {
     CeldaFinanciera,
     SaldoContent,
     MoraContent,
+    InteresContent,
     AbonosContent
 } from './CeldasBase';
 
@@ -28,7 +29,9 @@ export const CuotaCard = ({
     cronograma,
     esVistaIntegrante,
     onHistorialModal,
+    onHistorialInteresModal,
     onReducirMora,
+    onReducirInteres,
     extraColumns
 }) => {
 
@@ -50,9 +53,13 @@ export const CuotaCard = ({
         );
 
     /* ─────────────────────────────────────────────
-     * Mostrar botón reducir mora
+     * Botones de cabecera: Reducir Mora y Reducir Interés
+     * Valores tal cual los manda el backend.
      * ───────────────────────────────────────────── */
-    const mostrarBotonReducir = d.moraPend > 0 && !!onReducirMora && !d.esInactiva;
+    const interesPendiente = parseFloat(cuota.interes_pendiente ?? 0);
+
+    const mostrarBotonReducirMora    = d.moraPend > 0 && !!onReducirMora && !d.esInactiva;
+    const mostrarBotonReducirInteres = interesPendiente > 0 && !!onReducirInteres && !d.esInactiva;
 
     /* ─────────────────────────────────────────────
      * Color lateral
@@ -156,17 +163,39 @@ export const CuotaCard = ({
 
                         </span>
 
-                        {mostrarBotonReducir && (
+                        {mostrarBotonReducirMora && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onReducirMora(cuota);
                                 }}
-                                className="flex items-center gap-1 px-2 py-0.5 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 rounded-lg text-[9px] font-black uppercase transition-all"
+                                className="flex items-center gap-1 px-2 py-0.5 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 rounded-lg text-[9px] font-black uppercase transition-all"
                                 title="Reducir mora de esta cuota"
                             >
                                 <ScissorsIcon className="w-3 h-3" />
-                                Reducir
+                                Reducir Mora
+                            </button>
+                        )}
+
+                    </div>
+                )}
+
+                {/* Interés rápido */}
+                {interesPendiente > 0 && !d.esInactiva && (
+
+                    <div className="flex items-center justify-end mt-1.5">
+
+                        {mostrarBotonReducirInteres && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onReducirInteres(cuota);
+                                }}
+                                className="flex items-center gap-1 px-2 py-0.5 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 rounded-lg text-[9px] font-black uppercase transition-all"
+                                title="Reducir interés por cancelación anticipada"
+                            >
+                                <ScissorsIcon className="w-3 h-3" />
+                                Reducir Interés
                             </button>
                         )}
 
@@ -227,12 +256,13 @@ export const CuotaCard = ({
                         />
                     </CardRow>
 
-                    {/* Interés */}
+                    {/* Interés (historial + reducir viven aquí) */}
                     <CardRow label="Interés">
-                        <CeldaFinanciera
-                            total={d.interes}
-                            pagado={d.intPagado}
-                            pendiente={d.esInactiva ? 0 : d.intPend}
+                        <InteresContent
+                            d={d}
+                            cuota={cuota}
+                            nro={d.nro}
+                            onHistorialInteresModal={onHistorialInteresModal}
                         />
                     </CardRow>
 

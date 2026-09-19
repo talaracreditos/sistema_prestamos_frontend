@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
 import DatosEconomicosCards from 'components/Shared/Tables/components/CronogramaTable/DatosEconomicosCards';
+import HistorialInteresModal from 'pages/Prestamo/HistorialInteresModal';
 import {
     BanknotesIcon,
     UserGroupIcon,
@@ -24,16 +25,12 @@ const IntegranteRow = ({ integrante }) => (
     </div>
 );
 
-// ── Helper: integrante pagó su parte en una cuota ────────────────────────────
-const integrantePagoSuParte = (intDet) => {
-    if (!intDet) return false;
-    if (intDet.pagado === true) return true;
-    const saldo = parseFloat(intDet.saldo ?? intDet.saldo_real ?? 1);
-    return saldo <= 0;
-};
-
 // ── Componente principal ──────────────────────────────────────────────────────
 const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => {
+
+    // Historial de interés reducido (el hook va ANTES del return condicional)
+    const [historialInteresModal, setHistorialInteresModal] = useState(null);
+
     if (!prestamoDetalle) return null;
 
     const { datos_economicos, integrantes, cronograma } = prestamoDetalle;
@@ -52,10 +49,6 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
 
             if (!esPagable) return null;
 
-            // Cuota "futura": todavía no le corresponde (estado 1 = PENDIENTE,
-            // no vencida). Cobrarla de todas formas es un adelanto y requiere
-            // PIN de autorización — esto es independiente del bloqueo por
-            // integrante de abajo.
             const esCuotaFutura = row.estado === 1;
 
             // ── Individual ────────────────────────────────────────────────────
@@ -64,9 +57,6 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                     .filter(r => r.nro < row.nro)
                     .some(r => r.estado !== 2);
 
-                // Para individual, "cuota anterior pendiente" y "cuota futura" son
-                // la misma señal: adelantar el cobro requiere PIN. No se bloquea
-                // duro — se autoriza con PIN, igual que siempre funcionó esto.
                 const requierePinAnticipado = hayAnteriorPendiente || esCuotaFutura;
                 const rowIndividual = { ...row, es_grupal: false, requierePinAnticipado };
 
@@ -94,26 +84,11 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
             }
 
             // ── Grupal ────────────────────────────────────────────────────────
-            // Bloqueo DURO por integrante: si no pagó su parte de la cuota
-            // inmediatamente anterior, queda excluido de esta cuota. Sin PIN,
-            // sin excepción — el PIN nunca reactiva a un bloqueado.
-            const cuotaAnterior = allRows.find(r => r.nro === row.nro - 1);
+            // Bloqueo DURO por integrante: lo decide el BACKEND y no se puede pagar ni con PIN. Se muestra en el front para informar al usuario.
+            const integrantesCuota = row.integrantes ?? [];
 
-            const integrantesPueden = (row.integrantes ?? []).filter(int => {
-                if (integrantePagoSuParte(int)) return false;
-                if (!cuotaAnterior) return true;
-                const detAnt = (cuotaAnterior.integrantes ?? []).find(d => d.id === int.id);
-                if (!detAnt) return true;
-                return integrantePagoSuParte(detAnt);
-            });
-
-            const integrantesBloqueados = (row.integrantes ?? []).filter(int => {
-                if (integrantePagoSuParte(int)) return false;
-                if (!cuotaAnterior) return false;
-                const detAnt = (cuotaAnterior.integrantes ?? []).find(d => d.id === int.id);
-                if (!detAnt) return false;
-                return !integrantePagoSuParte(detAnt);
-            });
+            const integrantesPueden     = integrantesCuota.filter(int => !int.pagado && !int.bloqueado);
+            const integrantesBloqueados = integrantesCuota.filter(int => !int.pagado &&  int.bloqueado);
 
             if (integrantesPueden.length === 0) {
                 return (
@@ -134,9 +109,11 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                 ...row,
                 integrantes: integrantesPueden,
                 es_grupal: true,
-                // PIN a nivel de cuota, solo si se está adelantando el cobro de
-                // una cuota que todavía no le corresponde al grupo (PENDIENTE).
-                // Sigue aplicando únicamente a los habilitados.
+                saldo_pendiente: row.habilitados_saldo,
+                total_con_mora: row.habilitados_saldo,
+                mora: row.habilitados_mora,
+                pago_acumulado: row.habilitados_abonado,
+                total_habilitados: row.habilitados_saldo,
                 requierePinAnticipado: esCuotaFutura,
             };
 
@@ -214,10 +191,18 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
                         cronograma={cronograma}
                         esVistaIntegrante={false}
                         onHistorialModal={onHistorialModal}
+                        onHistorialInteresModal={setHistorialInteresModal}
                         extraColumns={accionColumn}
                     />
                 </div>
             </div>
+
+            {/* Modal historial de interés reducido */}
+            <HistorialInteresModal
+                isOpen={!!historialInteresModal}
+                onClose={() => setHistorialInteresModal(null)}
+                data={historialInteresModal}
+            />
         </div>
     );
 };

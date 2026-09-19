@@ -63,6 +63,14 @@ export const reducirMora = async (data) => {
     return handleResponse(response);
 };
 
+export const reducirInteres = async (data) => {
+    const response = await fetchWithAuth(`${BASE_URL}/reducir-interes`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+};
+
 export const cambiarPresidente = async (data) => {
     const response = await fetchWithAuth(`${BASE_URL}/cambiar-presidente`, {
         method: 'POST',
