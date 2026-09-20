@@ -11,8 +11,11 @@ import CuotaPendienteItem from './CuotaPendienteItem';
  * un grupo (esVistaPersonal cubre ambos casos). En vista grupal
  * global no todos están atrasados (algunos ya pagaron), así que el
  * título solo indica que hay atraso en el grupo, sin imperativo.
+ *
+ * miIntegranteId se pasa a cada item para marcar (Tú) en la lista
+ * "Falta que pague" de la vista grupal.
  * ───────────────────────────────────────────────────────────── */
-const CuotasAtrasadasSection = ({ atrasadas, esVistaPersonal, esVistaIntegrante }) => {
+const CuotasAtrasadasSection = ({ atrasadas, esVistaPersonal, esVistaIntegrante, miIntegranteId = null }) => {
     if (!atrasadas.length) return null;
     return (
         <div
@@ -31,6 +34,7 @@ const CuotasAtrasadasSection = ({ atrasadas, esVistaPersonal, esVistaIntegrante 
                     cuota={cuota}
                     i={i}
                     esVistaIntegrante={esVistaIntegrante}
+                    miIntegranteId={miIntegranteId}
                 />
             ))}
         </div>

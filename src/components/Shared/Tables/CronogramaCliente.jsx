@@ -122,6 +122,7 @@ const CronogramaCliente = ({
                     atrasadas={atrasadas}
                     esVistaPersonal={esVistaPersonal}
                     esVistaIntegrante={esVistaIntegrante}
+                    miIntegranteId={miIntegranteId}
                 />
             )}
 
@@ -147,6 +148,7 @@ const CronogramaCliente = ({
                             cuota={cuota}
                             i={i}
                             esVistaIntegrante={esVistaIntegrante}
+                            miIntegranteId={miIntegranteId}
                         />
                     ))}
                 </div>

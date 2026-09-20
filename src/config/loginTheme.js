@@ -7,4 +7,4 @@
  *
  * Valores disponibles: 'defecto' | 'navidad'
  */
-export const TEMA_LOGIN = 'defecto';
+export const TEMA_LOGIN = 'navidad';

@@ -8,12 +8,20 @@ import { fmt } from './utils';
  *
  * Jerarquía de color: días de atraso en rojo (alerta), nombre en
  * texto normal (negro/blanco), monto pendiente en rojo (lo urgente).
+ *
+ * "Incluye mora" se muestra siempre que haya mora pendiente:
+ *  - Vista grupal: mora pendiente de todo el grupo.
+ *  - Vista personal / integrante: mora pendiente propia.
+ *
+ * En vista grupal, en "Falta que pague" se marca con (Tú) al
+ * integrante logueado (miIntegranteId).
  * ───────────────────────────────────────────────────────────── */
-const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante }) => {
+const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante, miIntegranteId = null }) => {
 
     const d = useCuotaData(cuota, i, esVistaIntegrante);
     const esParcial = cuota.estado === 5;
     const conAtraso = d.diasAtraso > 0;
+    const conMora   = d.moraPend > 0;
 
     const integrantesPendientes = !esVistaIntegrante && cuota.integrantes?.length > 0
         ? cuota.integrantes.filter((int) => !int.pagado)
@@ -51,11 +59,21 @@ const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante }) => {
                             <p className="text-[9px] font-black text-slate-700 dark:text-dark-text uppercase">
                                 Falta que pague:
                             </p>
-                            {integrantesPendientes.map((int) => (
-                                <p key={int.id} className="text-[9px] font-bold text-slate-700 dark:text-dark-text">
-                                    - {int.nombre}: <span className="text-brand-red dark:text-red-400 font-black">{fmt(int.saldo)}</span>
-                                </p>
-                            ))}
+                            {integrantesPendientes.map((int) => {
+                                const soyYo = miIntegranteId !== null && int.id === miIntegranteId;
+                                return (
+                                    <p
+                                        key={int.id}
+                                        className={`text-[9px] ${
+                                            soyYo
+                                                ? 'font-black text-brand-red dark:text-brand-gold'
+                                                : 'font-bold text-slate-700 dark:text-dark-text'
+                                        }`}
+                                    >
+                                        - {int.nombre}{soyYo && ' (Tú)'}: <span className="text-brand-red dark:text-red-400 font-black">{fmt(int.saldo)}</span>
+                                    </p>
+                                );
+                            })}
                         </div>
                     ) : (
                         !conAtraso && (
@@ -74,6 +92,11 @@ const CuotaPendienteItem = ({ cuota, i, esVistaIntegrante }) => {
                 }`}>
                     {fmt(d.saldo)}
                 </p>
+                {conMora && (
+                    <p className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase whitespace-nowrap mt-0.5">
+                        Incluye mora: {fmt(d.moraPend)}
+                    </p>
+                )}
             </div>
         </div>
     );
