@@ -16,7 +16,7 @@ const ESTADOS_PRESTAMO = {
     4: { label: 'Refinanciado', classes: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 line-through' },
 };
 
-const CreditoCard = ({ prestamo, expanded, onToggle, kardex, kardexLoading }) => {
+const CreditoCard = ({ prestamo, clienteId, expanded, onToggle, kardex, kardexLoading }) => {
     const estadoInfo = ESTADOS_PRESTAMO[prestamo.estado] ?? { label: `Estado ${prestamo.estado}`, classes: 'bg-slate-100 dark:bg-dark-surface-alt text-slate-500' };
     const deudaCliente = prestamo.deuda_cliente ?? prestamo.saldo_cliente ?? 0;
 
@@ -139,12 +139,29 @@ const CreditoCard = ({ prestamo, expanded, onToggle, kardex, kardexLoading }) =>
                             <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Valor cuota</p>
                             <p className="font-bold text-slate-700 dark:text-dark-text">S/ {fmt(prestamo.valor_cuota)}</p>
                         </div>
+                        
+                        {/* 🔥 TASAS JUNTAS EN LA VISTA DE REACT */}
                         <div>
                             <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Tasa interés</p>
-                            <p className="font-bold text-slate-700 dark:text-dark-text">
-                                {prestamo.es_grupal ? prestamo.tasa_interes_cliente : prestamo.tasa_interes}%
+                            <p className="font-bold text-slate-700 dark:text-dark-text flex items-center gap-1">
+                                {prestamo.es_grupal ? (
+                                    <>
+                                        <span title="Interés del Grupo">{prestamo.tasa_interes}%</span>
+                                        {prestamo.tasa_interes_cliente !== null && prestamo.tasa_interes_cliente !== undefined && (
+                                            <>
+                                                <span className="text-slate-300 dark:text-dark-border mx-0.5">/</span>
+                                                <span title="Interés del Socio" className="text-brand-red dark:text-brand-gold">
+                                                    {prestamo.tasa_interes_cliente}%
+                                                </span>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    `${prestamo.tasa_interes}%`
+                                )}
                             </p>
                         </div>
+                        
                         <div>
                             <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Frecuencia</p>
                             <p className="font-bold text-slate-700 dark:text-dark-text capitalize">{prestamo.frecuencia}</p>
