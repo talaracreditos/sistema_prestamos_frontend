@@ -1,18 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
-import { descargarFichaPdf } from 'services/clienteService';
+import { descargarFichaPdf, exportarHistorialCreditos } from 'services/clienteService';
 import { 
     UserIcon, BuildingOfficeIcon, IdentificationIcon, PhoneIcon, 
     MapPinIcon, CreditCardIcon, TagIcon,
-    ComputerDesktopIcon, PrinterIcon, ArrowPathIcon, ShieldCheckIcon
+    ComputerDesktopIcon, PrinterIcon, ArrowPathIcon, ShieldCheckIcon,
+    BanknotesIcon, DocumentArrowDownIcon, DocumentTextIcon, TableCellsIcon
 } from '@heroicons/react/24/outline';
 import BarraRiesgoCrediticio from './BarraRiesgoCrediticio';
+import HistorialCreditosSection from './HistorialCreditosSection';
 
 const FichaClienteModal = ({ isOpen, onClose, data, isLoading }) => {
     const [pdfModalOpen, setPdfModalOpen] = useState(false);
     const [pdfData, setPdfData] = useState({ base64: '', title: '' });
     const [isGenerating, setIsGenerating] = useState(false);
+    const [tab, setTab] = useState('ficha');
+
+    const [isExporting, setIsExporting] = useState(false);
+    const [showExportMenu, setShowExportMenu] = useState(false);
+    const exportMenuRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+                setShowExportMenu(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     if (!data && !isLoading) return null;
 
@@ -36,16 +53,80 @@ const FichaClienteModal = ({ isOpen, onClose, data, isLoading }) => {
         }
     };
 
+    const handleExportHistorial = async (formato) => {
+        setShowExportMenu(false);
+        setIsExporting(true);
+        try {
+            const response = await exportarHistorialCreditos(data.usuario.id, formato);
+            const resData = response.data || response;
+
+            if (formato === 'pdf') {
+                setPdfData({ base64: resData.pdf, title: resData.title || `Historial_${data.dni || data.ruc}` });
+                setPdfModalOpen(true);
+            } else if (formato === 'excel' && resData.excel) {
+                const link = document.createElement("a");
+                link.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${resData.excel}`;
+                link.download = resData.title ? `${resData.title}.xlsx` : `Historial_Creditos_${data.dni || data.ruc}.xlsx`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error(`Error al exportar historial en ${formato}:`, error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <>
-            <ViewModal isOpen={isOpen} onClose={onClose} hideFooter={true} title="Ficha Detallada del Cliente" isLoading={isLoading}>
+            <ViewModal 
+                isOpen={isOpen} 
+                onClose={onClose} 
+                hideFooter={true} 
+                title="Ficha Detallada del Cliente" 
+                isLoading={isLoading}
+                size="2xl" 
+            >
                 {data && (
                     <div className="space-y-6 relative transition-colors">
                         
-                        <div className="absolute top-0 right-0 z-10">
+                        <div className="absolute top-0 right-0 z-20 flex items-center gap-2">
+                            
+                            <div className="relative" ref={exportMenuRef}>
+                                <button 
+                                    onClick={() => setShowExportMenu(!showExportMenu)}
+                                    disabled={isExporting || isGenerating}
+                                    title="Exportar Historial de Créditos"
+                                    className="flex items-center gap-2 bg-slate-100 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border text-slate-700 dark:text-dark-text px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-800 transition-all shadow-sm disabled:opacity-50 active:scale-95"
+                                >
+                                    {isExporting ? <ArrowPathIcon className="w-4 h-4 animate-spin text-slate-500" /> : <DocumentArrowDownIcon className="w-4 h-4 text-slate-500" />}
+                                    {isExporting ? 'Exportando...' : 'Exportar Historial'}
+                                </button>
+
+                                {showExportMenu && (
+                                    <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-dark-surface rounded-xl shadow-lg border border-slate-100 dark:border-dark-border overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                        <button 
+                                            onClick={() => handleExportHistorial('pdf')}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-dark-text hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-brand-red dark:hover:text-red-400 transition-colors"
+                                        >
+                                            <DocumentTextIcon className="w-4 h-4" /> PDF
+                                        </button>
+                                        <div className="h-px bg-slate-100 dark:bg-dark-border w-full"></div>
+                                        <button 
+                                            onClick={() => handleExportHistorial('excel')}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-dark-text hover:bg-green-50 dark:hover:bg-green-500/10 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                                        >
+                                            <TableCellsIcon className="w-4 h-4" /> Excel
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* IMPRIMIR FICHA */}
                             <button 
                                 onClick={handleGeneratePdf}
-                                disabled={isGenerating}
+                                disabled={isGenerating || isExporting}
                                 title="Imprimir Ficha PDF"
                                 className="flex items-center gap-2 bg-slate-900 dark:bg-black text-white dark:text-dark-text px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 dark:hover:bg-brand-gold dark:hover:text-black transition-all shadow-md disabled:opacity-50 active:scale-95"
                             >
@@ -54,7 +135,7 @@ const FichaClienteModal = ({ isOpen, onClose, data, isLoading }) => {
                             </button>
                         </div>
 
-                        <div className="flex flex-col md:flex-row gap-5 border-b border-slate-100 dark:border-dark-border pb-6 pr-32 transition-colors">
+                        <div className="flex flex-col md:flex-row gap-5 border-b border-slate-100 dark:border-dark-border pb-6 pr-64 transition-colors">
                             <div className={`w-20 h-20 rounded-2xl flex items-center justify-center border-2 shrink-0 transition-colors ${
                                 data.tipo === 2 ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' : 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20'
                             }`}>
@@ -109,6 +190,34 @@ const FichaClienteModal = ({ isOpen, onClose, data, isLoading }) => {
                             </div>
                         </div>
 
+                        {/* -- PESTAÑAS ----------------------------------------------- */}
+                        <div className="flex items-center gap-2 border-b border-slate-100 dark:border-dark-border -mt-2">
+                            <button
+                                onClick={() => setTab('ficha')}
+                                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-black uppercase tracking-wide border-b-2 transition-colors ${
+                                    tab === 'ficha'
+                                        ? 'border-brand-red dark:border-brand-gold text-brand-red dark:text-brand-gold'
+                                        : 'border-transparent text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
+                                }`}
+                            >
+                                <IdentificationIcon className="w-4 h-4" /> Ficha
+                            </button>
+                            <button
+                                onClick={() => setTab('historial')}
+                                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-black uppercase tracking-wide border-b-2 transition-colors ${
+                                    tab === 'historial'
+                                        ? 'border-brand-red dark:border-brand-gold text-brand-red dark:text-brand-gold'
+                                        : 'border-transparent text-slate-400 dark:text-dark-text-muted hover:text-slate-600 dark:hover:text-dark-text'
+                                }`}
+                            >
+                                <BanknotesIcon className="w-4 h-4" /> Historial de Créditos
+                            </button>
+                        </div>
+
+                        {tab === 'historial' ? (
+                            <HistorialCreditosSection clienteId={data.usuario?.id} />
+                        ) : (
+                        <>
                         {data.riesgo_crediticio && (
                             <div className="md:col-span-2 pt-2 pb-2">
                                 <div className="flex items-center gap-2 mb-4">
@@ -224,6 +333,8 @@ const FichaClienteModal = ({ isOpen, onClose, data, isLoading }) => {
                                 </div>
                             </div>
                         </div>
+                        </>
+                        )}
                     </div>
                 )}
             </ViewModal>

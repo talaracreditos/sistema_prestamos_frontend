@@ -32,6 +32,8 @@ export const useUpdate = () => {
                     tasacion_id:            data.tasacion_id || '',
                     tasacion_nombre:        tasacionNombre,
                     tasacion_monto_maximo:  data.tasacion?.total_maximo_prestar || '',
+                    tasacion_total_tasado:  data.tasacion?.total_tasacion || '', // ← nuevo
+                    monto_custodia:         data.monto_custodia ?? data.tasacion?.monto_custodia ?? '', // ← nuevo
                     fecha_inicio_personalizada: data.fecha_inicio_personalizada || '',
                     usar_fecha_personalizada:   !!data.fecha_inicio_personalizada,
                     integrantes: data.integrantes.map(i => ({
@@ -62,7 +64,31 @@ export const useUpdate = () => {
             const [obj, key] = field.split('.');
             setFormData(prev => ({ ...prev, [obj]: { ...prev[obj], [key]: value } }));
         } else {
-            setFormData(prev => ({ ...prev, [field]: value }));
+            setFormData(prev => {
+                const newData = { ...prev, [field]: value };
+
+                // ── Consistente con useStore: si se desactiva prendario,
+                // limpiar tasación/custodia; si cambia el cliente estando
+                // en modo prendario, también se limpian (la tasación es
+                // por cliente). ─────────────────────────────────────────
+                if (field === 'es_prendario' && value === false) {
+                    newData.tasacion_id           = '';
+                    newData.tasacion_nombre       = '';
+                    newData.tasacion_monto_maximo = '';
+                    newData.tasacion_total_tasado = '';
+                    newData.monto_custodia        = '';
+                }
+
+                if (field === 'cliente_id' && prev.es_prendario) {
+                    newData.tasacion_id           = '';
+                    newData.tasacion_nombre       = '';
+                    newData.tasacion_monto_maximo = '';
+                    newData.tasacion_total_tasado = '';
+                    newData.monto_custodia        = '';
+                }
+
+                return newData;
+            });
         }
     };
 
@@ -147,6 +173,10 @@ export const useUpdate = () => {
                 setAlert({ type: 'error', message: 'Debes seleccionar la tasación de la garantía.' });
                 return;
             }
+            if (!formData.monto_custodia || parseFloat(formData.monto_custodia) <= 0) {
+                setAlert({ type: 'error', message: 'Debes ingresar el monto de custodia.' });
+                return;
+            }
         }
 
         setSaving(true);
@@ -157,12 +187,16 @@ export const useUpdate = () => {
             delete payload.dni_status;
             delete payload.tasacion_nombre;
             delete payload.tasacion_monto_maximo;
+            delete payload.tasacion_total_tasado; // ← nuevo
             delete payload.tasacion;
 
             payload.seguro = payload.seguro || 0;
 
             if (!payload.es_prendario) {
                 delete payload.tasacion_id;
+                delete payload.monto_custodia; // ← nuevo
+            } else {
+                payload.monto_custodia = parseFloat(payload.monto_custodia) || 0; // ← nuevo
             }
 
             if (!payload.usar_fecha_personalizada) {

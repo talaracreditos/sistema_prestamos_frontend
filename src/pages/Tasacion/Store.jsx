@@ -14,9 +14,8 @@ const Store = () => {
         detalles, detalleActual, setDetalleActual, editandoId, montoAnteriorEdicion,
         pesoNeto, valorTasadoNum, porcentajeNum, maximoSugerido, formularioTieneDatos,
         handleAgregarDetalle, handleEditarDetalle, handleCancelarEdicion, handleEliminarDetalle,
-        porcentajePrestamo, setPorcentajePrestamo,
-        precioOroGramo, setPrecioOroGramo, precioEfectivoGramo,
-        camposLimitados, kilatesOpciones,
+        porcentajePrestamo, setPorcentajePrestamo, porcentajeOpciones,
+        camposLimitados,
         totalTasacion, totalMaximoPrestar, handleGuardarTasacion, guardando,
         showCancelarModal, setShowCancelarModal, handleCancelarTasacion,
         alert, setAlert,
@@ -55,10 +54,7 @@ const Store = () => {
 
                 porcentajePrestamo={porcentajePrestamo}
                 setPorcentajePrestamo={setPorcentajePrestamo}
-                precioOroGramo={precioOroGramo}
-                setPrecioOroGramo={setPrecioOroGramo}
-                precioEfectivoGramo={precioEfectivoGramo}
-                kilatesOpciones={kilatesOpciones}
+                porcentajeOpciones={porcentajeOpciones}
                 camposLimitados={camposLimitados}
             />
 

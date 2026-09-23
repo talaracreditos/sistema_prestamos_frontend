@@ -29,6 +29,8 @@ export const useStore = () => {
         tasacion_id:            '',
         tasacion_nombre:        '',
         tasacion_monto_maximo:  '',
+        tasacion_total_tasado:  '', // ← nuevo, base para el tope de custodia
+        monto_custodia:         '', // ← nuevo
         monto_solicitado:   0,
         tasa_interes:       '',
         cuotas_solicitadas: '',
@@ -64,6 +66,8 @@ export const useStore = () => {
                         newData.tasacion_id             = '';
                         newData.tasacion_nombre         = '';
                         newData.tasacion_monto_maximo   = '';
+                        newData.tasacion_total_tasado   = ''; // ← nuevo
+                        newData.monto_custodia          = ''; // ← nuevo
                     } else {
                         newData.modalidad   = '';
                         newData.grupo_id    = '';
@@ -88,6 +92,8 @@ export const useStore = () => {
                         newData.tasacion_id            = '';
                         newData.tasacion_nombre        = '';
                         newData.tasacion_monto_maximo  = '';
+                        newData.tasacion_total_tasado  = ''; // ← nuevo
+                        newData.monto_custodia         = ''; // ← nuevo
                         newData.modalidad              = '';
                     }
                 }
@@ -96,6 +102,8 @@ export const useStore = () => {
                     newData.tasacion_id           = '';
                     newData.tasacion_nombre       = '';
                     newData.tasacion_monto_maximo = '';
+                    newData.tasacion_total_tasado = ''; // ← nuevo
+                    newData.monto_custodia        = ''; // ← nuevo
                 }
 
                 return newData;
@@ -187,6 +195,8 @@ export const useStore = () => {
             tasacion_id:            '',
             tasacion_nombre:        '',
             tasacion_monto_maximo:  '',
+            tasacion_total_tasado:  '', // ← nuevo
+            monto_custodia:         '', // ← nuevo
         }));
     };
 
@@ -269,6 +279,10 @@ export const useStore = () => {
                 setAlert({ type: 'error', message: 'Debes seleccionar la tasación de la garantía.' });
                 return;
             }
+            if (!formData.monto_custodia || parseFloat(formData.monto_custodia) <= 0) {
+                setAlert({ type: 'error', message: 'Debes ingresar el monto de custodia.' });
+                return;
+            }
         }
 
         setLoading(true);
@@ -282,12 +296,16 @@ export const useStore = () => {
             delete payload.grupo_nombre;
             delete payload.tasacion_nombre;
             delete payload.tasacion_monto_maximo;
+            delete payload.tasacion_total_tasado; // ← nuevo, no lo espera el backend
 
             payload.seguro = payload.seguro || 0;
             if (!payload.prestamo_origen_id) delete payload.prestamo_origen_id;
 
             if (!payload.es_prendario) {
                 delete payload.tasacion_id;
+                delete payload.monto_custodia; // ← nuevo, no aplica si no es prendario
+            } else {
+                payload.monto_custodia = parseFloat(payload.monto_custodia) || 0; // ← nuevo
             }
 
             if (!payload.usar_fecha_personalizada) {

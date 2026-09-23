@@ -18,9 +18,6 @@ import CuotasAtrasadasSection from './components/CronogramaCliente/CuotasAtrasad
 import CuotaPagadaItem from './components/CronogramaCliente/CuotaPagadaItem';
 import CuotasRefinanciadasSection from './components/CronogramaCliente/CuotasRefinanciadasSection';
 
-/* ─────────────────────────────────────────────────────────────
- * COMPONENTE PRINCIPAL
- * ───────────────────────────────────────────────────────────── */
 const CronogramaCliente = ({
     cronograma = [],
     eco = null,
@@ -32,7 +29,6 @@ const CronogramaCliente = ({
     integrantesRefinanciados = [],
     miIntegranteId = null,
 }) => {
-
     const [verPagadas, setVerPagadas]   = useState(false);
     const [tutorialKey, setTutorialKey] = useState(0);
 
@@ -41,14 +37,14 @@ const CronogramaCliente = ({
     const { atrasadas, proxima, siguientes, pagadas, refinanciadas, totalExigibles, prestamoTerminado } =
         useCronogramaCliente(cronograma, estadoPrestamo);
 
+    const esPrendario = eco?.modalidad === 'PRENDARIO' || eco?.es_prendario;
+    const liqPrendario = esPrendario ? eco?.liquidacion_hoy?.modos?.cancelar : null;
+
     return (
         <div className="flex flex-col gap-4 transition-colors">
 
-            {/* Tutorial spotlight — resalta las secciones reales de esta vista.
-                Se abre solo la primera vez (localStorage 'tutorial_cliente') */}
             <TutorialCliente esGrupal={esGrupal} reabrir={tutorialKey} />
 
-            {/* Botón para reabrir la guía (también es el ancla del último paso) */}
             <button
                 data-tutorial="ayuda"
                 onClick={() => setTutorialKey(k => k + 1)}
@@ -60,30 +56,60 @@ const CronogramaCliente = ({
 
             {eco !== null && !prestamoCancelado && (
                 <div data-tutorial="resumen" className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-lg shadow-brand-red/20 dark:shadow-black/30 transition-colors">
-                        <p className="text-[9px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">
-                            {prestamoTerminado
-                                ? 'Total Adeudado'
-                                : esVistaPersonal ? 'Mi saldo por pagar' : 'Saldo del grupo'}
-                        </p>
-                        <p className="text-lg font-black text-white dark:text-dark-text">
-                            {fmt(eco?.total_prestamo)}
-                        </p>
-                        <p className="text-[11px] font-bold text-white/60 dark:text-dark-text-muted mt-0.5">
-                            de {fmt(eco?.total_original)}
-                        </p>
-                    </div>
-                    <div className="p-4 bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors">
-                        <p className="text-[9px] font-black uppercase text-slate-400 dark:text-dark-text-muted mb-1">
-                            {esVistaPersonal ? 'Mi cuota' : 'Valor de la cuota'}
-                        </p>
-                        <p className="text-lg font-black text-slate-800 dark:text-dark-text">{fmt(eco?.valor_cuota)}</p>
-                        <p className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mt-0.5">{eco?.frecuencia}</p>
-                    </div>
+                    {esPrendario && liqPrendario ? (
+                        // VISTA EXCLUSIVA PRENDARIO PARA EL CLIENTE
+                        <>
+                            <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-lg shadow-brand-red/20 dark:shadow-black/30 transition-colors flex flex-col justify-center">
+                                <p className="text-[9px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">
+                                    Deuda Total a Hoy
+                                </p>
+                                <p className="text-lg font-black text-white dark:text-dark-text">
+                                    {fmt(liqPrendario.cancelacion_total)}
+                                </p>
+                                <p className="text-[10px] font-bold text-white/60 dark:text-dark-text-muted mt-0.5">
+                                    Día {eco?.liquidacion_hoy?.dias} del período
+                                </p>
+                            </div>
+                            <div className="p-4 bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors flex flex-col justify-center">
+                                <p className="text-[9px] font-black uppercase text-slate-400 dark:text-dark-text-muted mb-1">
+                                    Interés a Hoy
+                                </p>
+                                <p className="text-lg font-black text-slate-800 dark:text-dark-text">
+                                    {fmt(liqPrendario.interes)}
+                                </p>
+                                <p className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mt-0.5">
+                                    Capital: {fmt(liqPrendario.capital)}
+                                </p>
+                            </div>
+                        </>
+                    ) : (
+                        // VISTA NORMAL EN CUOTAS
+                        <>
+                            <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-lg shadow-brand-red/20 dark:shadow-black/30 transition-colors">
+                                <p className="text-[9px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">
+                                    {prestamoTerminado
+                                        ? 'Total Adeudado'
+                                        : esVistaPersonal ? 'Mi saldo por pagar' : 'Saldo del grupo'}
+                                </p>
+                                <p className="text-lg font-black text-white dark:text-dark-text">
+                                    {fmt(eco?.total_prestamo)}
+                                </p>
+                                <p className="text-[11px] font-bold text-white/60 dark:text-dark-text-muted mt-0.5">
+                                    de {fmt(eco?.total_original)}
+                                </p>
+                            </div>
+                            <div className="p-4 bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors">
+                                <p className="text-[9px] font-black uppercase text-slate-400 dark:text-dark-text-muted mb-1">
+                                    {esVistaPersonal ? 'Mi cuota' : 'Valor de la cuota'}
+                                </p>
+                                <p className="text-lg font-black text-slate-800 dark:text-dark-text">{fmt(eco?.valor_cuota)}</p>
+                                <p className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mt-0.5">{eco?.frecuencia}</p>
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 
-            {/* Integrantes — SOLO grupal en vista global (incluye a los ya refinanciados) */}
             {esGrupal && !esVistaIntegrante && (
                 <ListaIntegrantes
                     integrantes={integrantes}
@@ -92,8 +118,8 @@ const CronogramaCliente = ({
                 />
             )}
 
-            {/* Barra de progreso */}
-            {totalExigibles > 0 && (
+            {/* OCULTAMOS LA BARRA DE PROGRESO SI ES PRENDARIO */}
+            {totalExigibles > 0 && !esPrendario && (
                 <ProgresoPago
                     pagadas={pagadas.length}
                     total={totalExigibles}
@@ -101,7 +127,6 @@ const CronogramaCliente = ({
                 />
             )}
 
-            {/* Préstamo terminado */}
             {prestamoTerminado && !prestamoCancelado && (
                 <div className="flex items-center gap-3 p-5 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-2xl transition-colors">
                     <SparklesIcon className="w-8 h-8 text-green-500 dark:text-green-400 shrink-0" />
@@ -116,7 +141,6 @@ const CronogramaCliente = ({
                 </div>
             )}
 
-            {/* 1º: cuotas atrasadas, siempre arriba de todo */}
             {!prestamoCancelado && (
                 <CuotasAtrasadasSection
                     atrasadas={atrasadas}
@@ -126,7 +150,6 @@ const CronogramaCliente = ({
                 />
             )}
 
-            {/* 2º: próxima cuota destacada — nunca atrasada, nunca parcial */}
             {proxima && !prestamoCancelado && (
                 <ProximaCuota
                     cuota={proxima.cuota}
@@ -136,7 +159,6 @@ const CronogramaCliente = ({
                 />
             )}
 
-            {/* 3º: resto de cuotas pendientes (ya sin las atrasadas, que van arriba) */}
             {siguientes.length > 0 && !prestamoCancelado && (
                 <div data-tutorial="pendientes" className="flex flex-col gap-2">
                     <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest px-1">
@@ -154,7 +176,6 @@ const CronogramaCliente = ({
                 </div>
             )}
 
-            {/* Cuotas pagadas — colapsadas */}
             {pagadas.length > 0 && (
                 <div data-tutorial="pagadas" className="flex flex-col gap-2">
                     <button
@@ -181,10 +202,8 @@ const CronogramaCliente = ({
                 </div>
             )}
 
-            {/* 5º: cuotas refinanciadas — su deuda ya pasó a otro préstamo */}
             <CuotasRefinanciadasSection refinanciadas={refinanciadas} />
 
-            {/* Sin cuotas */}
             {!proxima && atrasadas.length === 0 && siguientes.length === 0 && pagadas.length === 0 && refinanciadas.length === 0 && (
                 <div className="p-8 text-center">
                     <p className="text-xs font-bold text-slate-400 dark:text-dark-text-muted uppercase">

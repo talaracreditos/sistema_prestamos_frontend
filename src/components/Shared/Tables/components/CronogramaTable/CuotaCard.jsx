@@ -13,7 +13,8 @@ import {
     SaldoContent,
     MoraContent,
     InteresContent,
-    AbonosContent
+    AbonosContent,
+    CustodiaContent
 } from './CeldasBase';
 
 import {
@@ -39,9 +40,9 @@ export const CuotaCard = ({
 
     const d = useCuotaData(cuota, i, esVistaIntegrante);
 
-    /* ─────────────────────────────────────────────
+    /* ---------------------------------------------
      * Excedentes por integrantes
-     * ───────────────────────────────────────────── */
+     * --------------------------------------------- */
     const hayExcedentesIntegrantes =
         !esVistaIntegrante &&
         cuota.integrantes?.some(
@@ -52,18 +53,17 @@ export const CuotaCard = ({
                 int.excedente_consumido > 0
         );
 
-    /* ─────────────────────────────────────────────
+    /* ---------------------------------------------
      * Botones de cabecera: Reducir Mora y Reducir Interés
-     * Valores tal cual los manda el backend.
-     * ───────────────────────────────────────────── */
+     * --------------------------------------------- */
     const interesPendiente = parseFloat(cuota.interes_pendiente ?? 0);
 
     const mostrarBotonReducirMora    = d.moraPend > 0 && !!onReducirMora && !d.esInactiva;
-    const mostrarBotonReducirInteres = interesPendiente > 0 && !!onReducirInteres && !d.esInactiva;
+    const mostrarBotonReducirInteres = interesPendiente > 0 && !!onReducirInteres && !d.esInactiva && !d.esPrendario;
 
-    /* ─────────────────────────────────────────────
+    /* ---------------------------------------------
      * Color lateral
-     * ───────────────────────────────────────────── */
+     * --------------------------------------------- */
     const borderColor =
         d.esCancelada
             ? 'border-l-slate-300 dark:border-l-dark-border'
@@ -82,9 +82,7 @@ export const CuotaCard = ({
             }`}
         >
 
-            {/* ─────────────────────────────────────────────
-             * CABECERA
-             * ───────────────────────────────────────────── */}
+            {/* CABECERA */}
             <button
                 className="w-full text-left px-4 pt-3 pb-3"
                 onClick={() => setExpanded(v => !v)}
@@ -100,7 +98,6 @@ export const CuotaCard = ({
                         </span>
 
                         <div>
-
                             <span
                                 className={`text-xs font-bold block transition-colors ${
                                     d.esInactiva
@@ -116,13 +113,11 @@ export const CuotaCard = ({
                                     {d.diasAtraso} días atraso
                                 </span>
                             )}
-
                         </div>
                     </div>
 
                     {/* Monto + estado + excedente */}
                     <div className="flex flex-col items-end gap-1 shrink-0">
-
                         <span
                             className={`text-sm font-black transition-colors ${
                                 d.esInactiva
@@ -140,27 +135,19 @@ export const CuotaCard = ({
                                 Disponible: S/ {d.excAnterior.toFixed(2)}
                             </span>
                         )}
-
                     </div>
                 </div>
 
                 {/* Mora rápida */}
                 {d.moraPend > 0 && !d.esInactiva && (
-
                     <div className="flex items-center justify-between mt-1.5">
-
                         <span className="text-[9px] font-black text-brand-red dark:text-red-400 uppercase">
-
-                            Mora pendiente:
-                            {' '}
-                            +S/ {d.moraPend.toFixed(2)}
-
+                            Mora pendiente: +S/ {d.moraPend.toFixed(2)}
                             {parseFloat(cuota.mora_reducida ?? 0) > 0 && (
                                 <span className="ml-1 text-green-600 dark:text-green-400 line-through font-black">
                                     (-S/ {parseFloat(cuota.mora_reducida).toFixed(2)})
                                 </span>
                             )}
-
                         </span>
 
                         {mostrarBotonReducirMora && (
@@ -176,15 +163,12 @@ export const CuotaCard = ({
                                 Reducir Mora
                             </button>
                         )}
-
                     </div>
                 )}
 
                 {/* Interés rápido */}
                 {interesPendiente > 0 && !d.esInactiva && (
-
                     <div className="flex items-center justify-end mt-1.5">
-
                         {mostrarBotonReducirInteres && (
                             <button
                                 onClick={(e) => {
@@ -198,24 +182,19 @@ export const CuotaCard = ({
                                 Reducir Interés
                             </button>
                         )}
-
                     </div>
                 )}
 
                 {/* Saldo */}
                 <div className="flex items-center gap-1.5 mt-2">
-
                     <span className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase transition-colors">
                         Saldo pendiente:
                     </span>
-
                     <SaldoContent d={d} />
-
                 </div>
 
                 {/* Estado especial */}
                 {(d.esCancelada || d.esRefinanciada) && (
-
                     <span
                         className={`mt-1.5 inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-full transition-colors ${
                             d.esCancelada
@@ -223,31 +202,21 @@ export const CuotaCard = ({
                                 : 'bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400'
                         }`}
                     >
-                        {d.esCancelada
-                            ? 'Cancelado'
-                            : 'Refinanciado'}
+                        {d.esCancelada ? 'Cancelado' : 'Refinanciado'}
                     </span>
-
                 )}
 
                 {/* Icono expand */}
                 <div className="absolute top-3 right-3 text-slate-300 dark:text-dark-text-muted/60">
-                    {expanded
-                        ? <ChevronUpIcon className="w-4 h-4" />
-                        : <ChevronDownIcon className="w-4 h-4" />
-                    }
+                    {expanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
                 </div>
 
             </button>
 
-            {/* ─────────────────────────────────────────────
-             * DETALLE
-             * ───────────────────────────────────────────── */}
+            {/* DETALLE */}
             {expanded && (
-
                 <div className="px-4 pb-4 pt-1 bg-slate-50/60 dark:bg-dark-surface-alt border-t border-slate-100 dark:border-dark-border space-y-0 transition-colors">
 
-                    {/* Capital */}
                     <CardRow label="Capital">
                         <CeldaFinanciera
                             total={d.capital}
@@ -256,7 +225,6 @@ export const CuotaCard = ({
                         />
                     </CardRow>
 
-                    {/* Interés (historial + reducir viven aquí) */}
                     <CardRow label="Interés">
                         <InteresContent
                             d={d}
@@ -266,23 +234,15 @@ export const CuotaCard = ({
                         />
                     </CardRow>
 
-                    {/* Seguro */}
-                    <CardRow
-                        label="Seguro"
-                        hidden={d.seguro <= 0}
-                    >
-                        <CeldaFinanciera
-                            total={d.seguro}
-                            pagado={d.segPagado}
-                            pendiente={d.esInactiva ? 0 : d.segPend}
-                        />
+                    <CardRow label="Seguro" hidden={d.seguro <= 0}>
+                        <CeldaFinanciera total={d.seguro} pagado={d.segPagado} pendiente={d.esInactiva ? 0 : d.segPend} />
                     </CardRow>
 
-                    {/* Mora */}
-                    <CardRow
-                        label="Mora"
-                        hidden={d.moraTotal <= 0 || d.esInactiva}
-                    >
+                    <CardRow label="Custodia" hidden={d.custodia <= 0}>
+                        <CustodiaContent d={d} />
+                    </CardRow>
+
+                    <CardRow label="Mora" hidden={d.moraTotal <= 0 || d.esInactiva}>
                         <MoraContent
                             d={d}
                             cuota={cuota}
@@ -293,17 +253,12 @@ export const CuotaCard = ({
                         />
                     </CardRow>
 
-                    {/* Abonos */}
                     {d.tieneAbonos && (
                         <CardRow label="Movimientos">
-                            <AbonosContent
-                                d={d}
-                                esVistaIntegrante={esVistaIntegrante}
-                            />
+                            <AbonosContent d={d} esVistaIntegrante={esVistaIntegrante} />
                         </CardRow>
                     )}
 
-                    {/* Excedente */}
                     {d.tieneExcedente && !d.esInactiva && (
                         <CardRow label="Excedente">
                             <ExcedenteContent
@@ -311,60 +266,32 @@ export const CuotaCard = ({
                                 excAplicado={d.excAplicado}
                                 excConsumido={d.excConsumido}
                                 excGenerado={d.excGenerado}
-                                label={
-                                    esVistaIntegrante
-                                        ? 'Excedente propio'
-                                        : 'Excedente'
-                                }
+                                label={esVistaIntegrante ? 'Excedente propio' : 'Excedente'}
                             />
                         </CardRow>
                     )}
 
-                    {/* Excedentes socios */}
                     {hayExcedentesIntegrantes && (
                         <CardRow label="Excedentes socios">
-                            <ExcedentesIntegrantes
-                                integrantes={cuota.integrantes}
-                                isCard
-                            />
+                            <ExcedentesIntegrantes integrantes={cuota.integrantes} isCard />
                         </CardRow>
                     )}
 
-                    {/* Extras */}
                     {extraColumns.map((col) => (
-                        <CardRow
-                            key={col.header}
-                            label={col.header}
-                        >
+                        <CardRow key={col.header} label={col.header}>
                             {col.render(cuota, i, cronograma)}
                         </CardRow>
                     ))}
 
-                    {/* Resumen inferior */}
                     {d.moraPend > 0 && d.saldo > 0 && (
-
                         <p className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold pt-1 transition-colors">
-
-                            Capital pendiente:
-                            {' '}
-                            S/ {Math.max(
-                                0,
-                                d.monto - (d.acumInd || d.pagoAcumGrupo)
-                            ).toFixed(2)}
-
+                            Capital pendiente: S/ {Math.max(0, d.monto - (d.acumInd || d.pagoAcumGrupo)).toFixed(2)}
                             {' | '}
-
-                            Mora pendiente:
-                            {' '}
-                            S/ {d.moraPend.toFixed(2)}
-
+                            Mora pendiente: S/ {d.moraPend.toFixed(2)}
                         </p>
-
                     )}
-
                 </div>
             )}
-
         </div>
     );
 };

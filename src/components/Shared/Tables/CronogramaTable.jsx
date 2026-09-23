@@ -13,6 +13,7 @@ const CronogramaTable = ({
     eco = null,
     estadoPrestamo = 1,
     loadingEco = false,
+    liquidacionHoy = null,
 }) => {
     const sharedProps = {
         cronograma,
@@ -34,6 +35,7 @@ const CronogramaTable = ({
                         eco={eco}
                         estadoPrestamo={estadoPrestamo}
                         esVistaIntegrante={esVistaIntegrante}
+                        liquidacionHoy={liquidacionHoy}
                       />
             )}
 

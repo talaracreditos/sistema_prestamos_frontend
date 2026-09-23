@@ -7,17 +7,67 @@ import {
     BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon,
     UserGroupIcon, DocumentCheckIcon, XMarkIcon,
     ReceiptPercentIcon, ShieldExclamationIcon, KeyIcon, InformationCircleIcon,
+    CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
+
+const fmt = (n) => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Modos de pago del prendario. Las clases van completas (Tailwind no resuelve
+// nombres armados dinámicamente).
+const MODOS_PRENDARIO = [
+    {
+        id: 'abono',
+        titulo: 'Solo abonar',
+        sub: 'Mantiene la fecha de vencimiento',
+        activo: 'border-brand-gold bg-brand-gold-light/30 dark:bg-brand-gold/10 text-brand-gold-dark dark:text-brand-gold',
+    },
+    {
+        id: 'patear',
+        titulo: 'Pagar y patear 30 días',
+        sub: 'Paga hasta hoy y reinicia el plazo',
+        activo: 'border-brand-red dark:border-brand-gold bg-brand-red-light/50 dark:bg-brand-gold/10 text-brand-red dark:text-brand-gold',
+    },
+    {
+        id: 'cancelar',
+        titulo: 'Cancelar todo',
+        sub: 'Paga el total y liquida el préstamo',
+        activo: 'border-green-500 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400',
+    },
+];
+
+const FilaLiq = ({ label, value, destacar = false, resta = false }) => (
+    <div className="flex items-center justify-between text-[11px]">
+        <span className={destacar
+            ? 'font-black text-slate-800 dark:text-dark-text uppercase'
+            : 'font-bold text-slate-500 dark:text-dark-text-muted'}>
+            {label}
+        </span>
+        <span className={destacar
+            ? 'font-black text-brand-red dark:text-brand-gold'
+            : resta
+                ? 'font-bold text-green-600 dark:text-green-400'
+                : 'font-bold text-slate-700 dark:text-dark-text'}>
+            {resta ? '- ' : ''}S/ {fmt(value)}
+        </span>
+    </div>
+);
 
 const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
     const { state, setters, computed, handlers } = usePagoCuota({ isOpen, cuota, onClose, onConfirm });
     const { metodo, referencia, archivo, tieneComision, comision, pinRequerido, pinContexto, pin, pinError } = state;
+    const { liquidacion, liqModo } = computed;
 
     const handleClose = () => { if (!loading) handlers.reset(); };
 
     const descripcionPin = pinContexto?.cuota_anterior
         ? `La cuota #${pinContexto.cuota_anterior} está pendiente. Ingresa el PIN de un administrador para autorizar el cobro de la cuota #${pinContexto.cuota_actual} de todas formas.`
         : 'Esta cuota requiere autorización de un administrador. Ingresa el PIN para continuar.';
+
+    const textoAyudaModo = {
+        abono: 'Se aplica por prelación. El interés del mes no se recalcula y el vencimiento no cambia.',
+        patear: 'Debes cubrir todo lo devengado hasta hoy. El capital que quede abre un período nuevo de 30 días desde hoy.',
+        cancelar: 'Paga la deuda total con interés solo hasta hoy. El sistema fija el monto exacto y liquida el préstamo.',
+    }[state.modoPrendario];
 
     return (
         <ViewModal isOpen={isOpen} hideFooter={true} onClose={handleClose}
@@ -48,8 +98,12 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                             <p className="text-[11px] font-bold text-blue-700 dark:text-blue-400 leading-relaxed">
                                 Orden de aplicación del pago:{' '}
-                                <span className="font-black uppercase">Mora → Seguro → Interés → Capital</span>.
-                                El monto se descuenta primero de la mora pendiente, luego del seguro, después del interés y por último del capital.
+                                <span className="font-black uppercase">
+                                    {computed.esPrendario
+                                        ? 'Mora → Seguro → Custodia → Interés → Capital'
+                                        : 'Mora → Seguro → Interés → Capital'}
+                                </span>.
+                                El monto se descuenta en ese orden y lo que sobra amortiza el capital.
                             </p>
                         </div>
 
@@ -90,6 +144,52 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             </div>
                         )}
 
+                        {/* 1.5. Modo de pago — SOLO prendarios */}
+                        {computed.esPrendario && (
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-3 gap-2">
+                                    {MODOS_PRENDARIO.map((m) => (
+                                        <button key={m.id} type="button"
+                                            onClick={() => setters.setModoPrendario(m.id)}
+                                            disabled={loading}
+                                            className={`p-3 rounded-2xl font-black text-[10px] uppercase flex flex-col items-center gap-1 text-center border-2 transition-all disabled:opacity-50 ${
+                                                state.modoPrendario === m.id
+                                                    ? m.activo
+                                                    : 'border-slate-100 dark:border-dark-border text-slate-400 dark:text-dark-text-muted hover:border-slate-200'
+                                            }`}>
+                                            {m.titulo}
+                                            <span className="text-[8px] font-bold normal-case opacity-70 leading-tight">{m.sub}</span>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Desglose de la liquidación a hoy, según el modo elegido */}
+                                {liquidacion && liqModo && (
+                                    <div className="rounded-2xl border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-surface-alt p-4 space-y-1.5 transition-colors">
+                                        <div className="flex items-center justify-between pb-2 mb-1 border-b border-slate-200 dark:border-dark-border">
+                                            <span className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase">
+                                                <CalendarDaysIcon className="w-3.5 h-3.5" />
+                                                Al {liquidacion.fecha_corte}
+                                            </span>
+                                            <span className={`text-[10px] font-black uppercase ${liquidacion.vencida ? 'text-red-600 dark:text-red-400' : 'text-slate-500 dark:text-dark-text-muted'}`}>
+                                                Día {liquidacion.dias} del período{liquidacion.vencida ? ' · vencido' : ''}
+                                            </span>
+                                        </div>
+
+                                        {liqModo.mora > 0 && <FilaLiq label="Mora" value={liqModo.mora} />}
+                                        <FilaLiq label="Seguro" value={liqModo.seguro} />
+                                        <FilaLiq label="Custodia" value={liqModo.custodia} />
+                                        <FilaLiq label="Interés" value={liqModo.interes} />
+                                        <FilaLiq label="Capital pendiente" value={liqModo.capital} />
+                                        {liqModo.credito > 0 && <FilaLiq label="Crédito a favor" value={liqModo.credito} resta />}
+                                        <div className="pt-2 mt-1 border-t border-slate-200 dark:border-dark-border">
+                                            <FilaLiq label="Deuda total a hoy" value={liqModo.cancelacion_total} destacar />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* 2. Método */}
                         <div className="grid grid-cols-2 gap-3">
                             {['DEPOSITO', 'EFECTIVO'].map((m) => (
@@ -108,10 +208,43 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase mb-2 ml-1">Monto a Registrar *</label>
                                 <input type="number" step="0.01" required value={state.recibido}
-                                    readOnly={computed.esGrupal || loading}
-                                    onChange={e => !computed.esGrupal && !loading && setters.setRecibido(e.target.value)}
-                                    className={`w-full p-4 border-2 rounded-2xl text-sm font-bold outline-none transition-all text-slate-800 dark:text-dark-text ${computed.esGrupal || loading ? 'bg-slate-50 dark:bg-dark-surface-alt border-slate-100 dark:border-dark-border cursor-not-allowed opacity-70' : 'bg-slate-50 dark:bg-dark-surface-alt border-slate-100 dark:border-dark-border focus:border-brand-red dark:focus:border-brand-gold focus:ring-1 focus:ring-brand-red dark:focus:ring-brand-gold focus:bg-white dark:focus:bg-dark-surface'}`} />
-                                {!computed.esGrupal && <p className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold mt-1 ml-1">Puedes ajustar si el cliente paga una cantidad diferente.</p>}
+                                    min={computed.esPrendario && computed.montoMinimo != null ? computed.montoMinimo : undefined}
+                                    max={computed.esPrendario && computed.montoMaximo != null ? computed.montoMaximo : undefined}
+                                    readOnly={computed.montoBloqueado || loading}
+                                    onChange={e => (!computed.montoBloqueado && !loading) && setters.setRecibido(e.target.value)}
+                                    className={`w-full p-4 border-2 rounded-2xl text-sm font-bold outline-none transition-all text-slate-800 dark:text-dark-text ${
+                                        computed.errorMontoPrendario
+                                            ? 'bg-red-50 dark:bg-red-500/10 border-red-300 dark:border-red-500/40'
+                                            : (computed.montoBloqueado || loading)
+                                                ? 'bg-slate-50 dark:bg-dark-surface-alt border-slate-100 dark:border-dark-border cursor-not-allowed opacity-70'
+                                                : 'bg-slate-50 dark:bg-dark-surface-alt border-slate-100 dark:border-dark-border focus:border-brand-red dark:focus:border-brand-gold focus:ring-1 focus:ring-brand-red dark:focus:ring-brand-gold focus:bg-white dark:focus:bg-dark-surface'
+                                    }`} />
+
+                                {!computed.esGrupal && !computed.esPrendario && (
+                                    <p className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold mt-1 ml-1">Puedes ajustar si el cliente paga una cantidad diferente.</p>
+                                )}
+
+                                {computed.esPrendario && (
+                                    <div className="mt-1 ml-1 space-y-0.5">
+                                        {computed.errorMontoPrendario ? (
+                                            <p className="text-[9px] text-red-600 dark:text-red-400 font-bold">⚠ {computed.errorMontoPrendario}</p>
+                                        ) : (
+                                            <p className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold">{textoAyudaModo}</p>
+                                        )}
+                                        {state.modoPrendario === 'patear' && computed.capitalRemanentePreview != null && (
+                                            <p className="text-[9px] text-brand-gold-dark dark:text-brand-gold font-bold">
+                                                {computed.capitalRemanentePreview > 0
+                                                    ? `Capital que pasa al nuevo período: S/ ${fmt(computed.capitalRemanentePreview)}`
+                                                    : 'Este pago cubre toda la deuda: el préstamo se liquida.'}
+                                            </p>
+                                        )}
+                                        {!liqModo && (
+                                            <p className="text-[9px] text-red-600 dark:text-red-400 font-bold">
+                                                No se pudo cargar la liquidación de hoy. Recarga el préstamo.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             {state.metodo === 'DEPOSITO' && (
                                 <div>

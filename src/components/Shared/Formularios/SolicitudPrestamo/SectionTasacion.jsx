@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScaleIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ScaleIcon, CheckCircleIcon, ArrowPathIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { listarTasacionesCliente } from 'services/solicitudPrestamoService';
 
 const fmt = n => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -42,7 +42,14 @@ const SectionTasacion = ({ data, handleChange, isBlocked }) => {
         handleChange('tasacion_id', tasacion.id);
         handleChange('tasacion_nombre', etiquetaTasacion(tasacion));
         handleChange('tasacion_monto_maximo', tasacion.total_maximo_prestar);
+        handleChange('tasacion_total_tasado', tasacion.total_tasacion);
         handleChange('monto_solicitado', tasacion.total_maximo_prestar);
+    };
+
+    const handleCustodiaChange = (valor) => {
+        if (isBlocked) return;
+        const sanitized = valor.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+        handleChange('monto_custodia', sanitized);
     };
 
     return (
@@ -112,6 +119,11 @@ const SectionTasacion = ({ data, handleChange, isBlocked }) => {
                                 <p className="text-xs font-black text-brand-red dark:text-brand-gold mt-1">
                                     S/ {fmt(t.total_maximo_prestar)}
                                 </p>
+                                {t.total_tasacion && (
+                                    <p className="text-[8px] text-slate-400 dark:text-dark-text-muted font-bold uppercase mt-0.5">
+                                        Valor tasado: S/ {fmt(t.total_tasacion)}
+                                    </p>
+                                )}
                                 {t.fecha_tasacion && (
                                     <p className="text-[8px] text-slate-400 dark:text-dark-text-muted font-bold uppercase mt-1">
                                         Tasada: {t.fecha_tasacion}
@@ -124,17 +136,40 @@ const SectionTasacion = ({ data, handleChange, isBlocked }) => {
             )}
 
             {data.tasacion_id && (
-                <div className="mt-2 flex items-center gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-3">
-                    <CheckCircleIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                    <div className="flex-1">
-                        <p className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase">
-                            Seleccionada: {data.tasacion_nombre}
-                        </p>
-                        <p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase">
-                            Monto máximo tasado: S/ {fmt(data.tasacion_monto_maximo)}
-                        </p>
+                <>
+                    <div className="mt-2 flex items-center gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-3">
+                        <CheckCircleIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase">
+                                Seleccionada: {data.tasacion_nombre}
+                            </p>
+                            <p className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase">
+                                Monto máximo tasado: S/ {fmt(data.tasacion_monto_maximo)}
+                            </p>
+                        </div>
                     </div>
-                </div>
+
+                    {/* -- Monto de Custodia --------------------------------------- */}
+                    <div className="pt-2">
+                        <label className="block text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase mb-1.5 flex items-center gap-1">
+                            <LockClosedIcon className="w-3.5 h-3.5" />
+                            Monto de Custodia (S/) *
+                        </label>
+                        <input
+                            type="text"
+                            disabled={isBlocked}
+                            value={data.monto_custodia ?? ''}
+                            onChange={e => handleCustodiaChange(e.target.value)}
+                            placeholder="0.00"
+                            className="w-full p-3 border-2 rounded-xl text-sm font-black outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-surface-alt text-slate-800 dark:text-dark-text focus:border-brand-red dark:focus:border-brand-gold focus:ring-1 focus:ring-brand-red dark:focus:ring-brand-gold"
+                        />
+                        {(!data.monto_custodia || parseFloat(data.monto_custodia) === 0) && (
+                            <p className="text-[9px] text-brand-red dark:text-brand-gold font-bold uppercase mt-1">
+                                * Ingresa el monto de custodia libremente
+                            </p>
+                        )}
+                    </div>
+                </>
             )}
 
             {data.cliente_id && !data.tasacion_id && !loading && tasaciones.length > 0 && (

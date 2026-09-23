@@ -27,7 +27,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const [historialReprogOpen, setHistorialReprogOpen]     = useState(false);
     const [refreshing, setRefreshing]                       = useState(false);
 
-    // ── Interés — manejado localmente aquí (paralelo al de mora del hook) ──
     const [interesModalOpen, setInteresModalOpen]           = useState(false);
     const [interesData, setInteresData]                     = useState(null);
     const [historialInteresModal, setHistorialInteresModal] = useState(null);
@@ -67,6 +66,12 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         setRefModalOpen,
     } = useViewPrestamoModal({ data, onClose, onRefresh });
 
+    const liquidacionHoy = data?.liquidacion_hoy;
+    const cronogramaProcesado = (cronogramaActivo || []).map(c => ({
+        ...c,
+        liquidacion_hoy: liquidacionHoy
+    }));
+
     const miIntegrante = esCliente && data?.es_grupal
         ? data?.integrantes?.find(int => int.id === userId)
             ?? data?.integrantes_refinanciados?.find(int => int.id === userId)
@@ -95,7 +100,6 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
     const handleAbrirReprogramar = () => setReprogramarOpen(true);
 
-    // ── Reducir interés ──
     const handleAbrirReducirInteres = (cuota) => {
         setInteresData({
             cuota,
@@ -112,7 +116,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
     const handleSuccessReducirInteres = () => {
         handleCerrarReducirInteres();
-        handleSuccessReducirMora(); // Reutilizamos la función de éxito de reducir mora para refrescar el cronograma
+        handleSuccessReducirMora(); 
         if (onRefresh) onRefresh();
     };
 
@@ -126,7 +130,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                     : `Detalle de Préstamo #${data?.id?.toString().padStart(5, '0')}`}
                 isLoading={isLoading}
                 size="xl"
-                hideFooter = {true}
+                hideFooter={true}
             >
                 {data && (
                     <div className="space-y-6 transition-colors">
@@ -152,7 +156,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                 data.integrantes?.[0]?.situacion === 'VENCIDO'   ? 'text-amber-600 dark:text-amber-400' :
                                                 'text-green-600 dark:text-green-400'
                                             }`}>
-                                                ● {data.integrantes?.[0]?.situacion ?? 'VIGENTE'}
+                                                ✓ {data.integrantes?.[0]?.situacion ?? 'VIGENTE'}
                                             </span>
                                             {canCastigar && data.estado === 1 && !prestamoCancelado && (
                                                 <button
@@ -164,7 +168,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                             : 'bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-100'
                                                     }`}
                                                 >
-                                                    {loadingCastigo ? '...' : data.castigado ? '✓ Quitar Castigo' : '✕ Marcar Castigado'}
+                                                    {loadingCastigo ? '...' : data.castigado ? '✓ Quitar Castigo' : '✗ Marcar Castigado'}
                                                 </button>
                                             )}
                                             {data.total_reprogramaciones > 0 && (
@@ -198,8 +202,8 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-dark-surface-alt border border-slate-300 dark:border-dark-border rounded-xl transition-colors">
                                 <span className="text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase">
                                     {esCliente
-                                        ? '🚫 Este préstamo fue cancelado — Ya no hay cuotas por pagar'
-                                        : '🚫 Préstamo Cancelado — Las cuotas ya no son exigibles'}
+                                        ? '🔒 Este préstamo fue cancelado — Ya no hay cuotas por pagar'
+                                        : '🔒 Préstamo Cancelado — Las cuotas ya no son exigibles'}
                                 </span>
                             </div>
                         )}
@@ -230,7 +234,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                         int.situacion === 'VENCIDO'   ? 'text-amber-600 dark:text-amber-400' :
                                                         'text-green-600 dark:text-green-400'
                                                     }`}>
-                                                        ● {int.situacion ?? 'VIGENTE'}
+                                                        ✓ {int.situacion ?? 'VIGENTE'}
                                                     </span>
                                                 </div>
                                                 <span className="text-xs font-black text-brand-red dark:text-brand-gold bg-white dark:bg-dark-surface-alt px-2 py-1 rounded-lg border border-brand-red/20 dark:border-dark-border shadow-sm">
@@ -247,7 +251,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                             : 'bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-100'
                                                     }`}
                                                 >
-                                                    {loadingCastigo ? '...' : int.castigado ? '✓ Quitar Castigo' : '✕ Marcar Castigado'}
+                                                    {loadingCastigo ? '...' : int.castigado ? '✓ Quitar Castigo' : '✗ Marcar Castigado'}
                                                 </button>
                                             )}
                                         </div>
@@ -391,8 +395,9 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         ) : esCliente ? (
                             <CronogramaCliente
-                                cronograma={cronogramaActivo}
+                                cronograma={cronogramaProcesado}
                                 eco={eco}
+                                liquidacionHoy={liquidacionHoy}
                                 estadoPrestamo={data.estado}
                                 prestamoCancelado={prestamoCancelado}
                                 esGrupal={!!data.es_grupal}
@@ -403,7 +408,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             />
                         ) : (
                             <CronogramaTable
-                                cronograma={cronogramaActivo}
+                                cronograma={cronogramaProcesado}
                                 esVistaIntegrante={esVistaIntegrante}
                                 onHistorialModal={setHistorialModal}
                                 onHistorialInteresModal={setHistorialInteresModal}
@@ -412,6 +417,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                 eco={eco}
                                 estadoPrestamo={data.estado}
                                 loadingEco={loadingIntegrante}
+                                liquidacionHoy={liquidacionHoy}
                             />
                         )}
 

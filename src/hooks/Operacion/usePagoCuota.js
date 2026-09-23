@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 
+const round2 = (n) => Math.round((parseFloat(n) || 0) * 100) / 100;
+const money  = (n) => round2(n).toFixed(2);
+
 export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const [metodo,       setMetodo]       = useState('DEPOSITO');
     const [recibido,     setRecibido]     = useState('');
@@ -9,20 +12,20 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const [esParcial,    setEsParcial]    = useState(false);
     const [distribucion, setDistribucion] = useState({});
     const [alertLocal,   setAlertLocal]   = useState(null);
-    // ── Comisión ──────────────────────────────────────────────────────────────
     const [tieneComision, setTieneComision] = useState(false);
     const [comision,      setComision]      = useState('');
 
-    // ── PIN de autorización ──────────────────────────────────────────────────
-    // `cuota.requierePinAnticipado` ya viene decidido desde OperacionForm:
-    // - Individual: la cuota anterior está pendiente (adelanto de pago).
-    // - Grupal: la cuota en sí todavía no corresponde (estado PENDIENTE).
-    //   Los integrantes bloqueados (`int.bloqueado`, decidido por el backend)
-    //   NUNCA llegan hasta acá — ya fueron excluidos antes de abrir el modal,
-    //   así que el PIN solo autoriza el adelanto para los habilitados.
-    // pinRequerido puede además activarse en caliente si el backend lo exige
-    // al hacer submit (onRequierePin), por ejemplo si el PIN enviado era
-    // inválido o el backend detecta algo que el frontend no vio.
+    // Prendario: 'abono' | 'patear' | 'cancelar'
+    const [modoPrendario, setModoPrendario] = useState('abono');
+
+    const esPrendario = !!(cuota?.es_prendario);
+
+    // Liquidación a la fecha de corte, resuelta por el backend (show.php →
+    // PrendarioCalculoService::liquidacionHoy). El frontend NUNCA calcula
+    // intereses: solo muestra y valida rangos con lo que manda el backend.
+    const liquidacion = esPrendario ? (cuota?.liquidacion_hoy ?? null) : null;
+    const liqModo     = liquidacion?.modos?.[modoPrendario] ?? null;
+
     const [pinRequerido, setPinRequerido] = useState(false);
     const [pinContexto,  setPinContexto]  = useState(null);
     const [pin,          setPin]          = useState('');
@@ -33,14 +36,34 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const soloUnIntegrante       = esGrupal && integrantesPendientes.length === 1;
     const pinAnticipado          = !!cuota?.requierePinAnticipado;
 
-    /* Mora PENDIENTE — en grupal, OperacionForm ya pasa la de los habilitados */
-    const mora = parseFloat(cuota?.mora ?? 0);
+    const mora = (esPrendario && liqModo)
+        ? parseFloat(liqModo.mora ?? 0)
+        : parseFloat(cuota?.mora ?? 0);
 
     const excedenteIndividual = !esGrupal ? parseFloat(cuota?.excedente_anterior ?? 0) : 0;
 
-    /* Total a pagar — en grupal, OperacionForm ya pasa `habilitados_saldo`
-       (calculado por el backend solo para los integrantes habilitados) */
-    const totalAPagar = parseFloat(cuota?.saldo_pendiente ?? cuota?.saldo ?? 0).toFixed(2);
+    /* Total de la deuda A HOY:
+       - Prendario → cancelacion_total del modo elegido (capital + todo lo devengado
+         según el modo, menos crédito a favor).
+       - Grupal → habilitados_saldo (como antes).
+       - Resto → saldo_pendiente / saldo (como antes). */
+    const totalAPagar = (esPrendario && liqModo)
+        ? money(liqModo.cancelacion_total)
+        : parseFloat(cuota?.saldo_pendiente ?? cuota?.saldo ?? 0).toFixed(2);
+
+    // ── Monto sugerido al abrir / cambiar de modo (prendario) ─────────────────
+    // abono    → lo devengado a hoy (cargos), editable
+    // patear   → el mínimo obligatorio, editable hacia arriba
+    // cancelar → el total, bloqueado
+    const montoInicial = (() => {
+        if (esPrendario && liqModo) {
+            if (modoPrendario === 'abono') {
+                return liqModo.cargos > 0 ? money(liqModo.cargos) : '';
+            }
+            return money(liqModo.minimo);
+        }
+        return totalAPagar;
+    })();
 
     // ── Validaciones ──────────────────────────────────────────────────────────
     const integrantesSinCubrirMora = (esGrupal && esParcial)
@@ -55,6 +78,31 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const montoNum    = parseFloat(recibido || 0);
     const noCubreMora = !esGrupal && mora > 0 && montoNum > 0 && montoNum < mora;
 
+    const montoMinimo = (esPrendario && liqModo) ? round2(liqModo.minimo) : null;
+    const montoMaximo = (esPrendario && liqModo) ? round2(liqModo.maximo) : null;
+
+    // En 'cancelar' el monto va bloqueado y lo fija el backend.
+    const montoBloqueado = esGrupal || (esPrendario && modoPrendario === 'cancelar');
+
+    const errorMontoPrendario = (() => {
+        if (!esPrendario || !liqModo || modoPrendario === 'cancelar') return null;
+        if (!(montoNum > 0)) return 'Ingresa el monto a pagar.';
+        if (montoNum + 0.005 < montoMinimo) {
+            return modoPrendario === 'patear'
+                ? `Para patear debes cubrir todo lo devengado a hoy: mínimo S/ ${money(montoMinimo)}.`
+                : `El monto mínimo es S/ ${money(montoMinimo)}.`;
+        }
+        if (montoNum - 0.005 > montoMaximo) {
+            return `El monto supera la deuda a hoy (S/ ${money(montoMaximo)}).`;
+        }
+        return null;
+    })();
+
+    // Capital que pasaría al período nuevo si patea (solo informativo).
+    const capitalRemanentePreview = (esPrendario && liqModo && modoPrendario === 'patear')
+        ? Math.max(0, round2(liqModo.capital - Math.max(0, round2(montoNum + liqModo.credito - liqModo.cargos))))
+        : null;
+
     const comisionNum    = tieneComision ? parseFloat(comision || 0) : 0;
     const comisionValida = !tieneComision || (comisionNum > 0);
 
@@ -67,15 +115,17 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
 
     const puedeSubmit = !noCubreMora
         && integrantesSinCubrirMora.length === 0
+        && !errorMontoPrendario
         && validacionMetodo
         && comisionValida
         && pinValido;
 
     // ── Efectos ───────────────────────────────────────────────────────────────
+    // Reset SOLO al abrir. No depende de los totales: en prendario el total cambia
+    // al cambiar de modo y no debe borrar método, referencia, archivo ni el modo.
     useEffect(() => {
         if (isOpen) {
             setMetodo('DEPOSITO');
-            setRecibido(totalAPagar);
             setReferencia('');
             setArchivo(null);
             setPreview(null);
@@ -84,18 +134,21 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             setAlertLocal(null);
             setTieneComision(false);
             setComision('');
-            // PIN: arranca visible si el front ya sabía de antemano
-            // (cuota.requierePinAnticipado, decidido en OperacionForm).
             setPinRequerido(pinAnticipado);
             setPinContexto(null);
             setPin('');
             setPinError(null);
+            setModoPrendario('abono');
         }
-    }, [isOpen, totalAPagar, soloUnIntegrante, pinAnticipado]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, soloUnIntegrante, pinAnticipado]);
 
-    // Total distribuido: si todos van "completo" es el total del backend;
-    // si alguno pone monto parcial, se suma lo digitado + el `saldo` (que ya
-    // trae capital + interés + seguro + mora) de los que van completos.
+    // Monto: se precarga al abrir y se vuelve a precargar al cambiar de modo.
+    useEffect(() => {
+        if (isOpen) setRecibido(montoInicial);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, montoInicial]);
+
     const calcularTotalDistribuido = () => {
         if (integrantesPendientes.length === 0) return parseFloat(totalAPagar);
         const todosEnFull = integrantesPendientes.every(int => !distribucion[int.id] || distribucion[int.id] === '');
@@ -143,14 +196,9 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         if (pinError) setPinError(null);
     };
 
-    // ── Callback que onConfirm invoca si el backend exige PIN (o el PIN
-    // enviado era inválido) ──────────────────────────────────────────────────
     const handleRequierePin = (contexto, mensaje) => {
         setPinContexto(contexto);
         setPinRequerido(true);
-        // Si ya había un pin escrito (submit con pin incorrecto), mostramos
-        // el motivo devuelto por el backend; si no había pin, es la primera
-        // vez que se detecta el bloqueo.
         setPinError(pin ? (mensaje || 'PIN incorrecto o inválido.') : null);
         setAlertLocal(null);
     };
@@ -166,9 +214,14 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         if (tieneComision && comisionNum > 0) {
             formData.append('comision', comisionNum.toFixed(2));
         }
-
         if (pinRequerido && pinCompleto) {
             formData.append('pin', pin);
+        }
+
+        // Prendario: el backend decide el monto de 'cancelar' y valida el rango
+        // de 'abono' / 'patear' contra su propia liquidación. Aquí solo va el modo.
+        if (esPrendario) {
+            formData.append('modo_prendario', modoPrendario);
         }
 
         if (esGrupal && (esParcial || soloUnIntegrante)) {
@@ -200,17 +253,20 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             metodo, recibido, referencia, archivo, preview,
             esParcial, distribucion, alertLocal,
             tieneComision, comision,
-            pinRequerido, pinContexto, pin, pinError, pinCompleto,
+            pinRequerido, pinContexto, pin, pinError, pinCompleto, modoPrendario
         },
         setters: {
             setMetodo, setRecibido, setReferencia, setEsParcial, setAlertLocal,
-            setArchivo, setPreview, setTieneComision, setComision,
+            setArchivo, setPreview, setTieneComision, setComision, setModoPrendario
         },
         computed: {
             esGrupal, integrantesPendientes, soloUnIntegrante,
             totalAPagar, mora, excedenteIndividual,
             integrantesSinCubrirMora, noCubreMora,
-            puedeSubmit, totalDistribuido, comisionNum,
+            puedeSubmit, totalDistribuido, comisionNum, esPrendario,
+            liquidacion, liqModo,
+            montoMinimo, montoMaximo, montoBloqueado,
+            errorMontoPrendario, capitalRemanentePreview,
         },
         handlers: {
             handleFileChange, handleMontoIntegrante, reset, handleSubmit, handlePinChange,

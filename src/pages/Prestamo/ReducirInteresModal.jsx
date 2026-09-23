@@ -106,7 +106,14 @@ const ReducirInteresModal = ({ isOpen, onClose, cuota, cuotaDetalleId = null, in
                         className="w-full p-3 bg-slate-50 dark:bg-dark-surface-alt border-2 border-slate-100 dark:border-dark-border rounded-2xl text-xs font-bold text-slate-700 dark:text-dark-text focus:border-brand-red dark:focus:border-brand-gold focus:bg-white dark:focus:bg-dark-surface outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed placeholder-slate-400 dark:placeholder-dark-text-muted/60" />
                 </div>
 
-                {alert && <AlertMessage type={alert.type} message={alert.message} onClose={() => {}} />}
+                {alert && (
+                    <AlertMessage
+                        type={alert.type}
+                        message={alert.message}
+                        details={alert.details}
+                        onClose={() => {}}
+                    />
+                )}
 
                 <button onClick={() => handleSubmit(cuotaId, interesPendiente, cuotaDetalleId)} disabled={loading || !puedeSubmit}
                     className="w-full bg-brand-red dark:bg-brand-red-glow text-white dark:text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl shadow-brand-red/30 dark:shadow-black/30 hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95">

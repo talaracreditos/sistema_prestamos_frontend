@@ -69,4 +69,19 @@ export const convertirProspecto = async (data) => {
     });
     return handleResponse(response);
 };
- 
+
+export const historialCreditos = async (id, page = 1) => {
+    const response = await fetchWithAuth(`${BASE_URL}/historial/${id}?page=${page}`, { method: 'GET' });
+    return handleResponse(response);
+};
+
+export const kardexCredito = async (prestamoId, clienteId) => {
+    const params = new URLSearchParams({ cliente_id: clienteId });
+    const response = await fetchWithAuth(`${BASE_URL}/kardex/${prestamoId}?${params.toString()}`, { method: 'GET' });
+    return handleResponse(response);
+};
+
+export const exportarHistorialCreditos = async (clienteId, formato) => {
+    const response = await fetchWithAuth(`${BASE_URL}/exportar-historial/${clienteId}?formato=${formato}`, { method: 'GET' });
+    return handleResponse(response);
+};

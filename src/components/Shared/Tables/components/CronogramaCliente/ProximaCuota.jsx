@@ -3,13 +3,6 @@ import { CalendarDaysIcon, ExclamationTriangleIcon } from '@heroicons/react/24/o
 import { useCuotaData } from '../../hooks/useCuotaData';
 import { fmt } from './utils';
 
-/* ─────────────────────────────────────────────────────────────
- * PRÓXIMA CUOTA (destacada) — usa useCuotaData
- * Esta tarjeta SOLO recibe cuotas completas y NO atrasadas desde el
- * componente padre — las atrasadas (completas o parciales) van en
- * la sección de alerta arriba de todo, para no confundir a quien
- * ya pagó o para priorizar lo más urgente.
- * ───────────────────────────────────────────────────────────── */
 const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
 
     const d = useCuotaData(cuota, i, esVistaIntegrante);
@@ -30,8 +23,11 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
                     : <CalendarDaysIcon className="w-5 h-5 text-brand-gold" />
                 }
                 <p className="text-[14px] font-black uppercase tracking-widest text-white/70 dark:text-dark-text-muted">
+                    {/* EL TÍTULO CAMBIA SI ES PRENDARIO */}
                     {conAtraso
                         ? 'Cuota atrasada — ponte al día'
+                        : d.esPrendario
+                        ? 'Deuda total al día de hoy'
                         : esVenceHoy
                         ? '¡La cuota vence hoy!'
                         : esVistaPersonal ? 'Tu próximo pago' : 'Próximo pago del grupo'}
@@ -40,7 +36,8 @@ const ProximaCuota = ({ cuota, i, esVistaIntegrante, esVistaPersonal }) => {
 
             <div className="flex items-end justify-between flex-wrap gap-3">
                 <div>
-                    <p className="text-3xl font-black">{fmt(d.saldo)}</p>
+                    {/* d.saldo YA viene parchado desde tu hook, así que mostrará el devengado exacto a hoy */}
+                    <p className="text-3xl font-black">{fmt(d.saldo)}</p> 
                     <p className="text-[14px] font-bold text-white/70 dark:text-dark-text-muted mt-1">
                         Cuota #{d.nro.toString().padStart(2, '0')} · Vence: {cuota.vencimiento}
                     </p>

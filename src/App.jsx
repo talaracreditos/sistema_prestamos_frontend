@@ -141,6 +141,11 @@ import ListarSubtiposJoyas from 'pages/SubTipoJoya/Index';
 import AgregarSubtipoJoya from 'pages/SubTipoJoya/Store';
 import EditarSubtipoJoya from 'pages/SubTipoJoya/Update';
 
+// UI PRENDARIO (KILATAJES / PRECIO DE ORO)
+import ListarKilatajes from 'pages/Kilataje/Index';
+import AgregarKilataje from 'pages/Kilataje/Store';
+import EditarKilataje from 'pages/Kilataje/Update';
+
 // UI TASACION
 import ListarTasaciones from 'pages/Tasacion/Index';
 import AgregarTasacion from 'pages/Tasacion/Store';
@@ -299,6 +304,11 @@ function AppContent() {
         <Route path="/subtipo-joya/listar" element={<ProtectedRoute requiredPermission="subtipoJoya.index" element={<ListarSubtiposJoyas />} />} />
         <Route path="/subtipo-joya/agregar" element={<ProtectedRoute requiredPermission="subtipoJoya.store" element={<AgregarSubtipoJoya />} />} />
         <Route path="/subtipo-joya/editar/:id" element={<ProtectedRoute requiredPermission="subtipoJoya.update" element={<EditarSubtipoJoya />} />} />
+
+        {/* PRENDARIO: KILATAJES (PRECIO DE ORO) */}
+        <Route path="/kilataje/listar" element={<ProtectedRoute requiredPermission="kilataje.index" element={<ListarKilatajes />} />} />
+        <Route path="/kilataje/agregar" element={<ProtectedRoute requiredPermission="kilataje.store" element={<AgregarKilataje />} />} />
+        <Route path="/kilataje/editar/:id" element={<ProtectedRoute requiredPermission="kilataje.update" element={<EditarKilataje />} />} />
 
         {/* TASACION */}
         <Route path="/tasacion/listar" element={<ProtectedRoute requiredPermission="tasacion.index" element={<ListarTasaciones />} />} />

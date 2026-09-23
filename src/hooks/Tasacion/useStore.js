@@ -6,8 +6,7 @@ import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 const round = (n) => Math.round(n * 100) / 100;
 const fmt = (n) => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
 
-const KILATES_OPCIONES = ['18', '21', '24'];
-const KILATE_DEFAULT = '18';
+const PORCENTAJE_OPCIONES = [60, 70, 80, 90, 100];
 
 const vacioDetalle = () => ({
     tipo_joya: null,
@@ -15,15 +14,13 @@ const vacioDetalle = () => ({
     descripcion_detallada: '',
     peso_bruto: '',
     peso_incrustacion: '0',
-    kilates: KILATE_DEFAULT,
+    kilataje: null, // { id, nombre, precio_gramo } — viene del combobox de Kilataje
 });
 
 export const useStore = () => {
     const navigate = useNavigate();
 
     const [porcentajePrestamo, setPorcentajePrestamo] = useState(70);
-
-    const [precioOroGramo, setPrecioOroGramo] = useState('');
 
     // ── Paso 1: Cliente ──────────────────────────────────────────────────────
     const [cliente, setCliente] = useState(null);
@@ -59,17 +56,17 @@ export const useStore = () => {
     };
 
     // ── Cálculo automático de la joya en edición ────────────────────────────
-    // El precio ingresado (S/ por gramo) YA corresponde al kilataje seleccionado.
-    // El kilataje NO debe volver a aplicar ninguna conversión sobre ese precio.
-    const pesoBrutoNum      = parseFloat(detalleActual.peso_bruto) || 0;
-    const pesoIncrustNum    = parseFloat(detalleActual.peso_incrustacion) || 0;
-    const pesoNeto           = Math.max(0, round(pesoBrutoNum - pesoIncrustNum));
-    const porcentajeNum       = parseFloat(porcentajePrestamo) || 0;
-    const precioOroGramoNum   = parseFloat(precioOroGramo) || 0;
+    // El precio por gramo viene del kilataje seleccionado en el combobox
+    // (catálogo administrado en /kilataje/listar). Ya no se digita a mano.
+    const pesoBrutoNum    = parseFloat(detalleActual.peso_bruto) || 0;
+    const pesoIncrustNum  = parseFloat(detalleActual.peso_incrustacion) || 0;
+    const pesoNeto        = Math.max(0, round(pesoBrutoNum - pesoIncrustNum));
+    const porcentajeNum   = parseFloat(porcentajePrestamo) || 0;
+    const precioGramoNum  = parseFloat(detalleActual.kilataje?.precio_gramo) || 0;
 
     const valorTasadoNum = useMemo(
-        () => round(pesoNeto * precioOroGramoNum),
-        [pesoNeto, precioOroGramoNum]
+        () => round(pesoNeto * precioGramoNum),
+        [pesoNeto, precioGramoNum]
     );
 
     const maximoSugerido = useMemo(
@@ -78,16 +75,12 @@ export const useStore = () => {
     );
 
     const handleAgregarDetalle = () => {
-        if (precioOroGramoNum <= 0) {
-            setAlert({ type: 'error', message: 'Debes ingresar el precio del oro por gramo para poder tasar.' });
-            return;
-        }
         if (!detalleActual.tipo_joya || !detalleActual.subtipo_joya) {
             setAlert({ type: 'error', message: 'Selecciona tipo y subtipo de joya.' });
             return;
         }
-        if (!detalleActual.kilates) {
-            setAlert({ type: 'error', message: 'Selecciona el kilataje de la joya.' });
+        if (!detalleActual.kilataje) {
+            setAlert({ type: 'error', message: 'Selecciona el kilataje de la joya — de ahí se toma el precio del oro.' });
             return;
         }
         if (pesoBrutoNum <= 0) {
@@ -128,7 +121,7 @@ export const useStore = () => {
             descripcion_detallada: detalle.descripcion_detallada,
             peso_bruto: detalle.peso_bruto,
             peso_incrustacion: detalle.peso_incrustacion,
-            kilates: detalle.kilates || KILATE_DEFAULT,
+            kilataje: detalle.kilataje || null,
         });
         setEditandoId(detalle.id);
         setMontoAnteriorEdicion(parseFloat(detalle.maximo_prestar) || 0);
@@ -154,7 +147,7 @@ export const useStore = () => {
         detalleActual.tipo_joya || detalleActual.subtipo_joya ||
         detalleActual.descripcion_detallada || detalleActual.peso_bruto ||
         (detalleActual.peso_incrustacion && detalleActual.peso_incrustacion !== '0') ||
-        (detalleActual.kilates && detalleActual.kilates !== KILATE_DEFAULT)
+        detalleActual.kilataje
     );
 
     // ── Guardar tasación ─────────────────────────────────────────────────────
@@ -167,10 +160,6 @@ export const useStore = () => {
             setAlert({ type: 'error', message: 'Debes seleccionar un cliente.' });
             return;
         }
-        if (precioOroGramoNum <= 0) {
-            setAlert({ type: 'error', message: 'Debes ingresar el precio del oro por gramo.' });
-            return;
-        }
         if (detalles.length === 0) {
             setAlert({ type: 'error', message: 'Agrega al menos una joya a la tasación.' });
             return;
@@ -180,7 +169,6 @@ export const useStore = () => {
             cliente_id: cliente.usuario_id,
             fecha_tasacion: new Date().toISOString().split('T')[0],
             porcentaje_prestamo_aplicado: porcentajeNum,
-            precio_oro_gramo_aplicado: precioOroGramoNum,
             total_tasacion: totalTasacion,
             total_maximo_prestar: totalMaximoPrestar,
             detalles: detalles.map(d => ({
@@ -190,7 +178,7 @@ export const useStore = () => {
                 peso_bruto: d.peso_bruto,
                 peso_incrustacion: d.peso_incrustacion,
                 peso_neto: d.peso_neto,
-                kilates: d.kilates,
+                kilataje_id: d.kilataje?.id,
                 valor_tasado: d.valor_tasado,
                 maximo_prestar: d.maximo_prestar,
             })),
@@ -218,15 +206,12 @@ export const useStore = () => {
         pesoNeto, valorTasadoNum, porcentajeNum, maximoSugerido, formularioTieneDatos,
         handleAgregarDetalle, handleEditarDetalle, handleCancelarEdicion, handleEliminarDetalle,
 
-        // % préstamo y precio del oro (ambos editables, precio obligatorio)
+        // % préstamo — solo valores fijos
         porcentajePrestamo, setPorcentajePrestamo,
-        precioOroGramo, setPrecioOroGramo,
+        porcentajeOpciones: PORCENTAJE_OPCIONES,
 
         // campos limitados — en Store nunca aplica (todo es nuevo)
         camposLimitados: false,
-
-        // kilates disponibles para el combobox
-        kilatesOpciones: KILATES_OPCIONES,
 
         // totales / guardar / cancelar tasación
         totalTasacion, totalMaximoPrestar, handleGuardarTasacion, guardando,

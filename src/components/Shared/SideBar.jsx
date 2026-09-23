@@ -139,6 +139,13 @@ export const MENU_GROUPS = [
                 ],
             },
             {
+                section: 'Kilatajes (Precio Oro)', icon: CurrencyDollarIcon,
+                subs: [
+                    { name: 'Listar Kilatajes', link: '/kilataje/listar',  requiredPermission: 'kilataje.index' },
+                    { name: 'Nuevo Kilataje',   link: '/kilataje/agregar', requiredPermission: 'kilataje.store' },
+                ],
+            },
+            {
                 section: 'Tasaciones', icon: ScaleIcon,
                 subs: [
                     { name: 'Listar Tasaciones', link: '/tasacion/listar',  requiredPermission: 'tasacion.index' },
@@ -271,6 +278,7 @@ export const MENU_GROUPS = [
         ]
     }
 ];
+
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const [isOpen,      setIsOpen]      = useState(false);

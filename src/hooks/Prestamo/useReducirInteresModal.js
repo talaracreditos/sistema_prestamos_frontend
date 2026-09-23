@@ -74,7 +74,16 @@ export function useReducirInteresModal({ onSuccess, isOpen }) {
             setPreview(null);
             if (onSuccess) onSuccess(result);
         } catch (e) {
-            setAlert({ type: 'error', message: e.message ?? 'Error al reducir interés.' });
+            const backendData = e.response?.data ?? e.data ?? e;
+            const rawDetails  = backendData?.details ?? e.details ?? null;
+
+            setAlert({
+                type: 'error',
+                message: backendData?.message ?? e.message ?? 'Error al reducir interés.',
+                details: rawDetails
+                    ? (Array.isArray(rawDetails) ? rawDetails : [rawDetails])
+                    : null,
+            });
         } finally {
             setLoading(false);
         }
