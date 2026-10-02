@@ -20,7 +20,7 @@ export const CeldaFinanciera = ({ total, pagado, pendiente }) => (
 );
 
 export const InteresContent = ({ d, cuota, nro, onHistorialInteresModal }) => {
-    const interes   = parseFloat(cuota?.interes ?? 0);
+    const interes   = d.esPrendario ? d.interes : parseFloat(cuota?.interes ?? 0);
     const pagado    = parseFloat(cuota?.interes_pagado ?? 0);
     const reducido  = parseFloat(cuota?.interes_reducido ?? 0);
     const original  = cuota?.interes_original;   

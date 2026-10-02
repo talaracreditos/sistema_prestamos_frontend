@@ -71,6 +71,14 @@ export const reducirInteres = async (data) => {
     return handleResponse(response);
 };
 
+export const adjudicar = async (prestamoId, data = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/${prestamoId}/adjudicar`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+};
+
 export const cambiarPresidente = async (data) => {
     const response = await fetchWithAuth(`${BASE_URL}/cambiar-presidente`, {
         method: 'POST',

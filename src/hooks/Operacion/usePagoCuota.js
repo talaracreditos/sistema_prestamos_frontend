@@ -26,6 +26,15 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const liquidacion = esPrendario ? (cuota?.liquidacion_hoy ?? null) : null;
     const liqModo     = liquidacion?.modos?.[modoPrendario] ?? null;
 
+    // El período ya llegó/pasó su vencimiento: "abonar" (mantiene el mismo
+    // vencimiento) ya no tiene sentido — solo quedan patear o cancelar.
+    // El backend manda 'puede_abonar' ya calculado; fallback a comparar
+    // 'dias' contra 'dias_mes' por si un JSON viejo aún no lo trae.
+    const abonoBloqueado = !!(liquidacion) && (
+        liquidacion.puede_abonar === false
+        || (liquidacion.puede_abonar === undefined && liquidacion.dias >= (liquidacion.dias_mes ?? 30))
+    );
+
     const [pinRequerido, setPinRequerido] = useState(false);
     const [pinContexto,  setPinContexto]  = useState(null);
     const [pin,          setPin]          = useState('');
@@ -40,6 +49,8 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         ? parseFloat(liqModo.mora ?? 0)
         : parseFloat(cuota?.mora ?? 0);
 
+    const igv = (esPrendario && liqModo) ? parseFloat(liqModo.igv ?? 0) : 0;
+
     const excedenteIndividual = !esGrupal ? parseFloat(cuota?.excedente_anterior ?? 0) : 0;
 
     /* Total de la deuda A HOY:
@@ -52,18 +63,11 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         : parseFloat(cuota?.saldo_pendiente ?? cuota?.saldo ?? 0).toFixed(2);
 
     // ── Monto sugerido al abrir / cambiar de modo (prendario) ─────────────────
-    // abono    → lo devengado a hoy (cargos), editable
-    // patear   → el mínimo obligatorio, editable hacia arriba
-    // cancelar → el total, bloqueado
-    const montoInicial = (() => {
-        if (esPrendario && liqModo) {
-            if (modoPrendario === 'abono') {
-                return liqModo.cargos > 0 ? money(liqModo.cargos) : '';
-            }
-            return money(liqModo.minimo);
-        }
-        return totalAPagar;
-    })();
+    // abono y patear exigen lo MISMO: liqModo.minimo (todo lo devengado del
+    // período + IGV, neto de crédito). cancelar → el total, bloqueado.
+    const montoInicial = (esPrendario && liqModo)
+        ? money(liqModo.minimo)
+        : totalAPagar;
 
     // ── Validaciones ──────────────────────────────────────────────────────────
     const integrantesSinCubrirMora = (esGrupal && esParcial)
@@ -75,32 +79,44 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             return parseFloat(val) < moraPend;
         }) : [];
 
-    const montoNum    = parseFloat(recibido || 0);
-    const noCubreMora = !esGrupal && mora > 0 && montoNum > 0 && montoNum < mora;
+    const montoNum = parseFloat(recibido || 0);
+
+    // Genérico, solo para préstamos normales no-prendarios.
+    const noCubreMora = !esGrupal && !esPrendario && mora > 0 && montoNum > 0 && montoNum < mora;
 
     const montoMinimo = (esPrendario && liqModo) ? round2(liqModo.minimo) : null;
-    const montoMaximo = (esPrendario && liqModo) ? round2(liqModo.maximo) : null;
+
+    // Ni abono ni patear pueden alcanzar el total de la deuda: pagarlo todo
+    // es exclusivo de 'cancelar' (único modo que aplica la penalidad de
+    // pronto pago y liquida el préstamo correctamente). Se deja 1 céntimo de
+    // margen para forzar que siempre quede saldo pendiente.
+    const montoMaximo = (esPrendario && liqModo)
+        ? (modoPrendario === 'cancelar'
+            ? round2(liqModo.maximo)
+            : round2(Math.max(0.01, liqModo.maximo - 0.01)))
+        : null;
 
     // En 'cancelar' el monto va bloqueado y lo fija el backend.
     const montoBloqueado = esGrupal || (esPrendario && modoPrendario === 'cancelar');
 
     const errorMontoPrendario = (() => {
         if (!esPrendario || !liqModo || modoPrendario === 'cancelar') return null;
+        if (modoPrendario === 'abono' && abonoBloqueado) {
+            return 'El período ya venció: el modo "abonar" ya no está disponible. Usa "Pagar y patear" o "Cancelar todo".';
+        }
         if (!(montoNum > 0)) return 'Ingresa el monto a pagar.';
         if (montoNum + 0.005 < montoMinimo) {
-            return modoPrendario === 'patear'
-                ? `Para patear debes cubrir todo lo devengado a hoy: mínimo S/ ${money(montoMinimo)}.`
-                : `El monto mínimo es S/ ${money(montoMinimo)}.`;
+            return `Debes cubrir todo lo devengado a hoy (mora, seguro, custodia, interés e IGV): mínimo S/ ${money(montoMinimo)}.`;
         }
         if (montoNum - 0.005 > montoMaximo) {
-            return `El monto supera la deuda a hoy (S/ ${money(montoMaximo)}).`;
+            return `No puedes pagar el total del préstamo en modo "${modoPrendario === 'patear' ? 'Pagar y patear' : 'Solo abonar'}" (máx. S/ ${money(montoMaximo)}). Para pagarlo todo usa "Cancelar todo".`;
         }
         return null;
     })();
 
     // Capital que pasaría al período nuevo si patea (solo informativo).
     const capitalRemanentePreview = (esPrendario && liqModo && modoPrendario === 'patear')
-        ? Math.max(0, round2(liqModo.capital - Math.max(0, round2(montoNum + liqModo.credito - liqModo.cargos))))
+        ? Math.max(0, round2(liqModo.capital - Math.max(0, round2(montoNum + liqModo.credito - (liqModo.cargos + igv)))))
         : null;
 
     const comisionNum    = tieneComision ? parseFloat(comision || 0) : 0;
@@ -138,10 +154,28 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             setPinContexto(null);
             setPin('');
             setPinError(null);
-            setModoPrendario('abono');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, soloUnIntegrante, pinAnticipado]);
+
+    // Modo inicial al abrir: 'abono' si está disponible, si no arranca
+    // directo en 'patear' (el período ya venció).
+    useEffect(() => {
+        if (isOpen) {
+            setModoPrendario(abonoBloqueado ? 'patear' : 'abono');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
+
+    // Si el período vence MIENTRAS el modal está abierto en 'abono' (caso
+    // raro, pero posible si queda abierto cruzando medianoche), lo saca de
+    // abono automáticamente.
+    useEffect(() => {
+        if (isOpen && modoPrendario === 'abono' && abonoBloqueado) {
+            setModoPrendario('patear');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, abonoBloqueado]);
 
     // Monto: se precarga al abrir y se vuelve a precargar al cambiar de modo.
     useEffect(() => {
@@ -264,7 +298,7 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
             totalAPagar, mora, excedenteIndividual,
             integrantesSinCubrirMora, noCubreMora,
             puedeSubmit, totalDistribuido, comisionNum, esPrendario,
-            liquidacion, liqModo,
+            liquidacion, liqModo, abonoBloqueado,
             montoMinimo, montoMaximo, montoBloqueado,
             errorMontoPrendario, capitalRemanentePreview,
         },

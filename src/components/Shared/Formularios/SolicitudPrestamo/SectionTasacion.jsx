@@ -52,6 +52,10 @@ const SectionTasacion = ({ data, handleChange, isBlocked }) => {
         handleChange('monto_custodia', sanitized);
     };
 
+    const custodiaSinLlenar = data.monto_custodia === undefined
+        || data.monto_custodia === null
+        || data.monto_custodia === '';
+
     return (
         <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/25 p-5 space-y-3 transition-colors">
             <div className="flex items-center justify-between">
@@ -153,7 +157,10 @@ const SectionTasacion = ({ data, handleChange, isBlocked }) => {
                     <div className="pt-2">
                         <label className="block text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase mb-1.5 flex items-center gap-1">
                             <LockClosedIcon className="w-3.5 h-3.5" />
-                            Monto de Custodia (S/) *
+                            Monto de Custodia (S/)
+                            <span className="text-slate-300 dark:text-dark-text-muted/60 normal-case font-bold">
+                                — pon 0 si no se cobra
+                            </span>
                         </label>
                         <input
                             type="text"
@@ -163,9 +170,9 @@ const SectionTasacion = ({ data, handleChange, isBlocked }) => {
                             placeholder="0.00"
                             className="w-full p-3 border-2 rounded-xl text-sm font-black outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-surface-alt text-slate-800 dark:text-dark-text focus:border-brand-red dark:focus:border-brand-gold focus:ring-1 focus:ring-brand-red dark:focus:ring-brand-gold"
                         />
-                        {(!data.monto_custodia || parseFloat(data.monto_custodia) === 0) && (
+                        {custodiaSinLlenar && (
                             <p className="text-[9px] text-brand-red dark:text-brand-gold font-bold uppercase mt-1">
-                                * Ingresa el monto de custodia libremente
+                                * Ingresa el monto de custodia (usa 0 si no aplica)
                             </p>
                         )}
                     </div>

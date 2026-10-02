@@ -14,6 +14,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     const canCambiarPresidente = can('prestamo.cambiarPresidente');
     const canCastigar          = can('prestamoDetalle.status');
     const canReprogramar       = can('prestamo.reprogramar');
+    const canAdjudicar         = can('prestamo.adjudicar');
 
     const [integranteSeleccionado, setIntegranteSeleccionado] = useState(null);
     const [integranteData, setIntegranteData]                 = useState(null);
@@ -267,11 +268,23 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
     //    perdonando qué, que era la ambigüedad que motivó este cambio.
     const puedeVerReducirMora = canReducirMora && !prestamoCancelado && data?.estado === 1;
 
+    // Adjudicar: solo prendario, solo staff, y el backend ya calculó si
+    // pasaron los días mínimos de atraso y si la garantía no está ya
+    // adjudicada (data.prendario_info.puede_adjudicar).
+    const puedeVerAdjudicar =
+        !esCliente &&
+        canAdjudicar &&
+        esPrendario &&
+        data?.estado === 1 &&
+        !prestamoCancelado &&
+        !!data?.prendario_info?.puede_adjudicar &&
+        !data?.prendario_info?.garantia_adjudicada;
+
     return {
         // rol / auth
         esCliente,
         // permisos base (por si algún componente hijo los necesita crudos)
-        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canCastigar, canReprogramar,
+        canRefinanciar, canGeneratePdf, canReducirMora, canCambiarPresidente, canCastigar, canReprogramar, canAdjudicar,
         // estado
         integranteSeleccionado, integranteData, loadingIntegrante, loadingCastigo,
         pdfOpen, pdfBase64, pdfTitle, loadingPdf,
@@ -284,7 +297,7 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
         integranteTienePendientes, cuotasPendientesCount,
         // derivados de permiso — listos para usar directo en el JSX
         puedeVerReprogramar, puedeVerRefinanciar, puedeVerCambiarPresidente,
-        puedeVerDescargarPdf, puedeVerReducirMora,
+        puedeVerDescargarPdf, puedeVerReducirMora, puedeVerAdjudicar,
         // handlers
         handleSelectIntegrante, handleDescargarCronograma,
         handleCerrarPdf, handleClose,

@@ -32,8 +32,8 @@ const DatosEconomicosCards = ({ eco, estadoPrestamo, esVistaIntegrante, liquidac
     const esPrendario = eco?.modalidad === 'PRENDARIO' || eco?.es_prendario;
 
     if (esPrendario && dataLiq) {
-        const liq = dataLiq.modos.cancelar; 
-        
+        const liq = dataLiq.modos.patear;
+
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 transition-colors">
                 <div className="p-4 bg-slate-50 dark:bg-dark-surface-alt rounded-2xl border border-slate-100 dark:border-dark-border flex flex-col justify-center transition-colors">
@@ -62,7 +62,7 @@ const DatosEconomicosCards = ({ eco, estadoPrestamo, esVistaIntegrante, liquidac
 
                 <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-xl shadow-brand-red/20 dark:shadow-black/30 flex flex-col justify-center transition-colors">
                     <p className="text-[10px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">Deuda Total a Cancelar</p>
-                    <p className="text-xl font-black text-white dark:text-dark-text">S/ {parseFloat(liq.cancelacion_total).toFixed(2)}</p>
+                    <p className="text-xl font-black text-white dark:text-dark-text">S/ {parseFloat(liq.total_sin_igv).toFixed(2)}</p>
                     <p className="text-[10px] font-bold text-white/70 dark:text-dark-text-muted mt-1">Monto exacto al día de hoy</p>
                 </div>
             </div>

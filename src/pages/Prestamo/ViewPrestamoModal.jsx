@@ -9,12 +9,13 @@ import ReducirMoraModal from './ReducirMoraModal';
 import ReducirInteresModal from './ReducirInteresModal';
 import CambiarPresidenteModal from './CambiarPresidenteModal';
 import ReprogramacionModal from './ReprogramacionModal';
+import AdjudicarModal from './AdjudicarModal';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
 import CronogramaCliente from 'components/Shared/Tables/CronogramaCliente';
 import {
     CalendarIcon, UserIcon, UserGroupIcon,
     InformationCircleIcon, UsersIcon,
-    ArrowPathIcon, ArrowDownTrayIcon, ClockIcon,
+    ArrowPathIcon, ArrowDownTrayIcon, ClockIcon, ScaleIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowPathRoundedSquareIcon, StarIcon } from '@heroicons/react/24/outline';
 import { useViewPrestamoModal } from 'hooks/Prestamo/useViewPrestamoModal';
@@ -26,6 +27,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
     const [reprogramarOpen, setReprogramarOpen]             = useState(false);
     const [historialReprogOpen, setHistorialReprogOpen]     = useState(false);
     const [refreshing, setRefreshing]                       = useState(false);
+    const [adjudicarOpen, setAdjudicarOpen]                 = useState(false);
 
     const [interesModalOpen, setInteresModalOpen]           = useState(false);
     const [interesData, setInteresData]                     = useState(null);
@@ -51,7 +53,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         eco,
         cuotasPendientesCount,
         puedeVerReprogramar, puedeVerRefinanciar, puedeVerCambiarPresidente,
-        puedeVerDescargarPdf, puedeVerReducirMora,
+        puedeVerDescargarPdf, puedeVerReducirMora, puedeVerAdjudicar,
         moraModalOpen, moraData,
         handleSelectIntegrante,
         handleDescargarCronograma,
@@ -120,6 +122,11 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
         if (onRefresh) onRefresh();
     };
 
+    const handleSuccessAdjudicar = () => {
+        setAdjudicarOpen(false);
+        if (onRefresh) onRefresh();
+    };
+
     return (
         <>
             <ViewModal
@@ -180,6 +187,12 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                     <ClockIcon className="w-3 h-3" />
                                                     Reprogramado {data.total_reprogramaciones}x
                                                 </button>
+                                            )}
+                                            {data.prendario_info?.garantia_adjudicada && (
+                                                <span className="flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30">
+                                                    <ScaleIcon className="w-3 h-3" />
+                                                    Garantía Adjudicada
+                                                </span>
                                             )}
                                         </div>
                                     )}
@@ -356,6 +369,16 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     </button>
                                 )}
 
+                                {puedeVerAdjudicar && (
+                                    <button
+                                        onClick={() => setAdjudicarOpen(true)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black uppercase rounded-lg transition-all shadow-md shadow-amber-600/20"
+                                    >
+                                        <ScaleIcon className="w-3.5 h-3.5" />
+                                        Adjudicar Garantía
+                                    </button>
+                                )}
+
                                 {!esCliente && integranteYaRefinanciado && (
                                     <span className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase rounded-lg border border-blue-200 dark:border-blue-500/20 transition-colors">
                                         <ArrowPathRoundedSquareIcon className="w-3.5 h-3.5" />
@@ -478,6 +501,15 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         isOpen={historialReprogOpen}
                         onClose={() => setHistorialReprogOpen(false)}
                         prestamoId={data?.id}
+                    />
+                    <AdjudicarModal
+                        isOpen={adjudicarOpen}
+                        onClose={() => setAdjudicarOpen(false)}
+                        prestamoId={data?.id}
+                        valorTasado={data?.prendario_info?.valor_tasado ?? 0}
+                        deudaHoy={liquidacionHoy?.modos?.cancelar?.cancelacion_total ?? 0}
+                        diasAtraso={data?.prendario_info?.dias_atraso ?? 0}
+                        onSuccess={handleSuccessAdjudicar}
                     />
                 </>
             )}

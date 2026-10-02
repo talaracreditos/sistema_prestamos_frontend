@@ -53,19 +53,28 @@ export const useCuotaData = (cuota, i, esVistaIntegrante) =>
 
         const intDevengadoHoy = liqPatear ? parseFloat(liqPatear.interes ?? 0) : null;
         const custodiaDevengadaHoy = liqPatear ? parseFloat(liqPatear.custodia ?? 0) : null;
-        const seguroDevengadoHoy = liqPatear ? parseFloat(liqPatear.seguro ?? 0) : null; // 🔥 AHORA SÍ SACAMOS EL SEGURO
-        const cancelacionTotalHoy = liqPatear ? parseFloat(liqPatear.cancelacion_total ?? 0) : null;
+        const seguroDevengadoHoy = liqPatear ? parseFloat(liqPatear.seguro ?? 0) : null;
+
+        // Saldo/monto general de la cuota: SIN penalidad de pronto pago (solo
+        // aplica si cancela hoy) y SIN IGV (solo lo calcula/muestra el cajero
+        // en el modal de cobro). Por eso usamos total_sin_igv, no
+        // cancelacion_total (que sí trae el IGV sumado adentro).
+        const cancelacionTotalHoy = liqPatear ? parseFloat(liqPatear.total_sin_igv ?? 0) : null;
 
         const intPend = aplicaLiquidacion && intDevengadoHoy != null ? intDevengadoHoy : intPendMes;
         const custodiaPend = aplicaLiquidacion && custodiaDevengadaHoy != null ? custodiaDevengadaHoy : custodiaPendMes;
         const segPend = aplicaLiquidacion && seguroDevengadoHoy != null ? seguroDevengadoHoy : segPendMes; // 🔥 PENDIENTE REAL
-        const saldo = aplicaLiquidacion && cancelacionTotalHoy != null ? cancelacionTotalHoy : parseFloat(cuota.saldo_pendiente ?? cuota.saldo_real ?? 0);
+        const saldo = aplicaLiquidacion && cancelacionTotalHoy != null
+            ? cancelacionTotalHoy
+            : parseFloat(cuota.saldo_pendiente ?? cuota.saldo_real ?? 0);
 
         const interesTotalUi = aplicaLiquidacion && intDevengadoHoy != null ? (intPagado + intDevengadoHoy) : interes;
         const custodiaTotalUi = aplicaLiquidacion && custodiaDevengadaHoy != null ? (custodiaPagada + custodiaDevengadaHoy) : custodia;
         const seguroTotalUi = aplicaLiquidacion && seguroDevengadoHoy != null ? (segPagado + seguroDevengadoHoy) : seguro; // 🔥 TOTAL UI
-        
-        const montoTotalUi = aplicaLiquidacion ? (capital + interesTotalUi + seguroTotalUi + custodiaTotalUi + moraPend) : monto; // 🔥 SUMA PERFECTA
+
+        const montoTotalUi = aplicaLiquidacion && cancelacionTotalHoy != null
+            ? cancelacionTotalHoy
+            : monto;
 
         if (!esVistaIntegrante && cuota.integrantes?.length > 0 && !esInactiva) {
             if (saldo <= 0)      estadoGlobal = 2;
@@ -77,6 +86,6 @@ export const useCuotaData = (cuota, i, esVistaIntegrante) =>
             capPagado, intPagado, capPend, intPend, intPendMes,
             moraTotal, moraPagada, moraPend, abonado, acumInd, pagoAcumGrupo, saldo, diasAtraso,
             excAnterior, excAplicado, excConsumido, excGenerado, esCancelada, esRefinanciada, esInactiva, mostrarRecibido, estadoGlobal, tieneAbonos, tieneExcedente,
-            esPrendario, custodia: custodiaTotalUi, custodiaPagada, custodiaPend, custodiaPendMes, diasLiquidacion, intDevengadoHoy, custodiaDevengadaHoy, seguroDevengadoHoy
+            esPrendario, custodia: custodiaTotalUi, custodiaPagada, custodiaPend, custodiaPendMes, diasLiquidacion, intDevengadoHoy, custodiaDevengadaHoy, seguroDevengadoHoy,
         };
     }, [cuota, i, esVistaIntegrante]);

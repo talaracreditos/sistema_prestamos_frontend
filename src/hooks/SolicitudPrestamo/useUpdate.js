@@ -173,8 +173,11 @@ export const useUpdate = () => {
                 setAlert({ type: 'error', message: 'Debes seleccionar la tasación de la garantía.' });
                 return;
             }
-            if (!formData.monto_custodia || parseFloat(formData.monto_custodia) <= 0) {
-                setAlert({ type: 'error', message: 'Debes ingresar el monto de custodia.' });
+            const custodiaVacia = formData.monto_custodia === '' ||
+                formData.monto_custodia === null ||
+                formData.monto_custodia === undefined;
+            if (custodiaVacia || parseFloat(formData.monto_custodia) < 0) {
+                setAlert({ type: 'error', message: 'Debes ingresar el monto de custodia (usa 0 si no aplica).' });
                 return;
             }
         }
@@ -187,16 +190,16 @@ export const useUpdate = () => {
             delete payload.dni_status;
             delete payload.tasacion_nombre;
             delete payload.tasacion_monto_maximo;
-            delete payload.tasacion_total_tasado; // ← nuevo
+            delete payload.tasacion_total_tasado;
             delete payload.tasacion;
 
             payload.seguro = payload.seguro || 0;
 
             if (!payload.es_prendario) {
                 delete payload.tasacion_id;
-                delete payload.monto_custodia; // ← nuevo
+                delete payload.monto_custodia;
             } else {
-                payload.monto_custodia = parseFloat(payload.monto_custodia) || 0; // ← nuevo
+                payload.monto_custodia = parseFloat(payload.monto_custodia) || 0;
             }
 
             if (!payload.usar_fecha_personalizada) {

@@ -32,12 +32,12 @@ const Index = () => {
                 {/* Desktop */}
                 <div className="hidden md:block">
                     {/* Header */}
-                    <div className="grid grid-cols-12 px-6 py-4 bg-slate-50 dark:bg-dark-surface-alt border-b border-slate-100 dark:border-dark-border transition-colors">
-                        <span className="col-span-3 text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">
+                    <div className="grid grid-cols-12 gap-3 px-6 py-4 bg-slate-50 dark:bg-dark-surface-alt border-b border-slate-100 dark:border-dark-border transition-colors">
+                        <span className="col-span-4 text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">
                             Clave
                         </span>
 
-                        <span className="col-span-3 text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">
+                        <span className="col-span-2 text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">
                             Valor
                         </span>
 
@@ -57,15 +57,15 @@ const Index = () => {
                             {parametros.map((p) => (
                                 <div
                                     key={p.id}
-                                    className="grid grid-cols-12 px-6 py-5 items-center hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-all"
+                                    className="grid grid-cols-12 gap-3 px-6 py-5 items-center hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-all"
                                 >
-                                    <div className="col-span-3">
-                                        <span className="inline-flex items-center bg-slate-900 dark:bg-black text-white dark:text-dark-text text-[11px] font-black px-4 py-2 rounded-xl uppercase tracking-wide break-all transition-colors">
+                                    <div className="col-span-4">
+                                        <span className="inline-block max-w-full bg-slate-900 dark:bg-black text-white dark:text-dark-text text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-wide break-words leading-snug transition-colors">
                                             {p.clave}
                                         </span>
                                     </div>
 
-                                    <div className="col-span-3">
+                                    <div className="col-span-2">
                                         <span className="text-xl font-black text-brand-red dark:text-brand-gold break-words transition-colors">
                                             {p.valor}
                                         </span>
@@ -106,7 +106,7 @@ const Index = () => {
                                 >
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex-1 min-w-0">
-                                            <span className="inline-flex max-w-full bg-slate-900 dark:bg-black text-white dark:text-dark-text text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-wide break-all transition-colors">
+                                            <span className="inline-block max-w-full bg-slate-900 dark:bg-black text-white dark:text-dark-text text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-wide break-words leading-snug transition-colors">
                                                 {p.clave}
                                             </span>
 

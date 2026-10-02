@@ -279,8 +279,11 @@ export const useStore = () => {
                 setAlert({ type: 'error', message: 'Debes seleccionar la tasación de la garantía.' });
                 return;
             }
-            if (!formData.monto_custodia || parseFloat(formData.monto_custodia) <= 0) {
-                setAlert({ type: 'error', message: 'Debes ingresar el monto de custodia.' });
+            const custodiaVacia = formData.monto_custodia === '' ||
+                formData.monto_custodia === null ||
+                formData.monto_custodia === undefined;
+            if (custodiaVacia || parseFloat(formData.monto_custodia) < 0) {
+                setAlert({ type: 'error', message: 'Debes ingresar el monto de custodia (usa 0 si no aplica).' });
                 return;
             }
         }

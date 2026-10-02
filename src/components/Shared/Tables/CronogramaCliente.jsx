@@ -38,7 +38,7 @@ const CronogramaCliente = ({
         useCronogramaCliente(cronograma, estadoPrestamo);
 
     const esPrendario = eco?.modalidad === 'PRENDARIO' || eco?.es_prendario;
-    const liqPrendario = esPrendario ? eco?.liquidacion_hoy?.modos?.cancelar : null;
+    const liqPrendario = esPrendario ? eco?.liquidacion_hoy?.modos?.patear : null;
 
     return (
         <div className="flex flex-col gap-4 transition-colors">
