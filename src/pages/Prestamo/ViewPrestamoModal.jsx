@@ -21,6 +21,17 @@ import { ArrowPathRoundedSquareIcon, StarIcon } from '@heroicons/react/24/outlin
 import { useViewPrestamoModal } from 'hooks/Prestamo/useViewPrestamoModal';
 import { useAuth } from 'context/AuthContext';
 
+// Badge de documento (DNI/RUC) — solo staff
+const DocBadge = ({ documento, className = '' }) => {
+    if (!documento) return null;
+    const label = String(documento).length === 11 ? 'RUC' : 'DNI';
+    return (
+        <span className={`inline-flex items-center text-[9px] font-black text-slate-600 dark:text-dark-text bg-white dark:bg-dark-surface px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-dark-border normal-case tracking-normal ${className}`}>
+            {label}: {documento}
+        </span>
+    );
+};
+
 const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
     const [cambiarPresidenteOpen, setCambiarPresidenteOpen] = useState(false);
@@ -79,6 +90,13 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
             ?? data?.integrantes_refinanciados?.find(int => int.id === userId)
         : null;
 
+    // Documento del integrante seleccionado (para el título del cronograma)
+    const docIntegranteSeleccionado = esVistaIntegrante
+        ? (data?.integrantes?.find(i => i.id === integranteSeleccionado)?.documento
+            ?? data?.integrantes_refinanciados?.find(i => i.id === integranteSeleccionado)?.documento
+            ?? null)
+        : null;
+
     const handleVerMiSaldo = () => {
         if (!miIntegrante || esVistaIntegrante) return;
         handleSelectIntegrante(miIntegrante.id);
@@ -118,7 +136,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
     const handleSuccessReducirInteres = () => {
         handleCerrarReducirInteres();
-        handleSuccessReducirMora(); 
+        handleSuccessReducirMora();
         if (onRefresh) onRefresh();
     };
 
@@ -152,10 +170,25 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">
                                         {data.es_grupal ? 'Grupo Solidario' : 'Cliente Titular'}
                                     </p>
-                                    <p className="text-sm font-black uppercase text-slate-800 dark:text-dark-text">{data.cliente?.nombre}</p>
-                                    {!esCliente && (
-                                        <p className="text-[10px] font-bold text-brand-red dark:text-brand-gold">Documento: {data.cliente?.documento}</p>
-                                    )}
+                                    <p className="text-sm font-black uppercase text-slate-800 dark:text-dark-text flex items-center gap-2 flex-wrap">
+                                        {data.cliente?.nombre}
+                                        {/* DNI del titular — solo individual (en grupal el backend manda "GRUPAL") */}
+                                        {!esCliente && !data.es_grupal && (
+                                            <DocBadge documento={data.cliente?.documento} />
+                                        )}
+                                    </p>
+                                    <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                                        {data.codigo_recaudo && (
+                                            <span className="inline-flex items-center text-[9px] font-black text-slate-600 dark:text-dark-text bg-white dark:bg-dark-surface px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-dark-border">
+                                                COD. RECAUDO: {data.codigo_recaudo}
+                                            </span>
+                                        )}
+                                        {!esCliente && data.es_grupal && (
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted">
+                                                {data.integrantes?.length ?? 0} integrante(s) activo(s)
+                                            </span>
+                                        )}
+                                    </div>
                                     {!data.es_grupal && !esCliente && (
                                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                                             <span className={`text-[9px] font-black uppercase ${
@@ -234,14 +267,17 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     {data.integrantes.map((int) => (
                                         <div key={int.id} className="flex flex-col gap-1">
                                             <div onClick={() => handleSelectIntegrante(int.id)}
-                                                className={`flex justify-between items-center bg-white dark:bg-dark-surface p-2 rounded border shadow-sm cursor-pointer transition-all
+                                                className={`flex justify-between items-center gap-2 bg-white dark:bg-dark-surface p-2 rounded border shadow-sm cursor-pointer transition-all
                                                     ${integranteSeleccionado === int.id
                                                         ? 'border-brand-red dark:border-brand-gold ring-1 ring-brand-red/50 dark:ring-brand-gold/50 bg-brand-red-light dark:bg-brand-gold/20'
                                                         : 'border-slate-100 dark:border-dark-border hover:border-brand-red/30 dark:hover:border-brand-gold/30'}`}
                                             >
-                                                <div className="flex flex-col">
+                                                <div className="flex flex-col min-w-0">
                                                     <span className="text-[10px] font-black text-slate-700 dark:text-dark-text uppercase">{int.nombre}</span>
-                                                    <span className="text-[10px] text-brand-gold-dark dark:text-brand-gold font-bold">CARGO: {int.cargo}</span>
+                                                    <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                                        <DocBadge documento={int.documento} />
+                                                        <span className="text-[10px] text-brand-gold-dark dark:text-brand-gold font-bold">CARGO: {int.cargo}</span>
+                                                    </div>
                                                     <span className={`text-[9px] font-black uppercase mt-0.5 ${
                                                         int.situacion === 'CASTIGADO' ? 'text-red-600 dark:text-red-400' :
                                                         int.situacion === 'VENCIDO'   ? 'text-amber-600 dark:text-amber-400' :
@@ -250,7 +286,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                         ✓ {int.situacion ?? 'VIGENTE'}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs font-black text-brand-red dark:text-brand-gold bg-white dark:bg-dark-surface-alt px-2 py-1 rounded-lg border border-brand-red/20 dark:border-dark-border shadow-sm">
+                                                <span className="text-xs font-black text-brand-red dark:text-brand-gold bg-white dark:bg-dark-surface-alt px-2 py-1 rounded-lg border border-brand-red/20 dark:border-dark-border shadow-sm flex-shrink-0">
                                                     S/ {int.monto}
                                                 </span>
                                             </div>
@@ -271,17 +307,20 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                     ))}
                                     {data.integrantes_refinanciados?.map((int) => (
                                         <div key={int.id} onClick={() => handleSelectIntegrante(int.id)}
-                                            className={`flex justify-between items-center bg-blue-50 dark:bg-blue-500/10 p-2 rounded border shadow-sm cursor-pointer transition-all opacity-70
+                                            className={`flex justify-between items-center gap-2 bg-blue-50 dark:bg-blue-500/10 p-2 rounded border shadow-sm cursor-pointer transition-all opacity-70
                                                 ${integranteSeleccionado === int.id
                                                     ? 'border-blue-400 dark:border-blue-400 ring-1 ring-blue-400/50 opacity-100'
                                                     : 'border-blue-100 dark:border-blue-500/20 hover:border-blue-300'}`}
                                         >
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col min-w-0">
                                                 <span className="text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase line-through">{int.nombre}</span>
-                                                <span className="text-[10px] text-blue-500 dark:text-blue-400 font-black uppercase">Refinanciado</span>
+                                                <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                                    <DocBadge documento={int.documento} />
+                                                    <span className="text-[10px] text-blue-500 dark:text-blue-400 font-black uppercase">Refinanciado</span>
+                                                </div>
                                                 <span className="text-[9px] text-slate-400 dark:text-dark-text-muted font-bold">CARGO: {int.cargo}</span>
                                             </div>
-                                            <span className="text-xs font-black text-blue-400 dark:text-blue-400 bg-white dark:bg-dark-surface px-2 py-1 rounded-lg border border-blue-100 dark:border-dark-border shadow-sm line-through">
+                                            <span className="text-xs font-black text-blue-400 dark:text-blue-400 bg-white dark:bg-dark-surface px-2 py-1 rounded-lg border border-blue-100 dark:border-dark-border shadow-sm line-through flex-shrink-0">
                                                 S/ {int.monto}
                                             </span>
                                         </div>
@@ -299,7 +338,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             </div>
                         )}
 
-                        {/* Toggle Grupo / Mi saldo  */}
+                        {/* Toggle Grupo / Mi saldo */}
                         {esCliente && data.es_grupal && miIntegrante && (
                             <div data-tutorial="toggle-vista" className="flex items-center gap-1 bg-slate-100 dark:bg-dark-surface-alt p-1 rounded-xl w-fit transition-colors">
                                 <button
@@ -331,11 +370,14 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
 
                         {/* 4. Header cronograma */}
                         <div className="flex items-center justify-between flex-wrap gap-2">
-                            <h4 className="flex items-center gap-2 text-[11px] font-black text-slate-700 dark:text-dark-text uppercase tracking-widest px-1 transition-colors">
+                            <h4 className="flex items-center gap-2 text-[11px] font-black text-slate-700 dark:text-dark-text uppercase tracking-widest px-1 transition-colors flex-wrap">
                                 <CalendarIcon className="w-4 h-4 text-brand-red dark:text-brand-gold" />
                                 {esCliente
                                     ? (esVistaIntegrante ? 'Mis Cuotas' : (data.es_grupal ? 'Cuotas del Grupo' : 'Mis Cuotas'))
                                     : esVistaIntegrante ? `Cronograma — ${integranteNombre}` : 'Cronograma de Pagos y Saldos'}
+                                {!esCliente && esVistaIntegrante && (
+                                    <DocBadge documento={docIntegranteSeleccionado} />
+                                )}
                             </h4>
                             <div className="flex items-center gap-2 flex-wrap">
 
