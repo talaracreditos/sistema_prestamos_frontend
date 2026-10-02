@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import {
     BanknotesIcon, ChevronDownIcon, UserGroupIcon, SparklesIcon,
     ArrowPathIcon, ScaleIcon, UserIcon
@@ -16,9 +16,9 @@ const ESTADOS_PRESTAMO = {
     4: { label: 'Refinanciado', classes: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 line-through' },
 };
 
-const CreditoCard = ({ prestamo, clienteId, expanded, onToggle, kardex, kardexLoading }) => {
+const CreditoCard = ({ prestamo, expanded, onToggle, kardex, kardexLoading }) => {
     const estadoInfo = ESTADOS_PRESTAMO[prestamo.estado] ?? { label: `Estado ${prestamo.estado}`, classes: 'bg-slate-100 dark:bg-dark-surface-alt text-slate-500' };
-    const deudaCliente = prestamo.deuda_cliente ?? prestamo.saldo_cliente ?? 0;
+    const deudaTotal = prestamo.deuda_cliente ?? prestamo.deuda_actual ?? 0;
 
     return (
         <div className={`bg-white dark:bg-dark-surface rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm dark:shadow-black/20 overflow-hidden transition-colors ${prestamo.estado === 2 || prestamo.estado === 4 ? 'opacity-70' : ''}`}>
@@ -61,38 +61,40 @@ const CreditoCard = ({ prestamo, clienteId, expanded, onToggle, kardex, kardexLo
                     </div>
                 </div>
 
+                {/* Saldo Inicial | Saldo K | Deuda Grupal/actual (la original, intacta) */}
                 <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+                    <div className="text-right hidden sm:block">
+                        <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Saldo K Inicial (Cliente)</p>
+                        <p className="text-sm font-black text-slate-800 dark:text-dark-text">
+                            S/ {fmt(prestamo.monto_desembolsado_cliente)}
+                        </p>
+                    </div>
+                    <div className="text-right hidden sm:block border-l border-slate-200 dark:border-dark-border pl-4 sm:pl-6">
+                        <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Saldo K Pendiente (Cliente)</p>
+                        <p className={`text-sm font-black ${prestamo.saldo_capital_cliente > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                            S/ {fmt(prestamo.saldo_capital_cliente)}
+                        </p>
+                    </div>
+
                     {prestamo.es_grupal ? (
-                        <>
-                            <div className="text-right">
-                                <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Deuda Cliente</p>
-                                <p className={`text-sm font-black ${deudaCliente > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                    S/ {fmt(deudaCliente)}
-                                </p>
-                            </div>
-                            <div className="text-right hidden sm:block border-l border-slate-200 dark:border-dark-border pl-4 sm:pl-6">
-                                <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Deuda Grupal</p>
-                                <p className={`text-sm font-black ${prestamo.deuda_actual > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                    S/ {fmt(prestamo.deuda_actual)}
-                                </p>
-                            </div>
-                        </>
+                        <div className="text-right border-l border-slate-200 dark:border-dark-border pl-4 sm:pl-6">
+                            <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Deuda Grupal</p>
+                            <p className={`text-sm font-black ${prestamo.deuda_actual > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                S/ {fmt(prestamo.deuda_actual)}
+                            </p>
+                        </div>
                     ) : (
-                        <>
-                            <div className="text-right hidden sm:block">
-                                <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Monto</p>
-                                <p className="text-sm font-black text-slate-800 dark:text-dark-text">S/ {fmt(prestamo.monto_original)}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Deuda actual</p>
-                                <p className={`text-sm font-black ${prestamo.deuda_actual > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                    S/ {fmt(prestamo.deuda_actual)}
-                                </p>
-                            </div>
-                        </>
+                        <div className="text-right border-l border-slate-200 dark:border-dark-border pl-4 sm:pl-6">
+                            <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Deuda actual</p>
+                            <p className={`text-sm font-black ${prestamo.deuda_actual > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                S/ {fmt(prestamo.deuda_actual)}
+                            </p>
+                        </div>
                     )}
+
                     <ChevronDownIcon className={`w-4 h-4 text-slate-400 dark:text-dark-text-muted transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
                 </div>
+
             </button>
 
             {expanded && (
@@ -130,17 +132,16 @@ const CreditoCard = ({ prestamo, clienteId, expanded, onToggle, kardex, kardexLo
                     )}
 
                     {/* Datos generales del crédito */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2 text-xs">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-2 text-xs">
                         <div>
                             <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">N° cuotas</p>
                             <p className="font-bold text-slate-700 dark:text-dark-text">{prestamo.num_cuotas}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Valor cuota</p>
+                            <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Valor cuota (Grupal)</p>
                             <p className="font-bold text-slate-700 dark:text-dark-text">S/ {fmt(prestamo.valor_cuota)}</p>
                         </div>
                         
-                        {/* 🔥 TASAS JUNTAS EN LA VISTA DE REACT */}
                         <div>
                             <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Tasa interés</p>
                             <p className="font-bold text-slate-700 dark:text-dark-text flex items-center gap-1">
@@ -166,6 +167,11 @@ const CreditoCard = ({ prestamo, clienteId, expanded, onToggle, kardex, kardexLo
                             <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Frecuencia</p>
                             <p className="font-bold text-slate-700 dark:text-dark-text capitalize">{prestamo.frecuencia}</p>
                         </div>
+
+                        <div>
+                            <p className="text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase">Deuda total (Cliente)</p>
+                            <p className={`font-bold ${deudaTotal > 0 ? 'text-brand-red dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>S/ {fmt(deudaTotal)}</p>
+                        </div>
                     </div>
 
                     {/* Kardex de cuotas */}
@@ -177,16 +183,16 @@ const CreditoCard = ({ prestamo, clienteId, expanded, onToggle, kardex, kardexLo
 };
 
 const HistorialCreditosSection = ({ clienteId }) => {
-    const [loading, setLoading]     = useState(true);
-    const [prestamos, setPrestamos] = useState([]);
-    const [expandedId, setExpandedId] = useState(null);
-    const [kardexCache, setKardexCache] = useState({});
-    const [kardexLoadingId, setKardexLoadingId] = useState(null);
+    const [loading, setLoading]     = React.useState(true);
+    const [prestamos, setPrestamos] = React.useState([]);
+    const [expandedId, setExpandedId] = React.useState(null);
+    const [kardexCache, setKardexCache] = React.useState({});
+    const [kardexLoadingId, setKardexLoadingId] = React.useState(null);
     
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages]   = useState(1);
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [totalPages, setTotalPages]   = React.useState(1);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!clienteId) return;
         setLoading(true);
         setExpandedId(null);
@@ -207,11 +213,11 @@ const HistorialCreditosSection = ({ clienteId }) => {
             .finally(() => setLoading(false));
     }, [clienteId, currentPage]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         setCurrentPage(1);
     }, [clienteId]);
 
-    const handleToggle = useCallback(async (prestamoId) => {
+    const handleToggle = React.useCallback(async (prestamoId) => {
         if (expandedId === prestamoId) {
             setExpandedId(null);
             return;

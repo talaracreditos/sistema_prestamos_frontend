@@ -49,12 +49,14 @@ const KardexCuotas = ({ loading, data, esGrupal }) => {
 
     return (
         <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-dark-border mt-3">
-            {esGrupal && (
-                <div className="flex flex-wrap items-center gap-4 px-4 py-3 bg-slate-50 dark:bg-dark-surface-alt border-b border-slate-200 dark:border-dark-border text-xs font-bold text-slate-600 dark:text-dark-text-muted">
-                    <span>Monto grupal total: <span className="text-slate-800 dark:text-dark-text font-black">S/ {fmt(data.monto_grupal_total)}</span></span>
-                    <span>Monto de este cliente: <span className="text-brand-red dark:text-brand-gold font-black">S/ {fmt(data.monto_cliente)}</span></span>
-                </div>
-            )}
+            <div className="flex flex-wrap items-center gap-4 px-4 py-3 bg-slate-50 dark:bg-dark-surface-alt border-b border-slate-200 dark:border-dark-border text-xs font-bold text-slate-600 dark:text-dark-text-muted">
+                {esGrupal && (
+                    <>
+                        <span>Monto grupal total: <span className="text-slate-800 dark:text-dark-text font-black">S/ {fmt(data.monto_grupal_total)}</span></span>
+                        <span>Monto de este cliente: <span className="text-slate-800 dark:text-dark-text font-black">S/ {fmt(data.monto_cliente)}</span></span>
+                    </>
+                )}
+            </div>
             <table className="w-full text-sm">
                 <thead>
                     <tr className="bg-slate-50 dark:bg-dark-surface-alt text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase">
