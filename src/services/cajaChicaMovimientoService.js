@@ -31,3 +31,16 @@ export const store = async (data) => {
     });
     return handleResponse(response);
 };
+
+export const exportarMovimientos = async (filters = {}) => {
+    const params = new URLSearchParams({
+        search: filters.search || '',
+        tipo: filters.tipo || '',
+        medio_pago: filters.medio_pago || '',
+        fecha_inicio: filters.fecha_inicio || '',
+        fecha_fin: filters.fecha_fin || '',
+    });
+    const response = await fetchWithAuth(`${BASE_URL}/exportar?${params.toString()}`, { method: 'GET' });
+    if (!response.ok) throw new Error('Error al exportar movimientos');
+    return response.blob();
+};

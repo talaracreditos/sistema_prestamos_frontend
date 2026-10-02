@@ -4,6 +4,8 @@ import { useIndex } from 'hooks/CajaChicaMovimiento/useIndex';
 import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
+import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import { exportarMovimientos } from 'services/cajaChicaMovimientoService';
 import { BanknotesIcon } from '@heroicons/react/24/outline';
 
 const Index = () => {
@@ -83,13 +85,24 @@ const Index = () => {
 
     return (
         <div className="container mx-auto p-4 sm:p-6 animate-in fade-in duration-500 transition-colors">
-            <PageHeader
-                title="Movimientos de Caja Chica"
-                subtitle="Historial de ingresos y egresos, con saldo corrido."
-                icon={BanknotesIcon}
-            />
-            
+                <PageHeader
+                    title="Movimientos de Caja Chica"
+                    subtitle="Historial de ingresos y egresos, con saldo corrido."
+                    icon={BanknotesIcon}
+                />
+
+
             <AlertMessage type={alert?.type} message={alert?.message} details={alert?.details} onClose={() => setAlert(null)} />
+
+            <div className="flex justify-end mt-6 mb-3">
+                <ExcelExportButton
+                    exportService={exportarMovimientos}
+                    filters={filters}
+                    filename="mis_movimientos_caja_chica"
+                    label="Excel"
+                />
+
+            </div>
 
             <div className="mt-4">
                 <Table
