@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardClientesMora } from 'hooks/Dashboard/useDashboardClientesMora';
 import { exportClientesMoraDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import Pagination from 'components/Shared/Pagination';
 import {
     UserGroupIcon, UserIcon, ExclamationTriangleIcon,
@@ -239,22 +240,30 @@ const ClientesMoraCard = ({
     icon: Icon = ExclamationTriangleIcon,
 }) => {
     const [collapsed, setCollapsed] = useState(false);
+    const [comboKey,  setComboKey]  = useState(Date.now());
     const {
         loading, data,
         busqueda,    setBusqueda,
         fechaInicio, setFechaInicio,
         fechaFin,    setFechaFin,
+        asesoresSeleccionados,
+        handleAgregarAsesor, handleQuitarAsesor,
         handleFiltrar, handleLimpiar, handlePageChange,
     } = useDashboardHook();
 
     const filas       = data?.data ?? [];
-    const tieneFiltro = busqueda || fechaInicio || fechaFin;
+    const tieneFiltro = busqueda || fechaInicio || fechaFin || asesoresSeleccionados.length > 0;
 
     const exportFilters = {
-        ...(busqueda    ? { busqueda }              : {}),
+        ...(busqueda    ? { busqueda }                  : {}),
         ...(fechaInicio ? { fecha_inicio: fechaInicio } : {}),
-        ...(fechaFin    ? { fecha_fin:    fechaFin  } : {}),
+        ...(fechaFin    ? { fecha_fin:    fechaFin }    : {}),
+        ...(asesoresSeleccionados.length > 0
+            ? { asesor_ids: asesoresSeleccionados.map(a => a.id).join(',') }
+            : {}),
     };
+
+    const onLimpiar = () => { setComboKey(Date.now()); handleLimpiar(); };
 
     return (
         <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/20 overflow-hidden transition-colors duration-300">
@@ -321,17 +330,41 @@ const ClientesMoraCard = ({
                             <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)}
                                 className="p-2 text-xs text-slate-700 dark:text-dark-text bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold outline-none" />
                         </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="block text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">Asesor</label>
+                            <EmpleadoSearchSelect
+                                key={comboKey}
+                                rol="ASESOR"
+                                onSelect={handleAgregarAsesor}
+                                clearOnSelect={true}
+                                placeholder="Agregar asesor..."
+                            />
+                        </div>
                         <button onClick={handleFiltrar} disabled={loading}
                             className="flex items-center gap-1.5 px-4 py-2 bg-brand-red dark:bg-brand-red-glow text-white text-[10px] font-black uppercase rounded-lg hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50">
                             <MagnifyingGlassIcon className="w-3.5 h-3.5" /> Filtrar
                         </button>
                         {tieneFiltro && (
-                            <button onClick={handleLimpiar}
+                            <button onClick={onLimpiar}
                                 className="flex items-center gap-1 px-3 py-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold text-[10px] font-black uppercase rounded-lg border border-slate-200 dark:border-dark-border hover:border-brand-red/30 dark:hover:border-brand-gold/30 transition-all">
                                 <XMarkIcon className="w-3.5 h-3.5" /> Limpiar
                             </button>
                         )}
                     </div>
+
+                    {/* Tags asesores */}
+                    {asesoresSeleccionados.length > 0 && (
+                        <div className="px-6 py-2 border-b border-slate-50 dark:border-dark-border bg-white dark:bg-dark-surface flex flex-wrap gap-2 transition-colors">
+                            {asesoresSeleccionados.map(a => (
+                                <span key={a.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-red-light dark:bg-dark-surface-alt border border-brand-red/20 dark:border-brand-gold/20 rounded-full text-[10px] font-black text-brand-red dark:text-brand-gold uppercase">
+                                    {a.nombre}
+                                    <button onClick={() => handleQuitarAsesor(a.id)} className="hover:text-brand-red-dark dark:hover:text-red-400">
+                                        <XMarkIcon className="w-3 h-3" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Contenido */}
                     <div className="p-6">
