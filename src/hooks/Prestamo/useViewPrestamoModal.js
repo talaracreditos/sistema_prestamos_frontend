@@ -223,12 +223,14 @@ export function useViewPrestamoModal({ data, onClose, onRefresh }) {
 
     // ── Derivados de PERMISO (regla de negocio: quién puede ver qué botón) ────
     // Prendario nunca admite refinanciamiento ni reprogramación — no tiene
-    // sentido reprogramar/refinanciar una garantía que se remata en 1-2 cuotas.
+
+    // Reprogramar: individual o grupal. En grupal SIEMPRE es todo el grupo,
+    // por eso el botón se oculta cuando se está viendo a un integrante.
     const puedeVerReprogramar =
         !esCliente &&
         canReprogramar &&
-        !data?.es_grupal &&
         !esPrendario &&
+        !esVistaIntegrante &&
         data?.estado === 1 &&
         !prestamoCancelado &&
         !!data?.datos_economicos?.desembolsado;

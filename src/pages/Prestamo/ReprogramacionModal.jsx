@@ -2,7 +2,7 @@ import React from 'react';
 import Modal from 'components/Shared/Modals/ViewModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { useReprogramacionModal } from 'hooks/Prestamo/useReprogramacionModal';
-import { ClockIcon, ExclamationTriangleIcon, InformationCircleIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ExclamationTriangleIcon, InformationCircleIcon, CalendarDaysIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
 const ReprogramacionModal = ({ isOpen, onClose, data, onSuccess }) => {
     const {
@@ -40,10 +40,22 @@ const ReprogramacionModal = ({ isOpen, onClose, data, onSuccess }) => {
                     </div>
                 </div>
 
+                {/* Grupal: siempre es todo el grupo */}
+                {data.esGrupal && (
+                    <div className="flex items-start gap-2 bg-brand-red-light/40 dark:bg-brand-gold/10 border border-brand-red/20 dark:border-brand-gold/20 rounded-xl p-3 mb-4 transition-colors">
+                        <UserGroupIcon className="w-4 h-4 text-brand-red dark:text-brand-gold flex-shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-brand-red-dark dark:text-brand-gold font-bold leading-relaxed">
+                            Se reprograma <span className="font-black">TODO EL GRUPO</span>
+                            {data.integrantesActivos ? <> ({data.integrantesActivos} integrante{data.integrantesActivos !== 1 ? 's' : ''} activo{data.integrantesActivos !== 1 ? 's' : ''})</> : null}.
+                            {' '}No se puede reprogramar a un solo integrante. Todos deben tener pagado el interés y seguro de la cuota que se ajusta y no tener mora pendiente.
+                        </p>
+                    </div>
+                )}
+
                 <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl p-3 mb-4 transition-colors">
                     <InformationCircleIcon className="w-4 h-4 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <p className="text-[10px] text-blue-700 dark:text-blue-300 font-bold leading-relaxed transition-colors">
-                        Solo se mueven las fechas de las cuotas pendientes. Los montos no cambian. Este préstamo ya fue reprogramado{' '}
+                        Se mueven las fechas de las cuotas pendientes. A la cuota que se ajusta (la vencida o la próxima) se le suma un período más de interés y seguro; el capital no cambia. Este préstamo ya fue reprogramado{' '}
                         <span className="font-black">{data.totalReprogramaciones ?? 0}</span>{' '}
                         {data.totalReprogramaciones === 1 ? 'vez' : 'veces'} antes.
                     </p>

@@ -188,6 +188,16 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                                                 {data.integrantes?.length ?? 0} integrante(s) activo(s)
                                             </span>
                                         )}
+                                        {!esCliente && data.es_grupal && data.total_reprogramaciones > 0 && (
+                                            <button
+                                                onClick={() => setHistorialReprogOpen(true)}
+                                                title="Ver historial de reprogramaciones"
+                                                className="flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-500/30 hover:bg-teal-100 transition-colors"
+                                            >
+                                                <ClockIcon className="w-3 h-3" />
+                                                Reprogramado {data.total_reprogramaciones}x
+                                            </button>
+                                        )}
                                     </div>
                                     {!data.es_grupal && !esCliente && (
                                         <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -536,6 +546,8 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                             frecuenciaActual:      data?.datos_economicos?.frecuencia,
                             cuotasPendientes:      cuotasPendientesCount,
                             totalReprogramaciones: data?.total_reprogramaciones ?? 0,
+                            esGrupal:              !!data?.es_grupal,
+                            integrantesActivos:    data?.integrantes?.length ?? 0,
                         } : null}
                         onSuccess={handleSuccessReprogramacion}
                     />
@@ -549,7 +561,7 @@ const ViewPrestamoModal = ({ isOpen, onClose, data, isLoading, onRefresh }) => {
                         onClose={() => setAdjudicarOpen(false)}
                         prestamoId={data?.id}
                         valorTasado={data?.prendario_info?.valor_tasado ?? 0}
-                        deudaHoy={liquidacionHoy?.modos?.cancelar?.cancelacion_total ?? 0}
+                        liquidacion={liquidacionHoy?.modos?.cancelar ?? null}
                         diasAtraso={data?.prendario_info?.dias_atraso ?? 0}
                         onSuccess={handleSuccessAdjudicar}
                     />
