@@ -3,7 +3,7 @@ import {
     BanknotesIcon, CheckCircleIcon, CalendarDaysIcon,
     DocumentTextIcon, ChartBarIcon, ClockIcon,
     ExclamationTriangleIcon, MagnifyingGlassIcon, XMarkIcon,
-    BriefcaseIcon, ArrowPathIcon, UserGroupIcon
+    BriefcaseIcon, ArrowPathIcon, UserGroupIcon, ArrowsRightLeftIcon
 } from '@heroicons/react/24/outline';
 import {
     AreaChart, Area, BarChart, Bar,
@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import Pagination from 'components/Shared/Pagination';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import CompararMesesModal from 'pages/Dashboard/CompararMesesModal';
 
 const ICONS = {
     'banknotes':    BanknotesIcon,
@@ -150,9 +151,27 @@ const TablaLista = ({ paginationData, renderFila, onPageChange, emptyText = 'Sin
     );
 };
 
-const GraficaArea = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A', height = 200 }) => (
+/** Título de la gráfica + acción opcional a la derecha (ej. botón Comparar). */
+const TituloGrafica = ({ label, accion }) => {
+    if (!label && !accion) return null;
+    return (
+        <div className="flex items-center justify-between gap-3 mb-3">
+            {label ? <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">{label}</p> : <span />}
+            {accion}
+        </div>
+    );
+};
+
+const BotonComparar = ({ onClick }) => (
+    <button onClick={onClick}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-dark-border text-[10px] font-black uppercase tracking-wide text-slate-500 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:border-brand-red/40 dark:hover:border-brand-gold/40 transition-colors flex-shrink-0">
+        <ArrowsRightLeftIcon className="w-3.5 h-3.5" /> Comparar meses
+    </button>
+);
+
+const GraficaArea = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A', height = 200, accion = null }) => (
     <div>
-        {label && <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest mb-3">{label}</p>}
+        <TituloGrafica label={label} accion={accion} />
         <ResponsiveContainer width="100%" height={height}>
             <AreaChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 0 }}>
                 <defs>
@@ -171,9 +190,9 @@ const GraficaArea = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A', 
     </div>
 );
 
-const GraficaBarra = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A', isMoney = true, height = 180 }) => (
+const GraficaBarra = ({ data, xKey, dataKey = 'total', label, color = '#8B1A1A', isMoney = true, height = 180, accion = null }) => (
     <div>
-        {label && <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest mb-3">{label}</p>}
+        <TituloGrafica label={label} accion={accion} />
         <ResponsiveContainer width="100%" height={height}>
             <BarChart data={data} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
@@ -226,6 +245,7 @@ const DashboardCard = ({
     const primerTab = tabsFinales[0]?.id ?? 'cards';
     const [tab,       setTab]       = useState(tabActivo ?? primerTab);
     const [collapsed, setCollapsed] = useState(false);
+    const [comparar,  setComparar]  = useState(null); // { concepto, titulo }
 
     const tieneRango     = fechaInicio || fechaFin;
     const graficasDelTab = graficas.filter(g => !g.tab || g.tab === tab);
@@ -370,18 +390,31 @@ const DashboardCard = ({
                             )}
 
                             {/* Gráficas */}
-                            {graficasDelTab.map((g, i) => (
-                                g.tipo === 'area'
-                                    ? <GraficaArea key={i} data={g.data} xKey={g.xKey} dataKey={g.dataKey} label={g.label} color={g.color} height={g.height} />
-                                    : <GraficaBarra key={i} data={g.data} xKey={g.xKey} dataKey={g.dataKey} label={g.label} color={g.color} isMoney={g.isMoney} height={g.height} />
-                            ))}
+                            {graficasDelTab.map((g, i) => {
+                                // g.comparar = 'interes' | 'capital' | ... → botón "Comparar meses"
+                                const accion = g.comparar
+                                    ? <BotonComparar onClick={() => setComparar({ concepto: g.comparar, titulo: g.compararTitulo })} />
+                                    : null;
+                                return g.tipo === 'area'
+                                    ? <GraficaArea key={i} data={g.data} xKey={g.xKey} dataKey={g.dataKey} label={g.label} color={g.color} height={g.height} accion={accion} />
+                                    : <GraficaBarra key={i} data={g.data} xKey={g.xKey} dataKey={g.dataKey} label={g.label} color={g.color} isMoney={g.isMoney} height={g.height} accion={accion} />;
+                            })}
                         </div>
                     )}
                 </div>
+            )}
+
+            {comparar && (
+                <CompararMesesModal
+                    isOpen={!!comparar}
+                    onClose={() => setComparar(null)}
+                    concepto={comparar.concepto}
+                    titulo={comparar.titulo}
+                />
             )}
         </div>
     );
 };
 
 export { StatRow, GraficaArea, GraficaBarra, CustomTooltip, TablaLista };
-export default DashboardCard; 
+export default DashboardCard;

@@ -21,6 +21,10 @@ export const exportPagosDashboard = async (filters = {}) => {
     if (!response.ok) throw new Error('Error al exportar pagos');
     return response.blob();
 };
+export const getCompararMesesPagos = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/pagos/comparar-meses${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
 
 // ── Préstamos ─────────────────────────────────────────────────────────────────
 export const getPrestamosDashboard = async (filters = {}) => {
