@@ -3,7 +3,8 @@ import { useDashboardMora } from 'hooks/Dashboard/useDashboardMora';
 import { exportMoraDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
-import { ExclamationTriangleIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import MoraEvolucionModal from './MoraEvolucionModal';
+import { ExclamationTriangleIcon, MagnifyingGlassIcon, XMarkIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 const fmt  = n => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
 const fmtN = n => parseInt(n || 0).toLocaleString('es-PE');
@@ -16,7 +17,7 @@ const Chevron = ({ collapsed }) => (
     </div>
 );
 
-const TablaAsesor = ({ filas = [], totales = {}, esMonto }) => {
+const TablaAsesor = ({ filas = [], totales = {}, esMonto, onVerAsesor, onVerTotal }) => {
     const labelInicial = esMonto ? 'Capital Inicial' : 'Saldo Inicial';
     const labelActual  = esMonto ? 'Capital Actual'  : 'Saldo Actual';
 
@@ -34,11 +35,18 @@ const TablaAsesor = ({ filas = [], totales = {}, esMonto }) => {
                 <tbody className="divide-y divide-slate-50 dark:divide-dark-border">
                     {filas.map((f, i) => {
                         const varPositiva = f.variacion > 0;
+                        const clickable   = !!f.asesor_id;
                         return (
-                            <tr key={f.asesor_id} className={`hover:bg-slate-50 dark:hover:bg-dark-surface-alt transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-dark-surface-alt/30'}`}>
+                            <tr key={f.asesor_id ?? `sin-${i}`}
+                                onClick={clickable ? () => onVerAsesor?.(f) : undefined}
+                                title={clickable ? 'Ver evolución en el tiempo' : undefined}
+                                className={`group transition-colors ${clickable ? 'cursor-pointer hover:bg-brand-red-light/50 dark:hover:bg-dark-surface-alt' : ''} ${i % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-dark-surface-alt/30'}`}>
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-black text-slate-700 dark:text-dark-text uppercase">{f.nombre}</span>
+                                        <span className="text-xs font-black text-slate-700 dark:text-dark-text uppercase group-hover:text-brand-red dark:group-hover:text-brand-gold transition-colors">{f.nombre}</span>
+                                        {clickable && (
+                                            <ChartBarIcon className="w-3.5 h-3.5 text-slate-300 dark:text-dark-text-muted/50 group-hover:text-brand-red dark:group-hover:text-brand-gold transition-colors" />
+                                        )}
                                     </div>
                                 </td>
                                 <td className="px-4 py-3 text-right">
@@ -62,8 +70,10 @@ const TablaAsesor = ({ filas = [], totales = {}, esMonto }) => {
                     })}
                 </tbody>
                 <tfoot className="bg-slate-900 dark:bg-black text-white">
-                    <tr>
-                        <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest">TOTAL</td>
+                    <tr onClick={onVerTotal} title="Ver evolución del total" className="cursor-pointer hover:bg-slate-800 dark:hover:bg-dark-surface-alt transition-colors">
+                        <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest">
+                            <span className="inline-flex items-center gap-2">TOTAL <ChartBarIcon className="w-3.5 h-3.5 text-brand-gold" /></span>
+                        </td>
                         <td className="px-4 py-3 text-right text-sm font-black">
                             {esMonto ? `S/ ${fmt(totales.saldo_inicial)}` : fmtN(totales.saldo_inicial)}
                         </td>
@@ -93,6 +103,14 @@ const MoraCard = () => {
 
     const [collapsed, setCollapsed] = useState(false);
     const [comboKey,  setComboKey]  = useState(Date.now());
+    const [evolucion, setEvolucion] = useState(null); // { ids: number[], nombre }
+
+    const verAsesor = f => setEvolucion({ ids: [f.asesor_id], nombre: f.nombre });
+    const verTotal  = () => setEvolucion(
+        asesoresSeleccionados.length > 0
+            ? { ids: asesoresSeleccionados.map(a => a.id), nombre: asesoresSeleccionados.length === 1 ? asesoresSeleccionados[0].nombre : 'Asesores seleccionados' }
+            : { ids: [], nombre: 'Todos los asesores' }
+    );
     const rango = data?.rango ?? {};
 
     const exportFilters = {
@@ -115,7 +133,7 @@ const MoraCard = () => {
                     </div>
                     <div>
                         <h2 className="text-sm font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Mora Mayor a 8 Días</h2>
-                        <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">Seguimiento por asesor — capital adeudado inicial vs actual</p>
+                        <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest">Seguimiento por asesor — clic en un asesor para ver su evolución</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
@@ -191,17 +209,25 @@ const MoraCard = () => {
                             <>
                                 <div>
                                     <p className="text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest mb-3">Mora Mayor a 8 Días — Capital Adeudado (S/)</p>
-                                    <TablaAsesor filas={data?.monto?.filas ?? []} totales={data?.monto?.totales ?? {}} esMonto={true} />
+                                    <TablaAsesor filas={data?.monto?.filas ?? []} totales={data?.monto?.totales ?? {}} esMonto={true} onVerAsesor={verAsesor} onVerTotal={verTotal} />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest mb-3">Número de Clientes con Mora Mayor a 8 Días</p>
-                                    <TablaAsesor filas={data?.cantidad?.filas ?? []} totales={data?.cantidad?.totales ?? {}} esMonto={false} />
+                                    <TablaAsesor filas={data?.cantidad?.filas ?? []} totales={data?.cantidad?.totales ?? {}} esMonto={false} onVerAsesor={verAsesor} onVerTotal={verTotal} />
                                 </div>
                             </>
                         )}
                     </div>
                 </>
             )}
+
+            <MoraEvolucionModal
+                isOpen={!!evolucion}
+                onClose={() => setEvolucion(null)}
+                asesor={evolucion}
+                filtroInicio={fechaInicio}
+                filtroFin={fechaFin}
+            />
         </div>
     );
 };

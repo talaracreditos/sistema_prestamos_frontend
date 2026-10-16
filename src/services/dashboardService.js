@@ -49,6 +49,10 @@ export const getMoraDashboard = async (filters = {}) => {
     const response = await fetchWithAuth(`${BASE_URL}/mora${buildQs(filters)}`, { method: 'GET' });
     return handleResponse(response);
 };
+export const getMoraEvolucionDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/mora/evolucion${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
 export const exportMoraDashboard = async (filters = {}) => {
     const response = await fetchWithAuth(`${BASE_URL}/mora/export${buildQs(filters)}`, { method: 'GET' });
     if (!response.ok) throw new Error('Error al exportar mora');
