@@ -2,7 +2,7 @@ import React from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { usePagoCuota } from 'hooks/Operacion/usePagoCuota';
-import { ResumenPago, DistribucionGrupal, AlertasPago } from './Components/PagoCuotaParts';
+import { ResumenPago, DistribucionGrupal } from './Components/PagoCuotaParts';
 import {
     BanknotesIcon, DevicePhoneMobileIcon, PhotoIcon,
     UserGroupIcon, DocumentCheckIcon, XMarkIcon,
@@ -355,12 +355,6 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                 recibido={state.recibido} disabled={loading}
                             />
                         )}
-
-                        {/* 8. Alertas mora */}
-                        <AlertasPago
-                            noCubreMora={computed.noCubreMora} mora={computed.mora}
-                            integrantesSinCubrirMora={computed.integrantesSinCubrirMora}
-                        />
 
                         {/* 4. Voucher */}
                         <div>

@@ -101,27 +101,3 @@ export const DistribucionGrupal = ({ distribucion, handleMontoIntegrante, integr
         </div>
     </div>
 );
-
-// ── Alertas de Error ──
-export const AlertasPago = ({ noCubreMora, mora, integrantesSinCubrirMora }) => (
-    <>
-        {noCubreMora && (
-            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl p-4 transition-colors">
-                <p className="text-xs font-black text-red-700 dark:text-red-400 uppercase">⚠ Debe cubrir la mora primero</p>
-                <p className="text-[11px] text-red-500 dark:text-red-300 mt-1">El monto mínimo es <span className="font-black">S/ {mora.toFixed(2)}</span>.</p>
-            </div>
-        )}
-        {integrantesSinCubrirMora.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl p-4 transition-colors">
-                <p className="text-xs font-black text-red-700 dark:text-red-400 uppercase">⚠ Mora pendiente sin cubrir</p>
-                <div className="mt-1.5 space-y-1">
-                    {integrantesSinCubrirMora.map(int => (
-                        <p key={int.id} className="text-[11px] text-red-500 dark:text-red-300">
-                            <span className="font-black">{int.nombre}</span> — mora: <span className="font-black">S/ {parseFloat(int.mora_pendiente).toFixed(2)}</span>
-                        </p>
-                    ))}
-                </div>
-            </div>
-        )}
-    </>
-);

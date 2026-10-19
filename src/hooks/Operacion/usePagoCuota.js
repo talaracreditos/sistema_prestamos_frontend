@@ -69,7 +69,9 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
         ? money(liqModo.minimo)
         : totalAPagar;
 
-    // ── Validaciones ──────────────────────────────────────────────────────────
+    // ── Avisos de mora (YA NO BLOQUEAN) ───────────────────────────────────────
+    // Se permite pagar solo parte de la mora: por prelación todo el monto va
+    // primero a mora, así que solo se avisa que ese pago no llega a la cuota.
     const integrantesSinCubrirMora = (esGrupal && esParcial)
         ? integrantesPendientes.filter(int => {
             const moraPend = parseFloat(int.mora_pendiente ?? 0);
@@ -81,7 +83,7 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
 
     const montoNum = parseFloat(recibido || 0);
 
-    // Genérico, solo para préstamos normales no-prendarios.
+    // Genérico, solo para préstamos normales no-prendarios (aviso, no bloquea).
     const noCubreMora = !esGrupal && !esPrendario && mora > 0 && montoNum > 0 && montoNum < mora;
 
     const montoMinimo = (esPrendario && liqModo) ? round2(liqModo.minimo) : null;
@@ -129,9 +131,8 @@ export const usePagoCuota = ({ isOpen, cuota, onClose, onConfirm }) => {
     const pinCompleto = pin.length === 6;
     const pinValido    = !pinRequerido || pinCompleto;
 
-    const puedeSubmit = !noCubreMora
-        && integrantesSinCubrirMora.length === 0
-        && !errorMontoPrendario
+    const puedeSubmit = !errorMontoPrendario
+        && montoNum > 0
         && validacionMetodo
         && comisionValida
         && pinValido;
