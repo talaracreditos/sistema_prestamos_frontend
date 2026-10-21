@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardEstructuraCartera } from 'hooks/Dashboard/useDashboardEstructuraCartera';
 import { exportEstructuraCarteraDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import { Square3Stack3DIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -81,13 +82,16 @@ const EstructuraCarteraCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton
-                            exportService={exportEstructuraCarteraDashboard}
-                            filters={exportFilters}
-                            filename="estructura_cartera"
-                            label="Excel"
-                            disabled={loading}
-                        />
+                        <>
+                            <ExcelExportButton
+                                exportService={exportEstructuraCarteraDashboard}
+                                filters={exportFilters}
+                                filename="estructura_cartera"
+                                label="Excel"
+                                disabled={loading}
+                            />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />

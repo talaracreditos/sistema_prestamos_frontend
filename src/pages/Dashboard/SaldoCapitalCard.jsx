@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDashboardSaldoCapital } from 'hooks/Dashboard/useDashboardSaldoCapital';
 import { exportSaldoCapitalDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import { 
     BanknotesIcon, 
@@ -139,6 +140,7 @@ const SaldoCapitalCard = () => {
                                 label="Excel"
                                 disabled={loading}
                             />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
                         </>
                     )}
                     {!isFullScreen && (

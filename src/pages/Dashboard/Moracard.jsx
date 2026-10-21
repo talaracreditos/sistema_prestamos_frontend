@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardMora } from 'hooks/Dashboard/useDashboardMora';
 import { exportMoraDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import MoraEvolucionModal from './MoraEvolucionModal';
 import { ExclamationTriangleIcon, MagnifyingGlassIcon, XMarkIcon, ChartBarIcon } from '@heroicons/react/24/outline';
@@ -138,7 +139,10 @@ const MoraCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton exportService={exportMoraDashboard} filters={exportFilters} filename="reporte_mora" label="Excel" disabled={loading} />
+                        <>
+                            <ExcelExportButton exportService={exportMoraDashboard} filters={exportFilters} filename="reporte_mora" label="Excel" disabled={loading} />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardCuotaDia } from 'hooks/Dashboard/useDashboardCuotaDia';
 import { exportCuotaDiaDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import { CalendarDaysIcon, MagnifyingGlassIcon, XMarkIcon} from '@heroicons/react/24/outline';
 
 const fmt = n => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -55,13 +56,16 @@ const CuotaDiaCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton
-                            exportService={exportCuotaDiaDashboard}
-                            filters={exportFilters}
-                            filename="cuotas_dia"
-                            label="Excel"
-                            disabled={loading}
-                        />
+                        <>
+                            <ExcelExportButton
+                                exportService={exportCuotaDiaDashboard}
+                                filters={exportFilters}
+                                filename="cuotas_dia"
+                                label="Excel"
+                                disabled={loading}
+                            />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />

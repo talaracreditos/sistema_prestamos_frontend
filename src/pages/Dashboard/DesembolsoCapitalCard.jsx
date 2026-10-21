@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useDashboardDesembolsoCapital } from 'hooks/Dashboard/useDashboardDesembolsoCapital';
 import { exportDesembolsoCapitalDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import {
     CalendarDaysIcon, MagnifyingGlassIcon, XMarkIcon,
@@ -23,6 +24,8 @@ const ASESOR_COLORS = [
     { bg: 'bg-teal-100 dark:bg-teal-500/20',     text: 'text-teal-700 dark:text-teal-300',     dot: 'bg-teal-500 dark:bg-teal-400' },
     { bg: 'bg-orange-100 dark:bg-orange-500/20', text: 'text-orange-700 dark:text-orange-300', dot: 'bg-orange-500 dark:bg-orange-400' },
 ];
+
+const conUsuario = (label, usuario) => (usuario ? `${label} / ${usuario}` : label);
 
 const Chevron = ({ collapsed }) => (
     <div className={`w-6 h-6 flex items-center justify-center text-slate-400 dark:text-dark-text-muted flex-shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}>
@@ -104,7 +107,9 @@ const DayTooltip = ({ dia, eventos, asesorColorMap, anchorRect, onClose }) => {
                             return (
                                 <div key={i} className={`flex items-center justify-between px-2 py-1 rounded-lg mb-0.5 ${color.bg}`}>
                                     <div className="flex flex-col min-w-0">
-                                        <span className={`text-[9px] font-black ${color.text} opacity-60`}>{d.prestamo_label}</span>
+                                        <span className={`text-[9px] font-black truncate ${color.text} opacity-60`}>
+                                            {conUsuario(d.prestamo_label, d.asesor_usuario)}
+                                        </span>
                                         <span className={`text-[10px] font-bold truncate ${color.text}`}>{d.cliente}</span>
                                     </div>
                                     <span className={`text-[10px] font-black ml-2 flex-shrink-0 ${color.text}`}>+S/ {fmt(d.monto)}</span>
@@ -123,7 +128,9 @@ const DayTooltip = ({ dia, eventos, asesorColorMap, anchorRect, onClose }) => {
                             return (
                                 <div key={i} className={`flex items-center justify-between px-2 py-1 rounded-lg mb-0.5 ${color.bg}`}>
                                     <div className="flex flex-col min-w-0">
-                                        <span className={`text-[9px] font-black ${color.text} opacity-60`}>{p.prestamo_label} · C{p.numero_cuota}</span>
+                                        <span className={`text-[9px] font-black truncate ${color.text} opacity-60`}>
+                                            {conUsuario(`${p.prestamo_label} · C${p.numero_cuota}`, p.asesor_usuario)}
+                                        </span>
                                         <span className={`text-[10px] font-bold truncate ${color.text}`}>{p.cliente}</span>
                                     </div>
                                     <span className={`text-[9px] font-black ml-1 flex-shrink-0 ${color.text}`}>−S/ {fmt(p.capital)}</span>
@@ -372,13 +379,16 @@ const DesembolsoCapitalCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton
-                            exportService={exportDesembolsoCapitalDashboard}
-                            filters={exportFilters}
-                            filename="reporte_desembolso_capital"
-                            label="Excel"
-                            disabled={loading}
-                        />
+                        <>
+                            <ExcelExportButton
+                                exportService={exportDesembolsoCapitalDashboard}
+                                filters={exportFilters}
+                                filename="reporte_desembolso_capital"
+                                label="Excel"
+                                disabled={loading}
+                            />
+                            <RefreshButton onClick={handleFiltrarAsesor} loading={loading} />
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />

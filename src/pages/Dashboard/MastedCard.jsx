@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDashboardMaster } from 'hooks/Dashboard/useDashboardMaster';
 import { exportMasterDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import Pagination from 'components/Shared/Pagination';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import {
@@ -141,6 +142,7 @@ const MasterCard = () => {
                                 label="Excel"
                                 disabled={loading}
                             />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
                         </>
                     )}
                     {!isFullScreen && (

@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import Pagination from 'components/Shared/Pagination';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import CompararMesesModal from 'pages/Dashboard/CompararMesesModal';
 
 const ICONS = {
@@ -235,12 +236,16 @@ const DashboardCard = ({
     fechaInicio = '', setFechaInicio,
     fechaFin    = '', setFechaFin,
     onFiltrar, onLimpiar,
+    onRefrescar,
     tablas = {}, extraContent = {}, cardsPorTab = {},
     exportService = null, exportFilename = 'reporte', exportLabel = 'Excel',
     cardGroups = [],
 }) => {
     const Icon        = ICONS[icon] || BanknotesIcon;
     const tabsFinales = tabs ?? [{ id: 'cards', label: 'Resumen' }];
+
+    // Si la card no pasa onRefrescar, se usa onFiltrar (recarga con los filtros actuales)
+    const refrescar = onRefrescar ?? onFiltrar;
 
     const primerTab = tabsFinales[0]?.id ?? 'cards';
     const [tab,       setTab]       = useState(tabActivo ?? primerTab);
@@ -293,6 +298,9 @@ const DashboardCard = ({
                             label={exportLabel}
                             disabled={loading}
                         />
+                    )}
+                    {refrescar && !collapsed && (
+                        <RefreshButton onClick={refrescar} loading={loading} />
                     )}
                     <div className={`w-6 h-6 flex items-center justify-center text-slate-400 dark:text-dark-text-muted cursor-pointer transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
                         onClick={() => setCollapsed(v => !v)}>

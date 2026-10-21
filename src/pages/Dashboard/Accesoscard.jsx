@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useDashboardAccesos } from 'hooks/Dashboard/useDashboardAccesos';
 import { exportAccesosDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import Pagination from 'components/Shared/Pagination';
 import {
     UsersIcon, CheckCircleIcon, XCircleIcon,
-    ArrowPathIcon, ClockIcon, UserMinusIcon,
+    ClockIcon, UserMinusIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Barra de progreso ─────────────────────────────────────────────────────────
@@ -105,10 +106,7 @@ const AccesosCard = () => {
                                 label="Excel"
                                 disabled={loading}
                             />
-                            <button onClick={refresh} disabled={loading}
-                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold hover:bg-brand-red-light dark:hover:bg-dark-surface-alt rounded-xl border border-slate-200 dark:border-dark-border hover:border-brand-red/30 dark:hover:border-brand-gold/30 transition-all disabled:opacity-40">
-                                <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                            </button>
+                            <RefreshButton onClick={refresh} loading={loading} />
                         </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>

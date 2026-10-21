@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardSBS } from 'hooks/Dashboard/useDashboardSBS';
 import { exportSBSDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import Pagination from 'components/Shared/Pagination';
 import { ShieldCheckIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -69,13 +70,16 @@ const SBSCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton
-                            exportService={exportSBSDashboard}
-                            filters={exportFilters}
-                            filename="reporte_sbs"
-                            label="Excel SBS"
-                            disabled={loading}
-                        />
+                        <>
+                            <ExcelExportButton
+                                exportService={exportSBSDashboard}
+                                filters={exportFilters}
+                                filename="reporte_sbs"
+                                label="Excel SBS"
+                                disabled={loading}
+                            />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
+                        </>
                     )}
                     <div
                         className={`w-6 h-6 flex items-center justify-center text-slate-400 dark:text-dark-text-muted cursor-pointer transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}

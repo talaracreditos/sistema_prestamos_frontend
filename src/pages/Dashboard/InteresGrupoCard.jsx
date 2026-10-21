@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardInteresGrupo } from 'hooks/Dashboard/useDashboardInteresGrupo';
 import { exportInteresGrupoDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import Pagination from 'components/Shared/Pagination';
 import { BanknotesIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -49,7 +50,10 @@ const InteresGrupoCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton exportService={exportInteresGrupoDashboard} filters={exportFilters} filename="reporte_interes_grupo" label="Excel" disabled={loading} />
+                        <>
+                            <ExcelExportButton exportService={exportInteresGrupoDashboard} filters={exportFilters} filename="reporte_interes_grupo" label="Excel" disabled={loading} />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />

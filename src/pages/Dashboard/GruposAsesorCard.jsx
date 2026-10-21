@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardGruposAsesor } from 'hooks/Dashboard/useDashboardGruposAsesor';
 import { exportGruposAsesorDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import { UserGroupIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -63,7 +64,10 @@ const GruposAsesorCard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     {!collapsed && (
-                        <ExcelExportButton exportService={exportGruposAsesorDashboard} filters={exportFilters} filename="reporte_grupos_asesor" label="Excel" disabled={loading} />
+                        <>
+                            <ExcelExportButton exportService={exportGruposAsesorDashboard} filters={exportFilters} filename="reporte_grupos_asesor" label="Excel" disabled={loading} />
+                            <RefreshButton onClick={handleFiltrar} loading={loading} />
+                        </>
                     )}
                     <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
                         <Chevron collapsed={collapsed} />
