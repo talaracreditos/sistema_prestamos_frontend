@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
+// Boton de refresco para actualizar la información de la página. Se puede usar en cualquier parte de la aplicación donde se necesite un botón de actualización.
 
 const RefreshButton = ({ onClick, loading = false, title = 'Actualizar' }) => (
     <button
