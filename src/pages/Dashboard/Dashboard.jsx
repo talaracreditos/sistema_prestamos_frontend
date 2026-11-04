@@ -15,6 +15,7 @@ import AccesosCard from './Accesoscard';
 import ClientesMoraMayor8Card from './ClientesMoraMayor8Card';
 import EstructuraCarteraCard from './EstructuraCarteraCard';
 import InteresGrupoCard from './InteresGrupoCard';
+import ClientesDniCard from './ClientesDniCard';
 
 const STORAGE_KEY = 'dashboard.seccion';
 
@@ -25,6 +26,7 @@ const SECCIONES = [
         label: 'General',
         cards: [
             { permiso: 'dashboard.accesos', Component: AccesosCard },
+            { permiso: 'dashboard.clientesDni',  Component: ClientesDniCard },
             { permiso: 'dashboard.master',  Component: MasterCard },
         ],
     },
@@ -103,7 +105,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
+        <div className="w-full p-4 sm:p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-black text-slate-900 dark:text-dark-text uppercase tracking-tight">Dashboard</h1>
                 <p className="text-[11px] text-slate-400 dark:text-dark-text-muted font-bold uppercase tracking-widest mt-0.5">

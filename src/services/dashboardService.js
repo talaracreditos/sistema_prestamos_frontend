@@ -184,3 +184,9 @@ export const exportInteresGrupoDashboard = async (filters = {}) => {
     if (!response.ok) throw new Error('Error al exportar interés por grupo');
     return response.blob();
 };
+
+// ── Clientes con DNI vencido / por vencer ─────────────────────────────────────
+export const getClientesDniDashboard = async (filters = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/clientes-dni${buildQs(filters)}`, { method: 'GET' });
+    return handleResponse(response);
+};
