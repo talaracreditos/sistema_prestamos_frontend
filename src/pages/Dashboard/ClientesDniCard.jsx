@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useDashboardClientesDni, OPCIONES_DIAS } from 'hooks/Dashboard/useDashboardClientesDni';
+import RefreshButton from 'components/Shared/Buttons/RefreshButton';
+import Pagination from 'components/Shared/Pagination';
 import {
     IdentificationIcon, UserIcon, UserGroupIcon, PhoneIcon,
     MagnifyingGlassIcon, XMarkIcon, ExclamationTriangleIcon, ClockIcon,
@@ -16,6 +18,14 @@ const claseBadge = (dias) => {
     if (dias <= 7)  return 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/30';
     return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20';
 };
+
+const Chevron = ({ collapsed }) => (
+    <div className={`w-6 h-6 flex items-center justify-center text-slate-400 dark:text-dark-text-muted flex-shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+    </div>
+);
 
 const FilaCliente = ({ f }) => (
     <tr className="hover:bg-brand-red-light/20 dark:hover:bg-dark-surface-alt transition-colors text-[10px]">
@@ -105,18 +115,18 @@ const ClientesDniCard = () => {
         busqueda, setBusqueda,
         dias, handleCambiarDias,
         tab, setTab,
-        filas, totalVencidos, totalPorVencer, diasAlerta,
+        pagina, totalVencidos, totalPorVencer, diasAlerta,
         tieneFiltro, handleFiltrar, handleLimpiar,
+        handlePageChange, refresh,
     } = useDashboardClientesDni();
+
+    const filas = pagina.data ?? [];
 
     return (
         <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/20 overflow-hidden transition-colors duration-300">
             {/* Header */}
-            <div
-                className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-dark-border hover:bg-slate-50/60 dark:hover:bg-dark-surface-alt/60 transition-colors cursor-pointer select-none"
-                onClick={() => setCollapsed(v => !v)}
-            >
-                <div className="flex items-center gap-2.5 flex-1">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-dark-border hover:bg-slate-50/60 dark:hover:bg-dark-surface-alt/60 transition-colors">
+                <div className="flex items-center gap-2.5 flex-1 cursor-pointer select-none" onClick={() => setCollapsed(v => !v)}>
                     <div className="p-2 bg-brand-red-light dark:bg-dark-surface-alt rounded-xl">
                         <IdentificationIcon className="w-5 h-5 text-brand-red dark:text-brand-gold" />
                     </div>
@@ -127,10 +137,11 @@ const ClientesDniCard = () => {
                         </p>
                     </div>
                 </div>
-                <div className={`w-6 h-6 flex items-center justify-center text-slate-400 dark:text-dark-text-muted transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                    </svg>
+                <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                    {!collapsed && <RefreshButton onClick={refresh} loading={loading} />}
+                    <div className="cursor-pointer" onClick={() => setCollapsed(v => !v)}>
+                        <Chevron collapsed={collapsed} />
+                    </div>
                 </div>
             </div>
 
@@ -208,22 +219,29 @@ const ClientesDniCard = () => {
                                     : `Ningún DNI vence en los próximos ${diasAlerta} días`}
                             </div>
                         ) : (
-                            <div className="w-full overflow-x-auto">
-                                <table className="min-w-[860px] w-full text-left border-collapse table-auto">
-                                    <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
-                                        <tr>
-                                            <th className="px-2 py-3">Cliente</th>
-                                            <th className="px-2 py-3 whitespace-nowrap">Celular</th>
-                                            <th className="px-2 py-3 whitespace-nowrap">Vence DNI</th>
-                                            <th className="px-2 py-3 whitespace-nowrap">Estado</th>
-                                            <th className="px-2 py-3">Préstamos vigentes</th>
-                                            <th className="px-2 py-3 whitespace-nowrap">Asesor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-dark-border bg-white dark:bg-dark-surface">
-                                        {filas.map(f => <FilaCliente key={f.cliente_id} f={f} />)}
-                                    </tbody>
-                                </table>
+                            <div className="flex flex-col gap-3">
+                                <div className="w-full overflow-x-auto">
+                                    <table className="min-w-[860px] w-full text-left border-collapse table-auto">
+                                        <thead className="bg-slate-50 dark:bg-dark-surface-alt text-[9px] font-black text-slate-500 dark:text-dark-text-muted uppercase border-b border-slate-100 dark:border-dark-border">
+                                            <tr>
+                                                <th className="px-2 py-3">Cliente</th>
+                                                <th className="px-2 py-3 whitespace-nowrap">Celular</th>
+                                                <th className="px-2 py-3 whitespace-nowrap">Vence DNI</th>
+                                                <th className="px-2 py-3 whitespace-nowrap">Estado</th>
+                                                <th className="px-2 py-3">Préstamos vigentes</th>
+                                                <th className="px-2 py-3 whitespace-nowrap">Asesor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-dark-border bg-white dark:bg-dark-surface">
+                                            {filas.map(f => <FilaCliente key={f.cliente_id} f={f} />)}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <Pagination
+                                    currentPage={pagina.current_page}
+                                    totalPages={pagina.last_page}
+                                    onPageChange={handlePageChange}
+                                />
                             </div>
                         )}
                     </div>
