@@ -22,3 +22,10 @@ export const update = async (id, data) => {
     });
     return handleResponse(response);
 };
+
+// IGV del prendario (solo referencial). Devuelve el número directo, ej. 18.
+export const fetchIgv = async () => {
+    const response = await fetchWithAuth(`${BASE_URL}/igv`, { method: 'GET' });
+    const res = await handleResponse(response);
+    return parseFloat(res?.igv ?? res?.data?.igv ?? 0) || 0;
+};

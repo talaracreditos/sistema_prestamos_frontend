@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronUpDownIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { combobox } from 'services/kilatajeService';
 
 /**
- * Combobox de Kilataje. Al seleccionar un kilataje, dispara onSelect con el
- * objeto completo { id, nombre, precio_gramo } para que la pantalla de
- * Nueva Tasación pueda autocargar el precio del oro por gramo sin que el
- * tasador lo digite manualmente.
+ * Combobox de Kilataje. Dispara onSelect con { id, nombre, precio_gramo }.
  *
  * Props:
- * - initialName: nombre a mostrar precargado (modo edición)
- * - onSelect(kilataje | null): callback con el kilataje elegido
+ * - initialName: nombre precargado (modo edición)
+ * - onSelect(kilataje | null)
+ * - soloNombre: oro preferencial activo → solo muestra los kilatajes, sin precio
  */
-const KilatajeSearchSelect = ({ initialName = '', onSelect }) => {
+const KilatajeSearchSelect = ({ initialName = '', onSelect, soloNombre = false }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState([]);
@@ -23,6 +21,14 @@ const KilatajeSearchSelect = ({ initialName = '', onSelect }) => {
     useEffect(() => {
         setSearch(initialName);
     }, [initialName]);
+
+    // Si se marca/desmarca oro preferencial, refresca el texto del elegido
+    useEffect(() => {
+        if (!selected) return;
+        setSearch(soloNombre
+            ? selected.nombre
+            : `${selected.nombre} — S/ ${Number(selected.precio_gramo).toFixed(2)} x gr`);
+    }, [soloNombre, selected]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -53,7 +59,6 @@ const KilatajeSearchSelect = ({ initialName = '', onSelect }) => {
 
     const handlePick = (kilataje) => {
         setSelected(kilataje);
-        setSearch(`${kilataje.nombre} — S/ ${Number(kilataje.precio_gramo).toFixed(2)} x gr`);
         setOpen(false);
         onSelect && onSelect(kilataje);
     };
@@ -71,7 +76,6 @@ const KilatajeSearchSelect = ({ initialName = '', onSelect }) => {
     return (
         <div className="relative" ref={wrapperRef}>
             <div className="relative">
-                <SparklesIcon className="w-5 h-5 absolute left-3 top-3.5 text-slate-400 dark:text-dark-text-muted" />
                 <input
                     type="text"
                     value={search}
@@ -115,7 +119,7 @@ const KilatajeSearchSelect = ({ initialName = '', onSelect }) => {
                         >
                             <span>{k.nombre}</span>
                             <span className="flex items-center gap-2 text-xs text-slate-500 dark:text-dark-text-muted">
-                                S/ {Number(k.precio_gramo).toFixed(2)} / gr
+                                {!soloNombre && <>S/ {Number(k.precio_gramo).toFixed(2)} / gr</>}
                                 {selected?.id === k.id && <CheckIcon className="w-4 h-4 text-brand-red dark:text-brand-gold" />}
                             </span>
                         </button>

@@ -5,6 +5,7 @@ import {
     CheckCircleIcon,
     SparklesIcon,
     QuestionMarkCircleIcon,
+    CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { useCronogramaCliente } from './hooks/useCronogramaCliente';
 import TutorialCliente from './components/CronogramaCliente/TutorialCliente';
@@ -18,9 +19,17 @@ import CuotasAtrasadasSection from './components/CronogramaCliente/CuotasAtrasad
 import CuotaPagadaItem from './components/CronogramaCliente/CuotaPagadaItem';
 import CuotasRefinanciadasSection from './components/CronogramaCliente/CuotasRefinanciadasSection';
 
+// 'YYYY-MM-DD' → 'DD/MM/YYYY'
+const fmtFecha = (iso) => {
+    if (!iso) return '';
+    const [y, m, d] = String(iso).slice(0, 10).split('-');
+    return d && m && y ? `${d}/${m}/${y}` : iso;
+};
+
 const CronogramaCliente = ({
     cronograma = [],
     eco = null,
+    liquidacionHoy = null,
     estadoPrestamo = 1,
     prestamoCancelado = false,
     esGrupal = false,
@@ -37,9 +46,10 @@ const CronogramaCliente = ({
     const { atrasadas, proxima, siguientes, pagadas, refinanciadas, totalExigibles, prestamoTerminado } =
         useCronogramaCliente(cronograma, estadoPrestamo);
 
-    const esPrendario = eco?.modalidad === 'PRENDARIO' || eco?.es_prendario;
-    const liqPrendario = esPrendario ? eco?.liquidacion_hoy?.modos?.patear : null;
-
+    // La liquidación del día viene como prop aparte (no dentro de datos_economicos)
+    const liq          = liquidacionHoy ?? eco?.liquidacion_hoy ?? null;
+    const esPrendario  = !!liq || eco?.modalidad === 'PRENDARIO' || eco?.es_prendario;
+    const liqPrendario = esPrendario ? liq?.modos?.patear : null;
     return (
         <div className="flex flex-col gap-4 transition-colors">
 
@@ -61,24 +71,33 @@ const CronogramaCliente = ({
                         <>
                             <div className="p-4 bg-brand-red dark:bg-brand-red-glow rounded-2xl shadow-lg shadow-brand-red/20 dark:shadow-black/30 transition-colors flex flex-col justify-center">
                                 <p className="text-[9px] font-black uppercase text-white/70 dark:text-dark-text-muted mb-1">
-                                    Deuda Total a Hoy
+                                    Para cancelar todo
                                 </p>
                                 <p className="text-lg font-black text-white dark:text-dark-text">
                                     {fmt(liqPrendario.cancelacion_total)}
                                 </p>
                                 <p className="text-[10px] font-bold text-white/60 dark:text-dark-text-muted mt-0.5">
-                                    Día {eco?.liquidacion_hoy?.dias} del período
+                                    Incluye IGV
                                 </p>
                             </div>
                             <div className="p-4 bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors flex flex-col justify-center">
                                 <p className="text-[9px] font-black uppercase text-slate-400 dark:text-dark-text-muted mb-1">
-                                    Interés a Hoy
+                                    Para renovar (solo cargos)
                                 </p>
                                 <p className="text-lg font-black text-slate-800 dark:text-dark-text">
-                                    {fmt(liqPrendario.interes)}
+                                    {fmt(liqPrendario.minimo ?? 0)}
                                 </p>
                                 <p className="text-[9px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mt-0.5">
-                                    Capital: {fmt(liqPrendario.capital)}
+                                    Interés: {fmt(liqPrendario.interes)} · Capital: {fmt(liqPrendario.capital)}
+                                </p>
+                            </div>
+
+                            {/* Fecha de cálculo (día operativo) + aviso: el monto real lo da caja */}
+                            <div className="col-span-2 flex items-start gap-2 px-3 py-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl transition-colors">
+                                <CalendarDaysIcon className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 leading-snug">
+                                    Monto calculado a la fecha: <span className="font-black">{fmtFecha(liq?.fecha_corte)}</span>.
+                                    {' '}El monto real te lo dirá caja al momento de pagar.
                                 </p>
                             </div>
                         </>

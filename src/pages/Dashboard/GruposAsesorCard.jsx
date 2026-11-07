@@ -91,7 +91,7 @@ const GruposAsesorCard = () => {
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="block text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">Asesor</label>
-                            <EmpleadoSearchSelect key={comboKey} rol="ASESOR" onSelect={handleAgregarAsesor} clearOnSelect={true} placeholder="Agregar asesor..." />
+                            <EmpleadoSearchSelect key={comboKey} rol={['ASESOR', 'TASADOR']} onSelect={handleAgregarAsesor} clearOnSelect={true} placeholder="Agregar asesor..." />
                         </div>
                         <button onClick={handleFiltrar} disabled={loading}
                             className="flex items-center gap-1.5 px-4 py-2 bg-brand-red dark:bg-brand-red-glow text-white text-[10px] font-black uppercase rounded-lg hover:bg-brand-red-dark dark:hover:brightness-110 transition-all disabled:opacity-50">

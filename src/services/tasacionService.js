@@ -41,3 +41,8 @@ export const destroy = async (id) => {
     const response = await fetchWithAuth(`${BASE_URL}/delete/${id}`, { method: 'DELETE' });
     return handleResponse(response);
 };
+
+export const descargarTasacion = async (id) => {
+    const response = await fetchWithAuth(`${BASE_URL}/pdf/${id}`, { method: 'GET' });
+    return handleResponse(response);
+};

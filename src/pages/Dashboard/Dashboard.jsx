@@ -15,53 +15,58 @@ import AccesosCard from './Accesoscard';
 import ClientesMoraMayor8Card from './ClientesMoraMayor8Card';
 import EstructuraCarteraCard from './EstructuraCarteraCard';
 import InteresGrupoCard from './InteresGrupoCard';
+import PrendarioCard from './PrendarioCard';
+import PagoPrendarioCard from './PagoPrendarioCard';
 import ClientesDniCard from './ClientesDniCard';
 
 const STORAGE_KEY = 'dashboard.seccion';
 
 // Cada sección agrupa cards; una card solo se muestra si el usuario tiene el permiso.
+// `key` identifica la card dentro de la sección (dos cards pueden compartir permiso).
 const SECCIONES = [
     {
         id: 'general',
         label: 'General',
         cards: [
-            { permiso: 'dashboard.accesos', Component: AccesosCard },
+            { key: 'accesos', permiso: 'dashboard.accesos', Component: AccesosCard },
+            { key: 'master',  permiso: 'dashboard.master',  Component: MasterCard },
             { permiso: 'dashboard.clientesDni',  Component: ClientesDniCard },
-            { permiso: 'dashboard.master',  Component: MasterCard },
         ],
     },
     {
         id: 'cobranza',
         label: 'Cobranza',
         cards: [
-            { permiso: 'dashboard.pagos',        Component: PagoCard },
-            { permiso: 'dashboard.cuotaDia',     Component: CuotaDiaCard },
-            { permiso: 'dashboard.interesGrupo', Component: InteresGrupoCard },
+            { key: 'pagos',        permiso: 'dashboard.pagos',        Component: PagoCard },
+            { key: 'cuotaDia',     permiso: 'dashboard.cuotaDia',     Component: CuotaDiaCard },
+            { key: 'interesGrupo', permiso: 'dashboard.interesGrupo', Component: InteresGrupoCard },
         ],
     },
     {
         id: 'cartera',
         label: 'Préstamos y Cartera',
         cards: [
-            { permiso: 'dashboard.prestamos',         Component: PrestamoCard },
-            { permiso: 'dashboard.saldoCapital',      Component: SaldoCapitalCard },
-            { permiso: 'dashboard.desembolsoCapital', Component: DesembolsoCapitalCard },
-            { permiso: 'dashboard.estructuraCartera', Component: EstructuraCarteraCard },
+            { key: 'prestamos',         permiso: 'dashboard.prestamos',         Component: PrestamoCard },
+            { key: 'saldoCapital',      permiso: 'dashboard.saldoCapital',      Component: SaldoCapitalCard },
+            { key: 'desembolsoCapital', permiso: 'dashboard.desembolsoCapital', Component: DesembolsoCapitalCard },
+            { key: 'estructuraCartera', permiso: 'dashboard.estructuraCartera', Component: EstructuraCarteraCard },
         ],
     },
     {
         id: 'mora',
         label: 'Mora',
         cards: [
-            { permiso: 'dashboard.mora',               Component: MoraCard },
-            { permiso: 'dashboard.clientesMoraMayor8', Component: ClientesMoraMayor8Card },
-            { permiso: 'dashboard.clientesMora',       Component: ClientesMoraCard },
+            { key: 'mora',               permiso: 'dashboard.mora',               Component: MoraCard },
+            { key: 'clientesMoraMayor8', permiso: 'dashboard.clientesMoraMayor8', Component: ClientesMoraMayor8Card },
+            { key: 'clientesMora',       permiso: 'dashboard.clientesMora',       Component: ClientesMoraCard },
         ],
     },
     {
         id: 'asesores',
         label: 'Asesores',
         cards: [
+            { key: 'asesores',     permiso: 'dashboard.asesores',     Component: AsesorCard },
+            { key: 'gruposAsesor', permiso: 'dashboard.gruposAsesor', Component: GruposAsesorCard },
             { permiso: 'dashboard.asesores',     Component: AsesorCard },
             { permiso: 'dashboard.gruposAsesor', Component: GruposAsesorCard },
         ],
@@ -70,7 +75,15 @@ const SECCIONES = [
         id: 'sbs',
         label: 'SBS',
         cards: [
-            { permiso: 'dashboard.sbs', Component: SBSCard },
+            { key: 'sbs', permiso: 'dashboard.sbs', Component: SBSCard },
+        ],
+    },
+    {
+        id: 'prendario',
+        label: 'Prendario',
+        cards: [
+            { key: 'pagosPrendario', permiso: 'dashboard.prendario', Component: PagoPrendarioCard },
+            { key: 'prendario',      permiso: 'dashboard.prendario', Component: PrendarioCard },
         ],
     },
 ];
@@ -144,8 +157,8 @@ const Dashboard = () => {
 
             {activa ? (
                 <div key={activa.id} role="tabpanel" className="grid grid-cols-1 gap-6">
-                    {activa.cards.map(({ permiso, Component }) => (
-                        <Component key={permiso} />
+                    {activa.cards.map(({ key, Component }) => (
+                        <Component key={key} />
                     ))}
                 </div>
             ) : (

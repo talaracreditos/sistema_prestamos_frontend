@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import peruData from 'utilities/data/peruData';
 import { onlyLetters, onlyNumbers } from 'utilities/Validations/validations';
 
+/**
+ * Lógica compartida del formulario de solicitud (bloqueos, renovación, aval).
+ * La usan SolicitudForm (individual/grupal/renovación) y PrendarioForm.
+ */
 export const useSolicitudForm = (data, handleChange, opciones = {}) => {
     const {
         esRenovacion       = false,
@@ -12,17 +16,19 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
         onLimpiarOrigen    = null,
     } = opciones;
 
-    const esRenovacionActiva     = esRenovacion && !!prestamoOrigen;
+    const esRenovacionActiva         = esRenovacion && !!prestamoOrigen;
     const formBloqueadoPorRenovacion = esRenovacion && !prestamoOrigen;
 
     const idsOrigenRenovacion = prestamoOrigen?.integrantes?.map(i => i.id) ?? [];
 
     // ── Bloqueos riesgo/DNI ───────────────────────────────────────────────────
-    const dniPrincipalVencido      = data.dni_status?.estado === 'VENCIDO';
-    const dniIntegranteVencido     = data.es_grupal && data.integrantes?.some(i => i.dni_status?.estado === 'VENCIDO');
+    const dniPrincipalVencido  = data.dni_status?.estado === 'VENCIDO';
+    const dniIntegranteVencido = data.es_grupal && data.integrantes?.some(i => i.dni_status?.estado === 'VENCIDO');
+
     const principalBloqueadoPorRiesgo = !esRenovacionActiva && data.es_grupal &&
         data.modalidad?.includes('GRUPAL') &&
         (data.modalidad?.includes('VIGENTE') || data.modalidad?.includes('RCS'));
+
     const integranteBloqueadoPorRiesgo = data.es_grupal &&
         data.integrantes?.some(i => {
             const debeRenovar = esRenovacionActiva && idsOrigenRenovacion.includes(i.id);
@@ -34,14 +40,9 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
             return esGrupalVigente || esRCS;
         });
 
-    const isMainBlocked       = dniPrincipalVencido || principalBloqueadoPorRiesgo;
+    const isMainBlocked        = dniPrincipalVencido || principalBloqueadoPorRiesgo;
     const hasBlockedIntegrante = dniIntegranteVencido || integranteBloqueadoPorRiesgo;
-    const isBlocked           = isMainBlocked || hasBlockedIntegrante;
-
-    // ── Reglas propias de PRENDARIO (no bloquean el form, solo invalidan submit) ──
-    const cuotasPrendarioInvalidas = data.es_prendario &&
-        (parseInt(data.cuotas_solicitadas) < 1 || parseInt(data.cuotas_solicitadas) > 2 || !data.cuotas_solicitadas);
-    const tasacionFaltante = data.es_prendario && !data.tasacion_id;
+    const isBlocked            = isMainBlocked || hasBlockedIntegrante;
 
     const bloqueado = isBlocked || formBloqueadoPorRenovacion;
 
@@ -105,9 +106,6 @@ export const useSolicitudForm = (data, handleChange, opciones = {}) => {
         isBlocked,
         isMainBlocked,
         hasBlockedIntegrante,
-        // prendario
-        cuotasPrendarioInvalidas,
-        tasacionFaltante,
         // aval
         avalConfig: { tieneAval, handleToggleAval, handleAvalInputChange, provincias, distritos },
     };

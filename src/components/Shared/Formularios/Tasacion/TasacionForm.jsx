@@ -51,6 +51,22 @@ const TasacionForm = ({
     camposLimitados = false,
 }) => {
     const kilatajeInvalido = !detalleActual.kilataje;
+    const esPreferencial   = !!detalleActual.precio_oro_preferencial;
+
+    // Texto inicial del combobox: con oro preferencial solo el nombre del kilataje
+    const kilatajeInitialName = detalleActual.kilataje
+        ? (esPreferencial
+            ? detalleActual.kilataje.nombre
+            : `${detalleActual.kilataje.nombre} — S/ ${Number(detalleActual.kilataje.precio_gramo).toFixed(2)} x gr`)
+        : '';
+
+    const handleTogglePreferencial = (checked) => {
+        setDetalleActual(p => ({
+            ...p,
+            precio_oro_preferencial: checked,
+            precio_gramo: checked ? p.precio_gramo : '',
+        }));
+    };
 
     return (
         <>
@@ -87,7 +103,7 @@ const TasacionForm = ({
                 )}
             </div>
 
-            {/* ── PASO 2: TASACIÓN DE JOYAS — ya no depende de tener cliente ──── */}
+            {/* ── PASO 2: TASACIÓN DE JOYAS ───────────────────────────────────── */}
             <div className="bg-white dark:bg-dark-surface p-6 sm:p-8 rounded-2xl shadow-sm dark:shadow-black/25 border border-slate-100 dark:border-dark-border transition-colors mt-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 dark:border-dark-border pb-3">
                     <h3 className="text-base font-black text-slate-800 dark:text-dark-text flex items-center gap-2 uppercase tracking-wide transition-colors">
@@ -104,7 +120,7 @@ const TasacionForm = ({
                         )}
                     </h3>
 
-                    {/* % de préstamo — valores fijos, no se puede digitar libre */}
+                    {/* % de préstamo — valores fijos */}
                     <div className="flex items-center gap-2 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-xl px-4 py-2">
                         <AdjustmentsHorizontalIcon className="w-4 h-4 text-slate-400 dark:text-dark-text-muted flex-shrink-0" />
                         <span className="text-[10px] font-black text-slate-500 dark:text-dark-text-muted uppercase whitespace-nowrap">% a prestar</span>
@@ -136,9 +152,51 @@ const TasacionForm = ({
                         <KilatajeSearchSelect
                             key={`kilataje-${editandoId ?? 'nuevo'}`}
                             onSelect={(k) => setDetalleActual(p => ({ ...p, kilataje: k }))}
-                            initialName={detalleActual.kilataje ? `${detalleActual.kilataje.nombre} — S/ ${Number(detalleActual.kilataje.precio_gramo).toFixed(2)} x gr` : ''}
+                            initialName={kilatajeInitialName}
+                            soloNombre={esPreferencial}
                         />
                     </div>
+                </div>
+
+                {/* ── Oro preferencial (por joya) ── */}
+                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                    <label
+                        className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${
+                            esPreferencial
+                                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30'
+                                : 'bg-slate-50 dark:bg-dark-surface-alt border-slate-200 dark:border-dark-border'
+                        }`}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={esPreferencial}
+                            onChange={(e) => handleTogglePreferencial(e.target.checked)}
+                            className="w-4 h-4 accent-brand-red"
+                        />
+                        <span className={`text-xs font-black uppercase whitespace-nowrap ${esPreferencial ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500 dark:text-dark-text-muted'}`}>
+                            Precio de oro preferencial
+                        </span>
+                    </label>
+
+                    {esPreferencial && (
+                        <div className="w-full md:w-64">
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={detalleActual.precio_gramo ?? ''}
+                                onChange={(e) => setDetalleActual(p => ({ ...p, precio_gramo: e.target.value }))}
+                                placeholder="Precio preferencial x gr (S/)"
+                                className="w-full p-3.5 text-sm font-bold text-slate-800 dark:text-dark-text bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 rounded-xl outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold transition-all"
+                            />
+                        </div>
+                    )}
+
+                    {esPreferencial && detalleActual.kilataje && (
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase">
+                            Precio normal {detalleActual.kilataje.nombre}: S/ {fmt(detalleActual.kilataje.precio_gramo)} x gr
+                        </p>
+                    )}
                 </div>
 
                 {kilatajeInvalido && (
@@ -153,7 +211,7 @@ const TasacionForm = ({
                     </p>
                 )}
 
-                {/* Descripción — siempre editable, incluso con peso bloqueado */}
+                {/* Descripción — siempre editable */}
                 <div className="mb-4">
                     <textarea
                         value={detalleActual.descripcion_detallada}
@@ -184,8 +242,9 @@ const TasacionForm = ({
                 </div>
 
                 <p className="text-[9px] text-slate-400 dark:text-dark-text-muted uppercase font-bold -mt-2 mb-4">
-                    Valor tasado y máximo a prestar se calculan automáticamente (peso neto × precio del oro del kilataje × % a prestar) — no son editables.
-                    {editandoId && ' Si no cambias el kilataje, se conserva el precio con el que se tasó esta joya originalmente.'}
+                    Valor tasado y máximo a prestar se calculan automáticamente (peso neto × precio del oro × % a prestar) — no son editables.
+                    {esPreferencial && ' Con oro preferencial se usa el precio que ingresaste.'}
+                    {editandoId && !esPreferencial && ' Si no cambias el kilataje, se conserva el precio con el que se tasó esta joya originalmente.'}
                 </p>
 
                 <div className="flex items-center gap-3">
@@ -243,7 +302,13 @@ const TasacionForm = ({
                                         </td>
                                         <td className="p-3 text-right">
                                             <p className="font-bold text-slate-600 dark:text-dark-text-muted">{d.kilataje?.nombre}</p>
-                                            <p className="text-[10px] text-slate-400 dark:text-dark-text-muted">S/ {fmt(d.kilataje?.precio_gramo)}/g</p>
+                                            {d.precio_oro_preferencial ? (
+                                                <p className="text-[10px] font-black text-amber-600 dark:text-amber-400">
+                                                    S/ {fmt(d.precio_gramo)}/g · Preferencial
+                                                </p>
+                                            ) : (
+                                                <p className="text-[10px] text-slate-400 dark:text-dark-text-muted">S/ {fmt(d.kilataje?.precio_gramo)}/g</p>
+                                            )}
                                         </td>
                                         <td className="p-3 text-right font-bold text-slate-600 dark:text-dark-text-muted">{fmt(d.peso_neto)} g</td>
                                         <td className="p-3 text-right font-black text-slate-800 dark:text-dark-text">S/ {fmt(d.valor_tasado)}</td>

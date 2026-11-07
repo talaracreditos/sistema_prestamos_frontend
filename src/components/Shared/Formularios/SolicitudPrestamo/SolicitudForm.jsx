@@ -5,15 +5,14 @@ import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSel
 
 import SectionRenovacion   from './SectionRenovacion';
 import SectionClienteGrupo from './SectionClienteGrupo';
-import SectionTasacion     from './SectionTasacion';
 import SectionCondiciones  from './SectionCondiciones';
 import SectionAval         from './SectionAval';
 import SectionNotas        from './SectionNotas';
 
+// Prendario tiene su propio módulo (SolicitudPrendario / PrendarioForm)
 const TIPOS = [
-    { key: 'individual', label: 'Individual', es_grupal: false, es_prendario: false },
-    { key: 'grupal',     label: 'Grupal',      es_grupal: true,  es_prendario: false },
-    { key: 'prendario',  label: 'Prendario',   es_grupal: false, es_prendario: true  },
+    { key: 'individual', label: 'Individual', es_grupal: false },
+    { key: 'grupal',     label: 'Grupal',     es_grupal: true  },
 ];
 
 const SolicitudForm = ({
@@ -36,10 +35,10 @@ const SolicitudForm = ({
 }) => {
     const prestamoOrigenEfectivo = prestamoOrigen ?? (
         data.prestamo_origen_id ? {
-            id:         data.prestamo_origen_id,
-            cliente:    data.cliente_nombre    ?? '',
-            monto:      data.monto_solicitado ?? 0,
-            es_grupal: data.es_grupal,
+            id:          data.prestamo_origen_id,
+            cliente:     data.cliente_nombre   ?? '',
+            monto:       data.monto_solicitado ?? 0,
+            es_grupal:   data.es_grupal,
             integrantes: data.integrantes
                 ?.filter(i => i.puede_excluirse === false)
                 .map(i => ({
@@ -61,28 +60,23 @@ const SolicitudForm = ({
         isBlocked,
         isMainBlocked,
         hasBlockedIntegrante,
-        cuotasPrendarioInvalidas,
-        tasacionFaltante,
         avalConfig,
     } = useSolicitudForm(data, handleChange, {
-        esRenovacion:        esRenovacionEfectiva,
-        prestamoOrigen:      prestamoOrigenEfectivo,
+        esRenovacion:   esRenovacionEfectiva,
+        prestamoOrigen: prestamoOrigenEfectivo,
         comboKey,
         onToggleRenovacion,
         onSelectPrestamo,
         onLimpiarOrigen,
     });
 
-    // El submit se bloquea por riesgo/DNI (isBlocked) o por datos incompletos de prendario
-    const bloqueaEnvio = isBlocked || cuotasPrendarioInvalidas || tasacionFaltante;
-
     useEffect(() => {
-        onBlockedChange?.(bloqueaEnvio);
-    }, [bloqueaEnvio, onBlockedChange]);
+        onBlockedChange?.(isBlocked);
+    }, [isBlocked, onBlockedChange]);
 
     const mostrarSeccionRenovacion = onToggleRenovacion !== null || !!data.prestamo_origen_id;
 
-    const tipoActivo = data.es_prendario ? 'prendario' : (data.es_grupal ? 'grupal' : 'individual');
+    const tipoActivo = data.es_grupal ? 'grupal' : 'individual';
 
     return (
         <div className={`space-y-6 transition-all duration-300 ${isBlocked ? 'opacity-90' : ''}`}>
@@ -126,15 +120,13 @@ const SolicitudForm = ({
                         </div>
                     )}
 
-                  {/* ── Switch Individual / Grupal / Prendario ── */}
+                    {/* ── Switch Individual / Grupal ── */}
                     {(isUpdate || esRenovacionActiva) ? (
                         <div className="flex justify-center">
                             <span className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-colors ${
                                 tipoActivo === 'grupal'
                                     ? 'bg-brand-gold-light/20 dark:bg-brand-gold/10 text-brand-gold-dark dark:text-brand-gold border-brand-gold/30 dark:border-brand-gold/20'
-                                    : tipoActivo === 'prendario'
-                                        ? 'bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text border-slate-200 dark:border-dark-border'
-                                        : 'bg-brand-red-light/20 dark:bg-brand-red/10 text-brand-red dark:text-brand-gold border-brand-red/30 dark:border-brand-red/20'
+                                    : 'bg-brand-red-light/20 dark:bg-brand-red/10 text-brand-red dark:text-brand-gold border-brand-red/30 dark:border-brand-red/20'
                             }`}>
                                 {esRenovacionActiva && (
                                     <>
@@ -156,7 +148,6 @@ const SolicitudForm = ({
                                         onClick={() => {
                                             if (bloqueado) return;
                                             handleChange('es_grupal', opt.es_grupal);
-                                            handleChange('es_prendario', opt.es_prendario);
                                         }}
                                         disabled={bloqueado}
                                         className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
@@ -180,7 +171,7 @@ const SolicitudForm = ({
                             disabled={bloqueado}
                             initialName={data.asesor_nombre || ''}
                             onSelect={(asesor) => {
-                                handleChange('asesor_id',     asesor?.id            ?? '');
+                                handleChange('asesor_id',     asesor?.id              ?? '');
                                 handleChange('asesor_nombre', asesor?.nombre_completo ?? '');
                             }}
                         />
@@ -207,19 +198,11 @@ const SolicitudForm = ({
                         idsOrigenRenovacion={prestamoOrigenEfectivo?.integrantes?.map(i => i.id) ?? []}
                     />
 
-                    {data.es_prendario && (
-                        <SectionTasacion
-                            data={data}
-                            handleChange={handleChange}
-                            isBlocked={bloqueado}
-                        />
-                    )}
-
                     <SectionCondiciones
                         data={data}
                         handleChange={handleChange}
                         isBlocked={bloqueado}
-                        esPrendario={data.es_prendario}
+                        esPrendario={false}
                     />
 
                     <SectionAval

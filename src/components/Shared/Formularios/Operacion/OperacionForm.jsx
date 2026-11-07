@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CronogramaTable from 'components/Shared/Tables/CronogramaTable';
 import DatosEconomicosCards from 'components/Shared/Tables/components/CronogramaTable/DatosEconomicosCards';
 import HistorialInteresModal from 'pages/Prestamo/HistorialInteresModal';
+import SimuladorPrendario from 'components/Shared/SimuladorPrendario';
 import {
     BanknotesIcon, UserGroupIcon, ChartPieIcon, LockClosedIcon, ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
@@ -151,9 +152,12 @@ const OperacionForm = ({ prestamoDetalle, openPagoModal, onHistorialModal }) => 
             </div>
 
             <div className="bg-white dark:bg-dark-surface rounded-[28px] border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 overflow-hidden transition-colors">
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-dark-border flex items-center gap-3 transition-colors">
-                    <div className="p-2 bg-slate-900 dark:bg-black rounded-xl transition-colors"><BanknotesIcon className="w-4 h-4 text-white dark:text-dark-text" /></div>
-                    <h4 className="font-black text-slate-800 dark:text-dark-text uppercase text-xs tracking-[0.15em] transition-colors">Cronograma de Pagos y Saldos</h4>
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-dark-border flex items-center justify-between gap-3 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-slate-900 dark:bg-black rounded-xl transition-colors"><BanknotesIcon className="w-4 h-4 text-white dark:text-dark-text" /></div>
+                        <h4 className="font-black text-slate-800 dark:text-dark-text uppercase text-xs tracking-[0.15em] transition-colors">Cronograma de Pagos y Saldos</h4>
+                    </div>
+                    {esPrendario && <SimuladorPrendario prestamoDetalle={prestamoDetalle} />}
                 </div>
                 <div className="p-2">
                     <CronogramaTable

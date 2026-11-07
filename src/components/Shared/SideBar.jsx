@@ -152,6 +152,14 @@ export const MENU_GROUPS = [
                     { name: 'Nueva Tasación',    link: '/tasacion/agregar', requiredPermission: 'tasacion.store' },
                 ],
             },
+            {
+                section: 'Solicitudes Prendarias', icon: ScaleIcon,
+                subs: [
+                    { name: 'Nueva Solicitud', link: '/solicitudPrendario/agregar', requiredPermission: 'solicitudPrendario.store' },
+                    { name: 'Solicitudes',     link: '/solicitudPrendario/listar',  requiredPermission: 'solicitudPrendario.index' },
+                ],
+            },
+            { section: 'Garantías Prendarias', icon: ShieldCheckIcon, link: '/garantia-prendaria/listar', requiredPermission: 'garantiaPrendaria.index' },
         ]
     },
     {
@@ -172,7 +180,10 @@ export const MENU_GROUPS = [
                     { name: 'Gestión de Cajas',           link: '/caja/listar',   requiredPermission: 'caja.index' },
                     { name: 'Nueva Caja',                 link: '/caja/agregar',  requiredPermission: 'caja.store' },
                 ],
-            }
+            },
+            {
+                section: 'Venta Adjudicados', link: '/caja/ventas-adjudicados', requiredPermission: 'ventaAdjudicado.index', icon: TagIcon
+            },
         ]
     },
     {

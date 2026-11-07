@@ -52,6 +52,11 @@ import AgregarSolicitud from 'pages/SolicitudPrestamo/Store';
 import EditarSolicitud from 'pages/SolicitudPrestamo/Update';
 import ListarSolicitudes from 'pages/SolicitudPrestamo/Index';
 
+// UI SOLICITUD PRENDARIO
+import AgregarSolicitudPrendario from 'pages/SolicitudPrendario/Store';
+import EditarSolicitudPrendario from 'pages/SolicitudPrendario/Update';
+import ListarSolicitudesPrendario from 'pages/SolicitudPrendario/Index';
+
 // UI PRESTAMO
 import ListarPrestamos from 'pages/Prestamo/Index';
 
@@ -72,6 +77,9 @@ import RegistrarOperacion from 'pages/Operacion/Store';
 
 //UI CAJA MOVIMIENTOS
 import ListarMovimientos from 'pages/CajaMovimiento/Index';
+
+//UI VENTAS ADJUDICADOS
+import VentasAdjudicadosIndex from 'pages/VentasAdjudicados/index';
 
 // UI PAGOS
 import ListarPagos from 'pages/Pago/Index';
@@ -163,6 +171,9 @@ import RegistrarCajaChicaMovimiento from 'pages/CajaChicaMovimiento/Store';
 // UI SESIONES DE CAJA CHICA (TURNOS)
 import ListarSesionesCajaChica from 'pages/CajaChicaSesion/Index';
 
+// UI GARANTIAS PRENDARIAS
+import ListarGarantiasPrendarias from 'pages/GarantiaPrendaria/Index';
+
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
@@ -229,6 +240,11 @@ function AppContent() {
         <Route path="/solicitudPrestamo/editar/:id" element={<ProtectedRoute requiredPermission="solicitudPrestamo.update" element={<EditarSolicitud />} />} />
         <Route path="/solicitudPrestamo/listar" element={<ProtectedRoute requiredPermission="solicitudPrestamo.index" element={<ListarSolicitudes />} />} />
 
+        {/* SOLICITUD PRENDARIO */}
+        <Route path="/solicitudPrendario/agregar" element={<ProtectedRoute requiredPermission="solicitudPrendario.store" element={<AgregarSolicitudPrendario />} />} />
+        <Route path="/solicitudPrendario/editar/:id" element={<ProtectedRoute requiredPermission="solicitudPrendario.update" element={<EditarSolicitudPrendario />} />} />
+        <Route path="/solicitudPrendario/listar" element={<ProtectedRoute requiredPermission="solicitudPrendario.index" element={<ListarSolicitudesPrendario />} />} />
+
         {/* PRESTAMO */}
         <Route path="/prestamo/listar" element={<ProtectedRoute requiredPermission="prestamo.index" element={<ListarPrestamos />} />} />
 
@@ -249,6 +265,9 @@ function AppContent() {
 
         {/* CAJA MOVIMIENTOS */}
         <Route path="/caja/movimientos" element={<ProtectedRoute requiredPermission="cajaMovimiento.index" element={<ListarMovimientos />} />} />
+
+        {/* VENTAS ADJUDICADOS */}
+        <Route path="/caja/ventas-adjudicados" element={<ProtectedRoute requiredPermission="ventaAdjudicado.index" element={<VentasAdjudicadosIndex />} />} />
 
         {/* PAGOS */}
         <Route path="/pago/listar" element={<ProtectedRoute requiredPermission="pago.index" element={<ListarPagos />} />} />
@@ -314,6 +333,9 @@ function AppContent() {
         <Route path="/tasacion/listar" element={<ProtectedRoute requiredPermission="tasacion.index" element={<ListarTasaciones />} />} />
         <Route path="/tasacion/agregar" element={<ProtectedRoute requiredPermission="tasacion.store" element={<AgregarTasacion />} />} />
         <Route path="/tasacion/editar/:id" element={<ProtectedRoute requiredPermission="tasacion.update" element={<EditarTasacion />} />} />
+
+          {/* GARANTIAS PRENDARIAS */}
+        <Route path="/garantia-prendaria/listar" element={<ProtectedRoute requiredPermission="garantiaPrendaria.index" element={<ListarGarantiasPrendarias />} />} />
 
         {/* CAJA CHICA GASTO */}
         <Route path="/caja-chica-gasto/listar" element={<ProtectedRoute requiredPermission="cajaChicaGasto.index" element={<ListarCajaChicaGastos />} />} />

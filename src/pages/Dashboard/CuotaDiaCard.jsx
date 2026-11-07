@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDashboardCuotaDia } from 'hooks/Dashboard/useDashboardCuotaDia';
 import { exportCuotaDiaDashboard } from 'services/dashboardService';
 import ExcelExportButton from 'components/Shared/Buttons/ExcelExportButton';
+import EmpleadoSearchSelect from 'components/Shared/Comboboxes/EmpleadoSearchSelect';
 import RefreshButton from 'components/Shared/Buttons/RefreshButton';
 import { CalendarDaysIcon, MagnifyingGlassIcon, XMarkIcon} from '@heroicons/react/24/outline';
 
@@ -19,22 +20,24 @@ const CuotaDiaCard = () => {
     const {
         loading, data,
         fecha,    setFecha,
-        asesorId, setAsesorId,
+        asesoresSeleccionados,
+        handleAgregarAsesor, handleQuitarAsesor,
+        exportFilters,
         handleFiltrar, handleLimpiar,
     } = useDashboardCuotaDia();
 
     const [collapsed, setCollapsed] = useState(false);
+    const [comboKey,  setComboKey]  = useState(Date.now());
+
+    const onLimpiar = () => {
+        handleLimpiar();
+        setComboKey(Date.now()); // resetea el texto del combobox
+    };
 
     const porAsesor    = data?.por_asesor    ?? [];
     const totalGeneral = data?.total_general ?? 0;
     const totalCuotas  = data?.total_cuotas  ?? 0;
     const fechaLabel   = data?.fecha         ?? '—';
-    const asesoresDisp = data?.asesores_disponibles ?? [];
-
-    const exportFilters = {
-        fecha,
-        ...(asesorId ? { asesor_id: asesorId } : {}),
-    };
 
     return (
         <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/20 overflow-hidden transition-colors duration-300">
@@ -88,19 +91,16 @@ const CuotaDiaCard = () => {
                             />
                         </div>
 
-                        {/* Asesor (select dinámico con opciones del response) */}
-                        <div>
-                            <label className="block text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest mb-1">Asesor</label>
-                            <select
-                                value={asesorId}
-                                onChange={e => setAsesorId(e.target.value)}
-                                className="p-2 text-xs text-slate-700 dark:text-dark-text bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold outline-none min-w-[160px]"
-                            >
-                                <option value="">Todos los asesores</option>
-                                {asesoresDisp.map(a => (
-                                    <option key={a.id} value={a.id}>{a.username}</option>
-                                ))}
-                            </select>
+                        {/* Asesor / Tasador (combobox, permite varios) */}
+                        <div className="flex flex-col gap-1 min-w-[240px]">
+                            <label className="block text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">Asesor / Tasador</label>
+                            <EmpleadoSearchSelect
+                                key={comboKey}
+                                rol={['ASESOR', 'TASADOR']}
+                                onSelect={handleAgregarAsesor}
+                                clearOnSelect={true}
+                                placeholder="Agregar asesor / tasador..."
+                            />
                         </div>
 
                         <button
@@ -112,12 +112,26 @@ const CuotaDiaCard = () => {
                         </button>
 
                         <button
-                            onClick={handleLimpiar}
+                            onClick={onLimpiar}
                             className="flex items-center gap-1 px-3 py-2 text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold text-[10px] font-black uppercase rounded-lg border border-slate-200 dark:border-dark-border hover:border-brand-red/30 dark:hover:border-brand-gold/30 transition-all"
                         >
                             <XMarkIcon className="w-3.5 h-3.5" /> Hoy
                         </button>
                     </div>
+
+                    {/* Tags asesores */}
+                    {asesoresSeleccionados.length > 0 && (
+                        <div className="px-6 py-2 border-b border-slate-50 dark:border-dark-border bg-white dark:bg-dark-surface flex flex-wrap gap-2 transition-colors">
+                            {asesoresSeleccionados.map(a => (
+                                <span key={a.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-red-light dark:bg-dark-surface-alt border border-brand-red/20 dark:border-brand-gold/20 rounded-full text-[10px] font-black text-brand-red dark:text-brand-gold uppercase">
+                                    {a.nombre}
+                                    <button onClick={() => handleQuitarAsesor(a.id)} className="hover:text-brand-red-dark dark:hover:text-red-400">
+                                        <XMarkIcon className="w-3 h-3" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Contenido */}
                     <div className="p-6">

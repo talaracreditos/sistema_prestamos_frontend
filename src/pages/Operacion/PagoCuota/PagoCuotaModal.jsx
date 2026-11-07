@@ -23,7 +23,7 @@ const MODOS_PRENDARIO = [
     },
     {
         id: 'patear',
-        titulo: 'Pagar y patear 30 días',
+        titulo: 'Pagar y aplazar 30 días',
         sub: 'Paga hasta hoy y reinicia el plazo',
         activo: 'border-brand-red dark:border-brand-gold bg-brand-red-light/50 dark:bg-brand-gold/10 text-brand-red dark:text-brand-gold',
     },
@@ -168,7 +168,7 @@ const PagoCuotaModal = ({ isOpen, onClose, cuota, onConfirm, loading }) => {
                                             <button key={m.id} type="button"
                                                 onClick={() => !bloqueado && setters.setModoPrendario(m.id)}
                                                 disabled={loading || bloqueado}
-                                                title={bloqueado ? 'El período ya venció — usa "Pagar y patear" o "Cancelar todo".' : undefined}
+                                                title={bloqueado ? 'El período ya venció — usa "Pagar y aplazar" o "Cancelar todo".' : undefined}
                                                 className={`p-3 rounded-2xl font-black text-[10px] uppercase flex flex-col items-center gap-1 text-center border-2 transition-all disabled:opacity-40 ${
                                                     state.modoPrendario === m.id
                                                         ? m.activo

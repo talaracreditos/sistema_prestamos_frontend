@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { index, show, destroy } from 'services/tasacionService';
+import { index, show, destroy, descargarTasacion } from 'services/tasacionService';
 import { handleApiError } from 'utilities/Errors/apiErrorHandler';
 import { useAuth } from 'context/AuthContext';
 
@@ -11,7 +11,8 @@ export const useIndex = () => {
     const canUpdate = can('tasacion.update');
     const canDelete = can('tasacion.delete');
     const canStore = can('tasacion.store');
-    const canDoAnyAction = canShow || canUpdate || canDelete;
+    const canPdf = can('tasacion.generatePDF');
+    const canDoAnyAction = canShow || canUpdate || canDelete || canPdf;
 
     const [loading, setLoading] = useState(true);
     const [tasaciones, setTasaciones] = useState([]);
@@ -27,6 +28,30 @@ export const useIndex = () => {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [viewData, setViewData] = useState(null);
     const [viewLoading, setViewLoading] = useState(false);
+
+    // ── PDF de tasación ──────────────────────────────────────────────────────
+    const [pdfLoading, setPdfLoading] = useState(null);
+    const [isPdfOpen, setIsPdfOpen] = useState(false);
+    const [pdfBase64, setPdfBase64] = useState(null);
+    const [pdfTitle, setPdfTitle] = useState('');
+
+    const handleVerPdf = async (id) => {
+        if (!canPdf) return;
+        setPdfLoading(id);
+        try {
+            const response = await descargarTasacion(id);
+            setPdfBase64(response.data?.pdf || null);
+            setPdfTitle(response.data?.title || 'Tasación');
+            setIsPdfOpen(true);
+        } catch (err) {
+            setAlert(handleApiError(err));
+        } finally { setPdfLoading(null); }
+    };
+
+    const handleClosePdf = () => {
+        setIsPdfOpen(false);
+        setPdfBase64(null);
+    };
 
     const fetchTasaciones = useCallback(async (page = 1) => {
         setLoading(true);
@@ -89,10 +114,11 @@ export const useIndex = () => {
         loading, tasaciones, paginationInfo, filters, alert, setAlert,
         showDelete, setShowDelete,
         isViewOpen, setIsViewOpen, viewData, viewLoading, handleView,
+        pdfLoading, isPdfOpen, pdfBase64, pdfTitle, handleVerPdf, handleClosePdf,
         fetchTasaciones, handleAskDelete, handleConfirmDelete,
         handleFilterChange, handleFilterSubmit, handleFilterClear,
 
         // permisos
-        canShow, canUpdate, canDelete, canStore, canDoAnyAction,
+        canShow, canUpdate, canDelete, canStore, canPdf, canDoAnyAction,
     };
 };

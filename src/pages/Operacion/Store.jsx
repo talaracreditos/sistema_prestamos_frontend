@@ -3,8 +3,9 @@ import { useStore } from 'hooks/Operacion/useStore';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import PrestamoSearchSelect from 'components/Shared/Comboboxes/PrestamoSearchSelect';
 import OperacionForm from 'components/Shared/Formularios/Operacion/OperacionForm';
-import PagoCuotaModal from './PagoCuotaModal';
-import DesembolsoModal from './DesembolsoModal';
+import VentaAdjudicados from './VentaAdjudicados/VentaAdjudicados';
+import PagoCuotaModal from './PagoCuota/PagoCuotaModal';
+import DesembolsoModal from './Desembolso/DesembolsoModal';
 import AbrirSesionModal from 'components/Shared/Modals/Operacion/AbrirSesionModal';
 import CerrarSesionModal from 'components/Shared/Modals/Operacion/CerrarSesionModal';
 import PdfModal from 'components/Shared/Modals/PdfModal';
@@ -112,7 +113,7 @@ const Store = () => {
                     {/* ── Panel operación ── */}
                     <div className="bg-white dark:bg-dark-surface p-4 md:p-8 rounded-[40px] border border-slate-100 dark:border-dark-border shadow-sm dark:shadow-black/25 transition-colors">
 
-                        {/* Toggle cobro / desembolso */}
+                        {/* Toggle cobro / desembolso / venta adjudicados */}
                         <div className="flex gap-2 mb-8 bg-slate-100 dark:bg-dark-surface-alt p-1.5 rounded-2xl w-full sm:w-fit mx-auto border border-slate-200 dark:border-dark-border transition-colors">
                             <button
                                 onClick={() => { setTipoOperacion('cobro'); handleSelectPrestamo(null); }}
@@ -134,15 +135,30 @@ const Store = () => {
                             >
                                 <ArrowDownCircleIcon className="w-4 h-4" /> Desembolsar
                             </button>
+                            <button
+                                onClick={() => { setTipoOperacion('venta_adjudicados'); handleSelectPrestamo(null); }}
+                                className={`flex-1 sm:px-10 py-3 rounded-xl font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2 ${
+                                    tipoOperacion === 'venta_adjudicados'
+                                        ? 'bg-white dark:bg-dark-surface text-brand-red dark:text-brand-gold shadow-md ring-1 ring-brand-red/20 dark:ring-brand-gold/20'
+                                        : 'text-slate-400 dark:text-dark-text-muted hover:text-brand-red dark:hover:text-brand-gold'
+                                }`}
+                            >
+                                <BanknotesIcon className="w-4 h-4" /> Venta Adjudicados
+                            </button>
                         </div>
 
-                        {/* Buscador */}
-                        <PrestamoSearchSelect
-                            tipoOperacion={tipoOperacion}
-                            onSelect={handleSelectPrestamo}
-                            disabled={loading}
-                            resetKey={comboResetKey}
-                        />
+                        {/* Buscador — no aplica en Venta Adjudicados */}
+                        {tipoOperacion !== 'venta_adjudicados' && (
+                            <PrestamoSearchSelect
+                                tipoOperacion={tipoOperacion}
+                                onSelect={handleSelectPrestamo}
+                                disabled={loading}
+                                resetKey={comboResetKey}
+                            />
+                        )}
+
+                        {/* Venta Adjudicados */}
+                        {tipoOperacion === 'venta_adjudicados' && <VentaAdjudicados onVentaRegistrada={verifySesion} />}
 
                         {/* Desembolso */}
                         {prestamoSeleccionado && tipoOperacion === 'desembolso' && (

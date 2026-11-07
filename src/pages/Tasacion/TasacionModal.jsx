@@ -2,7 +2,7 @@ import React from 'react';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import {
     UserIcon, CalendarDaysIcon, IdentificationIcon,
-    BriefcaseIcon, BanknotesIcon, SparklesIcon, CurrencyDollarIcon, AdjustmentsHorizontalIcon
+    BriefcaseIcon, BanknotesIcon, SparklesIcon
 } from '@heroicons/react/24/outline';
 
 const fmt = (n) => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -54,18 +54,6 @@ const TasacionModal = ({ isOpen, onClose, data, isLoading }) => {
                                         Tasador: {data.tasador.name}
                                     </div>
                                 )}
-                                {data.precio_oro_gramo_aplicado != null && (
-                                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-200 dark:border-amber-500/20 transition-colors">
-                                        <CurrencyDollarIcon className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                                        Oro: S/ {fmt(data.precio_oro_gramo_aplicado)}/g
-                                    </div>
-                                )}
-                                {data.porcentaje_prestamo_aplicado != null && (
-                                    <div className="flex items-center gap-1.5 text-xs font-bold text-brand-red dark:text-brand-gold bg-brand-red-light dark:bg-dark-surface-alt px-2.5 py-1.5 rounded-lg border border-brand-red/20 dark:border-brand-gold/20 transition-colors">
-                                        <AdjustmentsHorizontalIcon className="w-4 h-4" />
-                                        {data.porcentaje_prestamo_aplicado}% a prestar
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -99,11 +87,18 @@ const TasacionModal = ({ isOpen, onClose, data, isLoading }) => {
                                                 <p className="text-sm font-black text-slate-800 dark:text-dark-text uppercase">
                                                     {d.tipo_joya?.descripcion} · {d.subtipo_joya?.descripcion}
                                                 </p>
-                                                {d.kilates && (
-                                                    <span className="inline-block mt-1 text-[10px] font-black bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text-muted px-2 py-0.5 rounded border border-slate-200 dark:border-dark-border">
-                                                        {d.kilates}K
-                                                    </span>
-                                                )}
+                                                <div className="flex flex-wrap items-center gap-1 mt-1">
+                                                    {d.kilataje?.nombre && (
+                                                        <span className="inline-block text-[10px] font-black bg-slate-100 dark:bg-dark-surface-alt text-slate-600 dark:text-dark-text-muted px-2 py-0.5 rounded border border-slate-200 dark:border-dark-border">
+                                                            {d.kilataje.nombre}
+                                                        </span>
+                                                    )}
+                                                    {d.precio_oro_preferencial && (
+                                                        <span className="inline-block text-[10px] font-black bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-500/20 uppercase">
+                                                            Oro preferencial
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 {d.descripcion_detallada && (
                                                     <p className="text-xs text-slate-500 dark:text-dark-text-muted mt-1.5 max-w-md">
                                                         {d.descripcion_detallada}
@@ -112,10 +107,23 @@ const TasacionModal = ({ isOpen, onClose, data, isLoading }) => {
                                             </div>
                                             <div className="text-right shrink-0">
                                                 <p className="text-xs text-slate-400 dark:text-dark-text-muted font-bold">
-                                                    {fmt(d.peso_bruto)} g bruto — {fmt(d.peso_neto)} g neto
+                                                    {fmt(d.peso_bruto)} gr bruto — {fmt(d.peso_neto)} gr neto
+                                                </p>
+                                                <p className="text-[10px] text-slate-400 dark:text-dark-text-muted font-bold">
+                                                    S/ {fmt(d.precio_gramo_aplicado)} / gr
                                                 </p>
                                                 <p className="text-sm font-black text-slate-800 dark:text-dark-text mt-1">S/ {fmt(d.valor_tasado)}</p>
-                                                <p className="text-xs font-black text-brand-gold">Máx: S/ {fmt(d.maximo_prestar)}</p>
+
+                                                <div className="inline-flex items-center gap-1.5 mt-1.5 bg-brand-red-light dark:bg-dark-surface-alt px-2.5 py-1 rounded-lg border border-brand-red/20 dark:border-brand-gold/20">
+                                                    {d.porcentaje_prestamo_aplicado != null && (
+                                                        <span className="text-[10px] font-black text-brand-red dark:text-brand-gold">
+                                                            {d.porcentaje_prestamo_aplicado}% a prestar:
+                                                        </span>
+                                                    )}
+                                                    <span className="text-xs font-black text-brand-red dark:text-brand-gold">
+                                                        S/ {fmt(d.maximo_prestar)}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

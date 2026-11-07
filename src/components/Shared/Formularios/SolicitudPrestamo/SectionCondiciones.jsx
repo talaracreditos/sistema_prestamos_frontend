@@ -27,9 +27,20 @@ const calcularPrimerPago = (fechaInicio, frecuencia) => {
     return fecha.toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
 };
 
+// Casilla fija (solo lectura) para los valores que prendario no permite cambiar
+const ValorFijoPrendario = ({ children }) => (
+    <div className="w-full p-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg text-sm font-black text-amber-700 dark:text-amber-400 flex items-center justify-between">
+        <span>{children}</span>
+    </div>
+);
+
 const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false }) => {
 
     const numIntegrantes = data.es_grupal ? Math.max(1, data.integrantes?.length || 1) : 1;
+
+    // Prendario: siempre 1 cuota mensual
+    const cuotas     = esPrendario ? 1 : data.cuotas_solicitadas;
+    const frecuencia = esPrendario ? 'MENSUAL' : data.frecuencia;
 
     const primerPago = useMemo(() => {
         if (esPrendario) return null; // prendario no usa fecha personalizada
@@ -66,24 +77,11 @@ const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false
                     />
                 </div>
 
-                {/* ── N° Cuotas: combobox 1/2 en prendario, input libre en los demás ── */}
+                {/* ── N° Cuotas: fijo en 1 para prendario, input libre en los demás ── */}
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">
-                        N° Cuotas
-                        {esPrendario && (
-                            <span className="ml-1 text-amber-500 dark:text-amber-400 normal-case font-bold">(máx. 2)</span>
-                        )}
-                    </label>
+                    <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">N° Cuotas</label>
                     {esPrendario ? (
-                        <select
-                            disabled={isBlocked}
-                            value={data.cuotas_solicitadas || '1'}
-                            onChange={e => handleChange('cuotas_solicitadas', e.target.value)}
-                            className="w-full p-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 disabled:cursor-not-allowed transition-colors"
-                        >
-                            <option value="1">1 cuota</option>
-                            <option value="2">2 cuotas</option>
-                        </select>
+                        <ValorFijoPrendario>1 CUOTA</ValorFijoPrendario>
                     ) : (
                         <input
                             disabled={isBlocked} type="text" value={data.cuotas_solicitadas}
@@ -93,13 +91,11 @@ const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false
                     )}
                 </div>
 
-                {/* ── Frecuencia: fija en 30 días para prendario, select normal para el resto ── */}
+                {/* ── Frecuencia: fija en mensual para prendario, select normal para el resto ── */}
                 <div className="col-span-2 md:col-span-1">
                     <label className="block text-[10px] font-bold text-slate-400 dark:text-dark-text-muted uppercase mb-1 transition-colors">Frecuencia</label>
                     {esPrendario ? (
-                        <div className="w-full p-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg text-sm font-black text-amber-700 dark:text-amber-400 flex items-center justify-between">
-                            <span>MENSUAL</span>
-                        </div>
+                        <ValorFijoPrendario>MENSUAL</ValorFijoPrendario>
                     ) : (
                         <select disabled={isBlocked} value={data.frecuencia} onChange={e => handleChange('frecuencia', e.target.value)} className="w-full p-2.5 bg-slate-50 dark:bg-dark-surface-alt border border-slate-200 dark:border-dark-border rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold disabled:cursor-not-allowed transition-colors">
                             <option value="SEMANAL">SEMANAL</option>
@@ -123,10 +119,10 @@ const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false
 
                 <div className="col-span-2 md:col-span-1">
                     <label className="block text-[10px] font-bold text-brand-gold-dark dark:text-brand-gold uppercase mb-1 transition-colors">Cobro Seguro</label>
-                    <select 
-                        disabled={isBlocked} 
-                        value={String(data.seguro_financiado) === 'true' || String(data.seguro_financiado) === '1' ? 'true' : 'false'} 
-                        onChange={e => handleChange('seguro_financiado', e.target.value === 'true')} 
+                    <select
+                        disabled={isBlocked}
+                        value={String(data.seguro_financiado) === 'true' || String(data.seguro_financiado) === '1' ? 'true' : 'false'}
+                        onChange={e => handleChange('seguro_financiado', e.target.value === 'true')}
                         className="w-full p-2.5 bg-brand-gold-light/20 dark:bg-brand-gold/10 border border-brand-gold/30 dark:border-brand-gold/20 rounded-lg text-sm font-black text-slate-800 dark:text-dark-text outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold disabled:cursor-not-allowed transition-colors"
                     >
                         <option value="true">Financiado (Cuotas)</option>
@@ -189,7 +185,7 @@ const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false
                     <div className="col-span-2 md:col-span-3 flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 rounded-lg px-3 py-2.5 transition-colors">
                         <CalendarDaysIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                         <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">
-                            El préstamo prendario no admite fecha de inicio personalizada: siempre inicia 30 días después de la generación.
+                            Prendario: 1 cuota mensual, sin fecha personalizada. Inicia 30 días después de la generación y se renueva pateando el vencimiento al cobrar.
                         </p>
                     </div>
                 )}
@@ -199,8 +195,8 @@ const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false
                 <CalculadoraCuota
                     integrantes={data.integrantes}
                     tasaGlobal={data.tasa_interes}
-                    cuotas={data.cuotas_solicitadas}
-                    frecuencia={data.frecuencia}
+                    cuotas={cuotas}
+                    frecuencia={frecuencia}
                     seguro={data.seguro}
                     seguro_financiado={data.seguro_financiado}
                     className="mt-6"
@@ -209,11 +205,13 @@ const SectionCondiciones = ({ data, handleChange, isBlocked, esPrendario = false
                 <CalculadoraCuota
                     monto={data.monto_solicitado}
                     tasa={data.tasa_interes}
-                    cuotas={data.cuotas_solicitadas}
-                    frecuencia={data.frecuencia}
+                    cuotas={cuotas}
+                    frecuencia={frecuencia}
                     seguro={data.seguro}
                     seguro_financiado={data.seguro_financiado}
                     cantidadIntegrantes={numIntegrantes}
+                    custodia={esPrendario ? data.monto_custodia : 0}
+                    esPrendario
                     className="mt-6"
                 />
             )}

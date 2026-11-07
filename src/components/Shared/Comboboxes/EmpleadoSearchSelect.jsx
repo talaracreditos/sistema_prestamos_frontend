@@ -7,7 +7,7 @@ const EmpleadoSearchSelect = ({
     disabled, 
     initialName = '', 
     clearOnSelect = false,
-    rol = ''
+    rol = ''            // 'ASESOR'  |  ['ASESOR', 'TASADOR']
 }) => {
     const [inputValue, setInputValue]           = useState(initialName);
     const [suggestions, setSuggestions]         = useState([]);
@@ -16,6 +16,13 @@ const EmpleadoSearchSelect = ({
 
     const wrapperRef  = useRef(null);
     const debounceRef = useRef(null);
+
+    // Normaliza: siempre lista de roles
+    const roles      = (Array.isArray(rol) ? rol : String(rol || '').split(','))
+        .map(r => r.trim())
+        .filter(Boolean);
+    const rolParam   = roles.join(',');          // se envía como "ASESOR,TASADOR"
+    const rolLabel   = roles.map(r => r.toLowerCase()).join(' / ');
 
     useEffect(() => { setInputValue(initialName || ''); }, [initialName]);
 
@@ -31,7 +38,7 @@ const EmpleadoSearchSelect = ({
     const fetchEmpleados = async (searchTerm = '') => {
         setLoading(true);
         try {
-            const response = await combobox(1, { search: searchTerm, estado: 1, rol });
+            const response = await combobox(1, { search: searchTerm, estado: 1, rol: rolParam });
             setSuggestions(response.data || []);
             setShowSuggestions(true);
         } catch {
@@ -71,7 +78,7 @@ const EmpleadoSearchSelect = ({
                     onChange={handleChange}
                     onClick={() => !showSuggestions && !disabled && fetchEmpleados(inputValue)}
                     disabled={disabled}
-                    placeholder={rol ? `Buscar ${rol}...` : 'Buscar empleado...'}
+                    placeholder={rolLabel ? `Buscar ${rolLabel}...` : 'Buscar empleado...'}
                     className="w-full border border-slate-300 dark:border-dark-border rounded-xl shadow-sm pl-10 pr-10 py-2.5 text-sm font-bold text-slate-800 dark:text-dark-text focus:ring-2 focus:ring-brand-red dark:focus:ring-brand-gold focus:border-brand-red dark:focus:border-brand-gold outline-none bg-white dark:bg-dark-surface transition-all disabled:bg-slate-50 dark:disabled:bg-dark-surface-alt disabled:text-slate-400 dark:disabled:text-dark-text-muted/60"
                     autoComplete="off"
                 />

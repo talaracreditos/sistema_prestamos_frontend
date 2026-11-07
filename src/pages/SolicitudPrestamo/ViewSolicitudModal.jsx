@@ -37,10 +37,11 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
 
     const totalSinSeguro  = parseFloat(data?.monto_solicitado || 0);
     const seguro          = parseFloat(data?.seguro || 0);
+    const custodia        = data?.es_prendario ? parseFloat(data?.monto_custodia || 0) : 0;
     const cantIntegrantes = data?.es_grupal ? (data?.integrantes?.length || 1) : 1;
-    const totalConSeguro  = data?.seguro_financiado
+    const totalConSeguro  = (data?.seguro_financiado
         ? totalSinSeguro + (seguro * cantIntegrantes)
-        : totalSinSeguro;
+        : totalSinSeguro) + custodia;
 
     const badge = data ? tipoBadge(data) : null;
 
@@ -107,9 +108,21 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
                                         }
                                     </span>
                                 </div>
-                                {data.seguro_financiado && (
+                                {data.es_prendario && custodia > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-slate-500 dark:text-dark-text-muted font-bold">Monto de Custodia:</span>
+                                        <span className="text-sm font-black text-slate-700 dark:text-dark-text">S/ {fmt(custodia)}</span>
+                                    </div>
+                                )}
+                                {(data.seguro_financiado || custodia > 0) && (
                                     <div className="flex justify-between items-center bg-brand-red-light dark:bg-brand-gold/10 px-3 py-1.5 rounded-lg transition-colors">
-                                        <span className="text-xs text-brand-red dark:text-brand-gold font-bold">Total con Seguro:</span>
+                                        <span className="text-xs text-brand-red dark:text-brand-gold font-bold">
+                                            {custodia > 0 && data.seguro_financiado
+                                                ? 'Total con Seguro y Custodia:'
+                                                : custodia > 0
+                                                    ? 'Total con Custodia:'
+                                                    : 'Total con Seguro:'}
+                                        </span>
                                         <span className="text-sm font-black text-brand-red dark:text-brand-gold">S/ {fmt(totalConSeguro)}</span>
                                     </div>
                                 )}
@@ -197,8 +210,9 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
                                                     </p>
                                                 )}
                                                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[9px] font-bold text-slate-500 dark:text-dark-text-muted">
-                                                    {d.kilates && <span>Kilates: {d.kilates}K</span>}
+                                                    {d.kilates && <span>Kilates: {d.kilates}</span>}
                                                     {d.peso_bruto && <span>Peso bruto: {d.peso_bruto}g</span>}
+                                                    {d.peso_incrustacion && <span>Peso incrustación: {d.peso_incrustacion}g</span>}
                                                     {d.peso_neto && <span>Peso neto: {d.peso_neto}g</span>}
                                                 </div>
                                                 <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-dark-border">
@@ -319,6 +333,7 @@ const ViewSolicitudModal = ({ isOpen, onClose, data, isLoading }) => {
                             seguro={data.seguro}
                             seguro_financiado={data.seguro_financiado}
                             cantidadIntegrantes={1}
+                            custodia={data.es_prendario ? data.monto_custodia : 0}
                         />
                     )}
 

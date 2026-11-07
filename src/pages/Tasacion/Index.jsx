@@ -5,8 +5,9 @@ import Table from 'components/Shared/Tables/Table';
 import PageHeader from 'components/Shared/Headers/PageHeader';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
+import PdfModal from 'components/Shared/Modals/PdfModal';
 import TasacionModal from './TasacionModal';
-import { ScaleIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ScaleIcon, EyeIcon, PencilSquareIcon, TrashIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 
 const fmt = (n) => parseFloat(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
 
@@ -22,9 +23,10 @@ const Index = () => {
         loading, tasaciones, paginationInfo, filters, alert, setAlert,
         showDelete, setShowDelete,
         isViewOpen, setIsViewOpen, viewData, viewLoading, handleView,
+        pdfLoading, isPdfOpen, pdfBase64, pdfTitle, handleVerPdf, handleClosePdf,
         fetchTasaciones, handleAskDelete, handleConfirmDelete,
         handleFilterChange, handleFilterSubmit, handleFilterClear,
-        canShow, canUpdate, canDelete, canStore, canDoAnyAction,
+        canShow, canUpdate, canDelete, canStore, canPdf, canDoAnyAction,
     } = useIndex();
 
     const columns = useMemo(() => {
@@ -93,6 +95,20 @@ const Index = () => {
                             </button>
                         )}
 
+                        {canPdf && (
+                            <button
+                                onClick={() => handleVerPdf(row.id)}
+                                disabled={pdfLoading === row.id}
+                                title="Ver / descargar tasación"
+                                className="p-2 text-slate-400 dark:text-dark-text-muted hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-dark-surface-alt rounded-xl transition-all border border-transparent hover:border-blue-200 dark:hover:border-blue-500/20 shadow-sm disabled:opacity-60"
+                            >
+                                {pdfLoading === row.id
+                                    ? <div className="w-4 h-4 border-2 border-slate-300 dark:border-dark-border border-t-blue-500 rounded-full animate-spin" />
+                                    : <DocumentArrowDownIcon className="w-4 h-4" />
+                                }
+                            </button>
+                        )}
+
                         {canUpdate && row.estado !== 3 && (
                             <Link
                                 to={`/tasacion/editar/${row.id}`}
@@ -118,7 +134,7 @@ const Index = () => {
         }
 
         return cols;
-    }, [handleAskDelete, handleView, canShow, canUpdate, canDelete, canDoAnyAction]);
+    }, [handleAskDelete, handleView, handleVerPdf, pdfLoading, canShow, canUpdate, canDelete, canPdf, canDoAnyAction]);
 
     return (
         <div className="container mx-auto p-4 sm:p-6 transition-colors">
@@ -156,6 +172,15 @@ const Index = () => {
                     confirmText="Sí, eliminar"
                     onConfirm={handleConfirmDelete}
                     onCancel={() => setShowDelete(false)}
+                />
+            )}
+
+            {canPdf && (
+                <PdfModal
+                    isOpen={isPdfOpen}
+                    onClose={handleClosePdf}
+                    title={pdfTitle}
+                    base64={pdfBase64}
                 />
             )}
 

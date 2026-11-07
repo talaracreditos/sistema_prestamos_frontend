@@ -49,7 +49,7 @@ const Store = () => {
                     <h3 className="text-xs font-black text-slate-500 dark:text-dark-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
                         <UserIcon className="w-4 h-4 text-brand-red dark:text-brand-gold" /> 1. Seleccionar Asesor Origen
                     </h3>
-                    <EmpleadoSearchSelect rol="asesor" onSelect={handleSelectAsesorOrigen} clearOnSelect={false} />
+                    <EmpleadoSearchSelect rol={['asesor','tasador']} onSelect={handleSelectAsesorOrigen} clearOnSelect={false} />
                     {formData.asesor_origen_id && (
                         <p className="text-[10px] text-green-600 dark:text-green-400 font-bold mt-2 flex items-center gap-1 transition-colors">
                             <CheckCircleIcon className="w-3.5 h-3.5" /> Asesor seleccionado

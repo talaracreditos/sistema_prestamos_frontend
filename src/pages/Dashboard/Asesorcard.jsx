@@ -98,7 +98,7 @@ const AsesorCard = () => {
                             <label className="block text-[9px] font-black text-slate-400 dark:text-dark-text-muted uppercase tracking-widest">Asesor</label>
                             <EmpleadoSearchSelect
                                 key={comboKey}
-                                rol="ASESOR"
+                                rol={['ASESOR', 'TASADOR']}
                                 onSelect={handleAgregarAsesor}
                                 clearOnSelect={true}
                                 placeholder="Agregar asesor..."

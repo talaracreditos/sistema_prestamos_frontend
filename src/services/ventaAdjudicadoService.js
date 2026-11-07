@@ -1,0 +1,37 @@
+import { fetchWithAuth } from 'js/authToken';
+import API_BASE_URL from 'js/urlHelper';
+import { handleResponse } from 'utilities/Responses/handleResponse';
+
+const BASE_URL = `${API_BASE_URL}/api/ventas-adjudicados`;
+
+export const store = async (data) => {
+    const response = await fetchWithAuth(`${BASE_URL}/store`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+};
+
+export const index = async (page = 1, filters = {}) => {
+    const params = new URLSearchParams({ page });
+    Object.entries(filters).forEach(([k, v]) => {
+        if (v !== '' && v !== null && v !== undefined) params.append(k, v);
+    });
+    const response = await fetchWithAuth(`${BASE_URL}/index?${params.toString()}`, { method: 'GET' });
+    return handleResponse(response);
+};
+
+export const destroy = async (id, { pin, motivo } = {}) => {
+    const response = await fetchWithAuth(`${BASE_URL}/delete/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin, motivo }),
+    });
+    return handleResponse(response);
+};
+
+export const recibo = async (id) => {
+    const response = await fetchWithAuth(`${BASE_URL}/recibo/${id}`, { method: 'GET' });
+    return handleResponse(response);
+};

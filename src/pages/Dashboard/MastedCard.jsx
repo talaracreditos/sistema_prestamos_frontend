@@ -232,7 +232,7 @@ const MasterCard = () => {
                             <label className={labelCls}>Asesor</label>
                             <EmpleadoSearchSelect
                                 key={comboKey}
-                                rol="ASESOR"
+                                rol={['ASESOR', 'TASADOR']}
                                 onSelect={handleAgregarAsesor}
                                 clearOnSelect={true}
                                 placeholder="Agregar asesor..."
